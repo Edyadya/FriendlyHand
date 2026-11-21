@@ -36,7 +36,8 @@ fun AppShell(repo: HelpRepository) {
         }
         return
     }
-    var role by remember(account) { mutableStateOf(account.role) }
+    // The role comes from the logged-in account; logging out returns to LoginScreen.
+    val role = account.role
     var screen by remember(account) { mutableStateOf<Screen>(Screen.Home) }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -46,21 +47,16 @@ fun AppShell(repo: HelpRepository) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text(
-                    stringResource(Res.string.app_name),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.weight(1f),
-                )
-                Role.entries.forEach { r ->
-                    FilterChip(
-                        selected = role == r,
-                        onClick = {
-                            role = r
-                            if ((r != Role.VOLUNTEER && (screen is Screen.Onboarding || screen is Screen.AddNeed)) ||
-                                (r != Role.DONOR && screen is Screen.Rewards)) screen = Screen.Home
-                        },
-                        label = { Text(stringResource(r.label())) },
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(Res.string.app_name), style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        stringResource(Res.string.logged_in_as, account.name, stringResource(role.label())),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                }
+                OutlinedButton(onClick = { repo.logout() }) {
+                    Text(stringResource(Res.string.logout))
                 }
             }
             Box(Modifier.weight(1f).fillMaxWidth()) {
