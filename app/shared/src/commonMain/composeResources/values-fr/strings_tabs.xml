@@ -32,4 +32,13 @@
     <string name="badge_three_areas_desc">Aider des personnes dans 3 quartiers différents</string>
     <string name="badge_thanks_3">3 mercis</string>
     <string name="badge_thanks_3_desc">3 de vos aides confirmées comme reçues</string>
+    <string name="hero_goals">OBJECTIFS</string>
+    <string name="voucher_title">Bon partenaire</string>
+    <string name="badge_unlock_by">À débloquer en : %1$s</string>
+    <string name="badge_locked">Verrouillé</string>
+    <string name="moment_title">Remise confirmée</string>
+    <string name="moment_count">remises confirmées jusqu'ici</string>
+    <string name="stage_pledged">Promis</string>
+    <string name="stage_picked_up">Récupéré</string>
+    <string name="stage_delivered">Remis</string>
 </resources>

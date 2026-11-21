@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -105,7 +106,8 @@ fun ProfileScreen(
 private fun NeedCard(repo: HelpRepository, role: Role, person: Person, need: Need, notify: (String) -> Unit) {
     Card(
         Modifier.fillMaxWidth().animateContentSize(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(need.title, style = MaterialTheme.typography.titleLarge)
@@ -115,6 +117,8 @@ private fun NeedCard(repo: HelpRepository, role: Role, person: Person, need: Nee
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier.fillMaxWidth().height(10.dp),
+                    color = MaterialTheme.app.accent,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant,
                 )
                 Text(
                     stringResource(Res.string.funded_of, need.fundedAmountChf, target),
@@ -138,6 +142,7 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
     // slider dialog: null = closed, otherwise whether this is for a small need or a big goal
     var choosing by remember { mutableStateOf<NeedType?>(null) }
     val scope = rememberCoroutineScope()
+    var showMoment by remember { mutableStateOf(false) }
 
     fun give(amount: Int, type: NeedType) {
         repo.donate(need.id, ME_DONOR, amount)
@@ -157,6 +162,9 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
             onDismiss = { choosing = null },
             onConfirm = { amount -> choosing = null; give(amount, type) },
         )
+    }
+    if (showMoment) {
+        ConfirmedMoment(repo.needs.count { it.status == NeedStatus.CONFIRMED }) { showMoment = false }
     }
     when (role) {
         Role.DONOR -> {
@@ -193,7 +201,7 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
                 }
             }
             if (need.status == NeedStatus.FULFILLED) {
-                AppButton(onClick = { repo.confirmReceived(need.id); notify(msgConfirmed) }, modifier = BigButtonModifier) {
+                AppButton(onClick = { repo.confirmReceived(need.id); notify(msgConfirmed); showMoment = true }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_confirm, person.firstName), style = MaterialTheme.typography.titleMedium)
                 }
             }

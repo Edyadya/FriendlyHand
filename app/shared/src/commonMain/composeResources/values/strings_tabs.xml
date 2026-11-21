@@ -32,4 +32,13 @@
     <string name="badge_three_areas_desc">Help people in 3 different areas</string>
     <string name="badge_thanks_3">3 thank-yous</string>
     <string name="badge_thanks_3_desc">3 of your helps confirmed as received</string>
+    <string name="hero_goals">GOALS</string>
+    <string name="voucher_title">Partner voucher</string>
+    <string name="badge_unlock_by">Unlock by: %1$s</string>
+    <string name="badge_locked">Locked</string>
+    <string name="moment_title">Delivery confirmed</string>
+    <string name="moment_count">deliveries confirmed so far</string>
+    <string name="stage_pledged">Pledged</string>
+    <string name="stage_picked_up">Picked up</string>
+    <string name="stage_delivered">Delivered</string>
 </resources>

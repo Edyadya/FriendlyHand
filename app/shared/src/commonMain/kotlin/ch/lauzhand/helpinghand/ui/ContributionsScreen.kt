@@ -1,6 +1,12 @@
 package ch.lauzhand.helpinghand.ui
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -15,12 +21,33 @@ import helpinghand.app.shared.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-private fun NeedStatus.statusText(): StringResource = when (this) {
-    NeedStatus.OPEN -> Res.string.status_open
-    NeedStatus.CLAIMED -> Res.string.status_claimed
-    NeedStatus.FUNDING -> Res.string.status_funding
-    NeedStatus.FULFILLED -> Res.string.status_fulfilled
-    NeedStatus.CONFIRMED -> Res.string.status_confirmed
+/** Where a contribution is on its way: pledged -> picked up -> delivered. */
+private enum class Stage(val label: StringResource) {
+    PLEDGED(Res.string.stage_pledged),
+    PICKED_UP(Res.string.stage_picked_up),
+    DELIVERED(Res.string.stage_delivered),
+}
+
+private fun NeedStatus.stage(): Stage = when (this) {
+    NeedStatus.OPEN, NeedStatus.CLAIMED, NeedStatus.FUNDING -> Stage.PLEDGED
+    NeedStatus.FULFILLED -> Stage.PICKED_UP
+    NeedStatus.CONFIRMED -> Stage.DELIVERED
+}
+
+@Composable
+private fun Stage.dotColor(): Color = when (this) {
+    Stage.PLEDGED -> MaterialTheme.app.accent
+    Stage.PICKED_UP -> MaterialTheme.colorScheme.primary
+    Stage.DELIVERED -> MaterialTheme.app.success
+}
+
+/** A coloured dot with its label, so the stage is never shown by colour alone. */
+@Composable
+private fun StageDot(stage: Stage) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Box(Modifier.size(10.dp).clip(CircleShape).background(stage.dotColor()))
+        Text(stringResource(stage.label), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)
+    }
 }
 
 /** Donor tab: everything I brought, paid or gave, newest first. Tapping one opens the person. */
@@ -69,7 +96,8 @@ fun ContributionsScreen(repo: HelpRepository, onOpenPerson: (String) -> Unit) {
 private fun ContributionCard(c: Contribution, need: Need, person: Person?, onClick: () -> Unit) {
     Card(
         Modifier.fillMaxWidth().clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
@@ -90,19 +118,16 @@ private fun ContributionCard(c: Contribution, need: Need, person: Person?, onCli
                 LinearProgressIndicator(
                     progress = { (need.fundedAmountChf.toFloat() / target).coerceIn(0f, 1f) },
                     modifier = Modifier.fillMaxWidth().height(8.dp),
+                    color = MaterialTheme.app.accent,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant,
                 )
                 Text(
                     stringResource(Res.string.funded_of, need.fundedAmountChf, target),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-            } else {
-                Text(
-                    stringResource(need.status.statusText()),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
             }
+            StageDot(need.status.stage())
         }
     }
 }
