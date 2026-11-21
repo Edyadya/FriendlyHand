@@ -60,6 +60,8 @@ class RemoteRepository(
     override val people = mutableStateListOf<Person>()
     override val needs = mutableStateListOf<Need>()
     private val completed = mutableStateMapOf<String, Int>()
+    // the logged-in donor's own contributions (server ids)
+    private val myContributions = mutableStateListOf<Contribution>()
 
     override var currentAccount: Account? by mutableStateOf(null)
         private set
@@ -103,12 +105,16 @@ class RemoteRepository(
             val c = if (account?.role == Role.DONOR) {
                 runCatching { get<CompletedGoals>("/donors/${account.id}/completed-goals").count }.getOrNull()
             } else null
+            val mine = if (account?.role == Role.DONOR) {
+                runCatching { get<ContributionList>("/donors/${account.id}/contributions").contributions }.getOrNull()
+            } else emptyList()
             if (skipIfActionPending && actionsStarted != actionsDone) return@withLock
             applyAtomically {
                 zones.replaceAll(z)
                 people.replaceAll(p.map { it.fromServer() })
                 needs.replaceAll(n.map { it.fromServer() })
                 if (account != null && c != null) completed[account.id] = c
+                if (mine != null && account == currentAccount) myContributions.replaceAll(mine)
                 lastError = null
             }
         } catch (e: CancellationException) {
@@ -154,6 +160,7 @@ class RemoteRepository(
     }
 
     override fun claimNeed(needId: String, donorId: String) {
+        needs.firstOrNull { it.id == needId }?.let { myContributions += it.claimContribution(toServerId(donorId)) }
         changeNeed(needId) { it.claimedBy(donorId) }
         send("/needs/$needId/claim") {
             replaceNeed(needId, post<ClaimRequest, Need>("/needs/$needId/claim", ClaimRequest(donorId)).fromServer())
@@ -162,6 +169,7 @@ class RemoteRepository(
     }
 
     override fun donate(needId: String, donorId: String, amountChf: Int) {
+        needs.firstOrNull { it.id == needId }?.let { myContributions += it.donationContribution(toServerId(donorId), amountChf) }
         changeNeed(needId) { it.withDonation(donorId, amountChf) }
         send("/needs/$needId/donate") {
             replaceNeed(needId, post<DonateRequest, Need>("/needs/$needId/donate", DonateRequest(donorId, amountChf)).fromServer())
@@ -188,6 +196,11 @@ class RemoteRepository(
     /** Cached count; refreshed after every action and on [refresh]. */
     override fun completedGoalsFor(donorId: String): Int = completed[toServerId(donorId)] ?: 0
 
+    override fun contributionsOf(donorId: String): List<Contribution> {
+        val id = toServerId(donorId)
+        return myContributions.filter { it.donorId == id }
+    }
+
     override suspend fun login(name: String, role: Role, code: String?): Result<Account> = try {
         val res = client.post("$baseUrl/login") {
             contentType(ContentType.Application.Json)
@@ -212,6 +225,7 @@ class RemoteRepository(
     override fun logout() {
         token = null
         currentAccount = null
+        myContributions.clear()
         refresh()
     }
 
@@ -245,6 +259,8 @@ class RemoteRepository(
         scope.launch {
             runCatching { get<CompletedGoals>("/donors/${account.id}/completed-goals").count }
                 .onSuccess { completed[account.id] = it }
+            runCatching { get<ContributionList>("/donors/${account.id}/contributions").contributions }
+                .onSuccess { if (account == currentAccount) myContributions.replaceAll(it) }
         }
     }
 

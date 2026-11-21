@@ -1,0 +1,35 @@
+<resources>
+    <string name="tab_contributions">My contributions</string>
+    <string name="tab_map">Map</string>
+    <string name="tab_achievements">Achievements</string>
+    <string name="map_tap_bubble">Tap a bubble on the map to see who is there.</string>
+    <string name="map_close_area">Close</string>
+    <string name="contrib_title">My contributions</string>
+    <string name="contrib_summary_one">You helped 1 person</string>
+    <string name="contrib_summary_many">You helped %1$d people</string>
+    <string name="contrib_empty">Nothing yet. Open the map and tap a bubble to find someone to help.</string>
+    <string name="contrib_person_need">%1$s · %2$s</string>
+    <string name="contrib_brought">You’re bringing it</string>
+    <string name="contrib_paid">You paid CHF %1$d</string>
+    <string name="contrib_gave">You gave CHF %1$d</string>
+    <string name="achievements_title">Achievements</string>
+    <string name="badges_title">Badges</string>
+    <string name="badge_progress">%1$d / %2$d</string>
+    <string name="badge_unlocked">Unlocked</string>
+    <string name="badge_first_help">First helping hand</string>
+    <string name="badge_first_help_desc">Help someone for the first time</string>
+    <string name="badge_helped_3">Helped 3 people</string>
+    <string name="badge_helped_3_desc">Bring or give something to 3 different people</string>
+    <string name="badge_helped_10">Helped 10 people</string>
+    <string name="badge_helped_10_desc">Bring or give something to 10 different people</string>
+    <string name="badge_hand_to_hand">Hand to hand</string>
+    <string name="badge_hand_to_hand_desc">Bring an item in person</string>
+    <string name="badge_goal_reached">Goal reached</string>
+    <string name="badge_goal_reached_desc">Help a bigger goal get fully funded</string>
+    <string name="badge_gave_100">CHF 100 given</string>
+    <string name="badge_gave_100_desc">Pay or give CHF 100 in total</string>
+    <string name="badge_three_areas">All over Lausanne</string>
+    <string name="badge_three_areas_desc">Help people in 3 different areas</string>
+    <string name="badge_thanks_3">3 thank-yous</string>
+    <string name="badge_thanks_3_desc">3 of your helps confirmed as received</string>
+</resources>

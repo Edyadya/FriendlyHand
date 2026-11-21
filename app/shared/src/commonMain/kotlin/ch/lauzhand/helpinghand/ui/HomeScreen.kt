@@ -38,8 +38,9 @@ fun HomeScreen(
         LoadingScreen()
         return
     }
+    // People are only listed for the area whose bubble was tapped; nobody is listed before that.
     var zoneFilter by remember { mutableStateOf<String?>(null) }
-    val people = repo.people.filter { zoneFilter == null || it.zoneId == zoneFilter }
+    val people = repo.people.filter { it.zoneId == zoneFilter }
 
     @Composable
     fun Header() {
@@ -65,7 +66,21 @@ fun HomeScreen(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f),
             )
-            TextButton(onClick = { zoneFilter = null }) { Text(stringResource(Res.string.show_everyone)) }
+            TextButton(onClick = { zoneFilter = null }) { Text(stringResource(Res.string.map_close_area)) }
+        }
+    }
+
+    @Composable
+    fun AreaPeople(modifier: Modifier) {
+        if (zoneFilter == null) {
+            Text(
+                stringResource(Res.string.map_tap_bubble),
+                modifier,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
+            PeopleList(repo, people, modifier, onOpenPerson)
         }
     }
 
@@ -76,15 +91,17 @@ fun HomeScreen(
                 Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Header()
                     FilterRow()
-                    PeopleList(repo, people, Modifier.weight(1f), onOpenPerson)
+                    AreaPeople(Modifier.weight(1f))
                 }
             }
         } else {
             Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                HomeMap(repo, role, zoneFilter, { zoneFilter = it }, onOpenPerson, Modifier.fillMaxWidth().height(300.dp))
+                // the map fills the screen until an area is picked, then makes room for its people
+                val mapSize = if (zoneFilter == null) Modifier.weight(1f) else Modifier.height(260.dp)
+                HomeMap(repo, role, zoneFilter, { zoneFilter = it }, onOpenPerson, Modifier.fillMaxWidth().then(mapSize))
                 Header()
                 FilterRow()
-                PeopleList(repo, people, Modifier.weight(1f), onOpenPerson)
+                AreaPeople(if (zoneFilter != null) Modifier.weight(1f) else Modifier)
             }
         }
     }

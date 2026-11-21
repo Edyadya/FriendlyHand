@@ -64,6 +64,27 @@ class ApplicationTest {
     }
 
     @Test
+    fun donorSeesOwnContributionsOnly() = api { client ->
+        val d = donor(client, "Dana")
+        client.post("/needs/n-1/claim") { auth(d); contentType(ContentType.Application.Json); setBody(ClaimRequest("x")) }
+        client.post("/needs/n-2/donate") { auth(d); contentType(ContentType.Application.Json); setBody(DonateRequest("x", 50)) }
+        client.post("/needs/n-3/donate") { auth(d); contentType(ContentType.Application.Json); setBody(DonateRequest("x", 20)) }
+
+        val list = client.get("/donors/${d.account.id}/contributions") { auth(d) }.body<ContributionList>()
+        assertEquals(listOf("n-1", "n-2", "n-3"), list.contributions.map { it.needId })
+        assertEquals(
+            listOf(ContributionKind.BROUGHT, ContributionKind.GAVE, ContributionKind.PAID),
+            list.contributions.map { it.kind },
+        )
+        assertEquals(listOf(null, 50, 20), list.contributions.map { it.amountChf })
+        assertTrue(list.contributions.all { it.donorId == d.account.id })
+
+        val other = donor(client, "Otto")
+        assertEquals(HttpStatusCode.Forbidden, client.get("/donors/${d.account.id}/contributions") { auth(other) }.status)
+        assertEquals(HttpStatusCode.Unauthorized, client.get("/donors/${d.account.id}/contributions").status)
+    }
+
+    @Test
     fun onlyVolunteerConfirms() = api { client ->
         val d = donor(client)
         val vol = volunteer(client)

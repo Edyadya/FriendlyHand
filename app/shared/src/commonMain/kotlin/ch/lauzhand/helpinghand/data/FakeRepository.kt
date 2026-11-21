@@ -21,6 +21,9 @@ interface HelpRepository {
     fun confirmReceived(needId: String)
     fun completedGoalsFor(donorId: String): Int
 
+    /** What this donor did (brought / paid / gave), newest last. Backed by Compose state. */
+    fun contributionsOf(donorId: String): List<Contribution>
+
     // --- login and last seen (added later; the functions above are unchanged) ---
 
     /** The logged-in account, or null. Backed by Compose state, so reading it in a composable recomposes. */
@@ -48,30 +51,31 @@ class FakeRepository : HelpRepository {
 
     override val needs = Seed.needs.toMutableStateList()
 
-    // (donorId, needId): who helped with what, used for rewards
-    private val contributions = mutableStateListOf<Pair<String, String>>()
+    // who helped with what, used for "My contributions" and rewards
+    private val contributions = mutableStateListOf<Contribution>()
 
     override fun addPerson(person: Person) { people += person }
     override fun addNeed(need: Need) { needs += need }
 
     override fun claimNeed(needId: String, donorId: String) {
+        val need = needs.firstOrNull { it.id == needId } ?: return
         update(needId) { it.claimedBy(donorId) }
-        contributions += donorId to needId
+        contributions += need.claimContribution(donorId)
     }
 
     override fun donate(needId: String, donorId: String, amountChf: Int) {
+        val need = needs.firstOrNull { it.id == needId } ?: return
         update(needId) { it.withDonation(donorId, amountChf) }
-        contributions += donorId to needId
+        contributions += need.donationContribution(donorId, amountChf)
     }
 
     override fun markFulfilled(needId: String) = update(needId) { it.fulfilled() }
 
     override fun confirmReceived(needId: String) = update(needId) { it.confirmed() }
 
-    override fun completedGoalsFor(donorId: String): Int {
-        val helped = contributions.filter { it.first == donorId }.map { it.second }.toSet()
-        return needs.count { it.id in helped && it.isCompleted }
-    }
+    override fun completedGoalsFor(donorId: String): Int = completedGoals(contributionsOf(donorId), needs)
+
+    override fun contributionsOf(donorId: String): List<Contribution> = contributions.filter { it.donorId == donorId }
 
     override var currentAccount: Account? by mutableStateOf(null)
         private set

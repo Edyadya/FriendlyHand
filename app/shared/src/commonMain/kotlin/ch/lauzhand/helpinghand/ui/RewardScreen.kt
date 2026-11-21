@@ -21,36 +21,42 @@ fun RewardScreen(repo: HelpRepository, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
         Text(stringResource(Res.string.rewards_title), style = MaterialTheme.typography.headlineSmall)
-        Card(
-            Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        ) {
-            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                AnimatedContent(completed) { n ->
-                    Text(
-                        if (n == 1) stringResource(Res.string.rewards_goals_one)
-                        else stringResource(Res.string.rewards_goals_many, n),
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
-                val progress by animateFloatAsState((completed.toFloat() / VOUCHER_GOAL).coerceIn(0f, 1f))
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier.fillMaxWidth().height(12.dp),
-                )
+        VoucherCard(completed)
+    }
+}
+
+/** Progress towards the partner voucher; also shown on the Achievements tab. */
+@Composable
+fun VoucherCard(completed: Int, modifier: Modifier = Modifier) {
+    Card(
+        modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            AnimatedContent(completed) { n ->
                 Text(
-                    stringResource(Res.string.rewards_progress, completed.coerceAtMost(VOUCHER_GOAL), VOUCHER_GOAL),
-                    style = MaterialTheme.typography.bodyLarge,
+                    if (n == 1) stringResource(Res.string.rewards_goals_one)
+                    else stringResource(Res.string.rewards_goals_many, n),
+                    style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
-                if (completed >= VOUCHER_GOAL) {
-                    Text(
-                        stringResource(Res.string.rewards_unlocked),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
+            }
+            val progress by animateFloatAsState((completed.toFloat() / VOUCHER_GOAL).coerceIn(0f, 1f))
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier.fillMaxWidth().height(12.dp),
+            )
+            Text(
+                stringResource(Res.string.rewards_progress, completed.coerceAtMost(VOUCHER_GOAL), VOUCHER_GOAL),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            if (completed >= VOUCHER_GOAL) {
+                Text(
+                    stringResource(Res.string.rewards_unlocked),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
             }
         }
     }

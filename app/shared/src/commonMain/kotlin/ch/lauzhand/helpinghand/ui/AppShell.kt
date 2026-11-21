@@ -41,6 +41,9 @@ fun AppShell(repo: HelpRepository) {
     // The role comes from the logged-in account; logging out returns to LoginScreen.
     val role = account.role
     var screen by remember(account) { mutableStateOf<Screen>(Screen.Home) }
+    // Donors get three tabs in a bottom bar (all screen sizes); Home shows the selected one.
+    var tab by remember(account) { mutableStateOf(DonorTab.MAP) }
+    val selectTab: (DonorTab) -> Unit = { tab = it; screen = Screen.Home }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.safeContentPadding().fillMaxSize()) {
@@ -66,33 +69,41 @@ fun AppShell(repo: HelpRepository) {
                     Text(stringResource(Res.string.logout))
                 }
             }
-            Box(Modifier.weight(1f).fillMaxWidth()) {
-                // Never show a screen the role isn't allowed on (same rule the role chips used).
-                val allowed = !((role != Role.VOLUNTEER && (screen is Screen.Onboarding || screen is Screen.AddNeed)) ||
-                    (role != Role.DONOR && screen is Screen.Rewards))
-                when (val s = if (allowed) screen else Screen.Home) {
-                    Screen.Home -> HomeScreen(
-                        repo, role,
-                        onOpenPerson = { screen = Screen.Profile(it) },
-                        onNewPerson = { screen = Screen.Onboarding },
-                        onRewards = { screen = Screen.Rewards },
-                    )
-                    is Screen.Profile -> ProfileScreen(
-                        repo, role, s.personId,
-                        onBack = { screen = Screen.Home },
-                        onAddNeed = { screen = Screen.AddNeed(s.personId) },
-                    )
-                    Screen.Rewards -> RewardScreen(repo, onBack = { screen = Screen.Home })
-                    Screen.Onboarding -> OnboardingScreen(
-                        repo,
-                        onBack = { screen = Screen.Home },
-                        onSaved = { screen = Screen.Profile(it) },
-                    )
-                    is Screen.AddNeed -> AddNeedScreen(
-                        repo, s.personId,
-                        onDone = { screen = Screen.Profile(s.personId) },
-                    )
+            val showTabs = role == Role.DONOR
+            Column(Modifier.weight(1f).fillMaxWidth()) {
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    // Never show a screen the role isn't allowed on (same rule the role chips used).
+                    val allowed = !((role != Role.VOLUNTEER && (screen is Screen.Onboarding || screen is Screen.AddNeed)) ||
+                        (role != Role.DONOR && screen is Screen.Rewards))
+                    when (val s = if (allowed) screen else Screen.Home) {
+                        Screen.Home -> when (if (showTabs) tab else DonorTab.MAP) {
+                            DonorTab.MAP -> HomeScreen(
+                                repo, role,
+                                onOpenPerson = { screen = Screen.Profile(it) },
+                                onNewPerson = { screen = Screen.Onboarding },
+                                onRewards = { selectTab(DonorTab.ACHIEVEMENTS) },
+                            )
+                            DonorTab.CONTRIBUTIONS -> ContributionsScreen(repo, onOpenPerson = { screen = Screen.Profile(it) })
+                            DonorTab.ACHIEVEMENTS -> AchievementsScreen(repo)
+                        }
+                        is Screen.Profile -> ProfileScreen(
+                            repo, role, s.personId,
+                            onBack = { screen = Screen.Home },
+                            onAddNeed = { screen = Screen.AddNeed(s.personId) },
+                        )
+                        Screen.Rewards -> RewardScreen(repo, onBack = { screen = Screen.Home })
+                        Screen.Onboarding -> OnboardingScreen(
+                            repo,
+                            onBack = { screen = Screen.Home },
+                            onSaved = { screen = Screen.Profile(it) },
+                        )
+                        is Screen.AddNeed -> AddNeedScreen(
+                            repo, s.personId,
+                            onDone = { screen = Screen.Profile(s.personId) },
+                        )
+                    }
                 }
+                if (showTabs) DonorBottomBar(tab, selectTab)
             }
         }
     }

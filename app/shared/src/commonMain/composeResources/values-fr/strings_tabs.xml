@@ -1,0 +1,35 @@
+<resources>
+    <string name="tab_contributions">Mes contributions</string>
+    <string name="tab_map">Carte</string>
+    <string name="tab_achievements">Succès</string>
+    <string name="map_tap_bubble">Touchez une bulle sur la carte pour voir qui s’y trouve.</string>
+    <string name="map_close_area">Fermer</string>
+    <string name="contrib_title">Mes contributions</string>
+    <string name="contrib_summary_one">Vous avez aidé 1 personne</string>
+    <string name="contrib_summary_many">Vous avez aidé %1$d personnes</string>
+    <string name="contrib_empty">Rien pour l’instant. Ouvrez la carte et touchez une bulle pour trouver quelqu’un à aider.</string>
+    <string name="contrib_person_need">%1$s · %2$s</string>
+    <string name="contrib_brought">Vous l’apportez</string>
+    <string name="contrib_paid">Vous avez payé CHF %1$d</string>
+    <string name="contrib_gave">Vous avez donné CHF %1$d</string>
+    <string name="achievements_title">Succès</string>
+    <string name="badges_title">Badges</string>
+    <string name="badge_progress">%1$d / %2$d</string>
+    <string name="badge_unlocked">Débloqué</string>
+    <string name="badge_first_help">Premier coup de main</string>
+    <string name="badge_first_help_desc">Aider quelqu’un pour la première fois</string>
+    <string name="badge_helped_3">3 personnes aidées</string>
+    <string name="badge_helped_3_desc">Apporter ou donner quelque chose à 3 personnes différentes</string>
+    <string name="badge_helped_10">10 personnes aidées</string>
+    <string name="badge_helped_10_desc">Apporter ou donner quelque chose à 10 personnes différentes</string>
+    <string name="badge_hand_to_hand">De main à main</string>
+    <string name="badge_hand_to_hand_desc">Apporter un objet en personne</string>
+    <string name="badge_goal_reached">Objectif atteint</string>
+    <string name="badge_goal_reached_desc">Aider un grand objectif à être entièrement financé</string>
+    <string name="badge_gave_100">CHF 100 donnés</string>
+    <string name="badge_gave_100_desc">Payer ou donner CHF 100 au total</string>
+    <string name="badge_three_areas">Partout à Lausanne</string>
+    <string name="badge_three_areas_desc">Aider des personnes dans 3 quartiers différents</string>
+    <string name="badge_thanks_3">3 mercis</string>
+    <string name="badge_thanks_3_desc">3 de vos aides confirmées comme reçues</string>
+</resources>

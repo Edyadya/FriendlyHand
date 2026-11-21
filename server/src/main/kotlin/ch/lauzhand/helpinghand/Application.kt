@@ -28,8 +28,8 @@ class Store {
     private val people = Seed.people.toMutableList()
     private val needs = Seed.needs.toMutableList()
 
-    // (donorId, needId): who helped with what, used for rewards
-    private val contributions = mutableListOf<Pair<String, String>>()
+    // who helped with what, used for "My contributions" and rewards
+    private val contributions = mutableListOf<Contribution>()
     private val tokens = mutableMapOf<String, Account>()
 
     fun zones(): List<Zone> = zones
@@ -59,14 +59,17 @@ class Store {
         change(needs[i]).also { needs[i] = it }
     }
 
-    fun addContribution(donorId: String, needId: String) = synchronized(lock) {
-        contributions += donorId to needId
+    fun addContribution(contribution: Contribution) = synchronized(lock) {
+        contributions += contribution
+    }
+
+    fun contributionsOf(donorId: String): List<Contribution> = synchronized(lock) {
+        contributions.filter { it.donorId == donorId }
     }
 
     /** Number of distinct completed needs this donor helped with. */
     fun completedGoalsFor(donorId: String): Int = synchronized(lock) {
-        val helped = contributions.filter { it.first == donorId }.map { it.second }.toSet()
-        needs.count { it.id in helped && it.isCompleted }
+        completedGoals(contributions.filter { it.donorId == donorId }, needs)
     }
 
     fun updatePerson(id: String, change: (Person) -> Person): Person? = synchronized(lock) {
@@ -142,6 +145,12 @@ fun Application.module(store: Store = Store()) {
             if (id != account.id) throw ForbiddenException("Only your own rewards")
             call.respond(CompletedGoals(id, store.completedGoalsFor(id)))
         }
+        get("/donors/{id}/contributions") {
+            val account = call.requireRole(store, Role.DONOR)
+            val id = call.parameters["id"]!!
+            if (id != account.id) throw ForbiddenException("Only your own contributions")
+            call.respond(ContributionList(id, store.contributionsOf(id)))
+        }
 
         post("/people") {
             val account = call.requireRole(store, Role.VOLUNTEER)
@@ -166,7 +175,7 @@ fun Application.module(store: Store = Store()) {
                 call.receive<ClaimRequest>() // body kept for compatibility; the caller's account is the donor
                 val id = call.parameters["id"]!!
                 val need = store.updateNeed(id) { it.claimedBy(account.id) }
-                if (need != null) store.addContribution(account.id, id)
+                if (need != null) store.addContribution(need.claimContribution(account.id))
                 call.respondNeed(need)
             }
             post("/donate") {
@@ -175,7 +184,7 @@ fun Application.module(store: Store = Store()) {
                 require(req.amountChf > 0) { "amountChf must be positive" }
                 val id = call.parameters["id"]!!
                 val need = store.updateNeed(id) { it.withDonation(account.id, req.amountChf) }
-                if (need != null) store.addContribution(account.id, id)
+                if (need != null) store.addContribution(need.donationContribution(account.id, req.amountChf))
                 call.respondNeed(need)
             }
             post("/fulfil") {

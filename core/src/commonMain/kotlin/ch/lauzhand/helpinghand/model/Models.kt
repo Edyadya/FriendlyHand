@@ -75,3 +75,26 @@ data class LastSeenRequest(val lat: Double, val lng: Double, val note: String? =
 /** Answer of GET /donors/{id}/completed-goals */
 @Serializable
 data class CompletedGoals(val donorId: String, val count: Int)
+
+// --- Donor contributions ---
+
+/** What a donor did for a need. */
+@Serializable
+enum class ContributionKind {
+    BROUGHT, // claimed a small need to bring it in person
+    PAID,    // paid for a small need
+    GAVE,    // gave money towards a big goal
+}
+
+@Serializable
+data class Contribution(
+    val donorId: String,
+    val needId: String,
+    val kind: ContributionKind,
+    val amountChf: Int? = null,
+    val atMillis: Long = 0,
+)
+
+/** Answer of GET /donors/{id}/contributions */
+@Serializable
+data class ContributionList(val donorId: String, val contributions: List<Contribution>)
