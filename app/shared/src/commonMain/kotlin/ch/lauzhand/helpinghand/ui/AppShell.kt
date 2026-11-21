@@ -17,6 +17,7 @@ sealed interface Screen {
     data object Home : Screen
     data class Profile(val personId: String) : Screen
     data object Onboarding : Screen
+    data object Rewards : Screen
     data class AddNeed(val personId: String) : Screen
 }
 
@@ -48,7 +49,8 @@ fun AppShell(repo: HelpRepository) {
                         selected = role == r,
                         onClick = {
                             role = r
-                            if (r != Role.VOLUNTEER && (screen is Screen.Onboarding || screen is Screen.AddNeed)) screen = Screen.Home
+                            if ((r != Role.VOLUNTEER && (screen is Screen.Onboarding || screen is Screen.AddNeed)) ||
+                                (r != Role.DONOR && screen is Screen.Rewards)) screen = Screen.Home
                         },
                         label = { Text(stringResource(r.label())) },
                     )
@@ -60,12 +62,14 @@ fun AppShell(repo: HelpRepository) {
                         repo, role,
                         onOpenPerson = { screen = Screen.Profile(it) },
                         onNewPerson = { screen = Screen.Onboarding },
+                        onRewards = { screen = Screen.Rewards },
                     )
                     is Screen.Profile -> ProfileScreen(
                         repo, role, s.personId,
                         onBack = { screen = Screen.Home },
                         onAddNeed = { screen = Screen.AddNeed(s.personId) },
                     )
+                    Screen.Rewards -> RewardScreen(repo, onBack = { screen = Screen.Home })
                     Screen.Onboarding -> OnboardingScreen(
                         repo,
                         onBack = { screen = Screen.Home },

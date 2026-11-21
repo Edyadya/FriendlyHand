@@ -40,4 +40,12 @@
     <string name="need_title_field">What is needed?</string>
     <string name="need_big_goal">Bigger goal (money)</string>
     <string name="need_target_chf">Target in CHF</string>
+    <string name="map_lake">Lake Geneva</string>
+    <string name="show_everyone">Show everyone</string>
+    <string name="zone_filter">Area: %1$s</string>
+    <string name="rewards_title">Your rewards</string>
+    <string name="rewards_goals_one">You helped complete 1 goal</string>
+    <string name="rewards_goals_many">You helped complete %1$d goals</string>
+    <string name="rewards_progress">%1$d of %2$d goals towards a partner voucher</string>
+    <string name="rewards_unlocked">Voucher unlocked. Thank you for your help!</string>
 </resources>

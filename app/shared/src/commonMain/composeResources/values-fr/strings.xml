@@ -40,4 +40,12 @@
     <string name="need_title_field">De quoi a-t-elle besoin ?</string>
     <string name="need_big_goal">Objectif plus important (argent)</string>
     <string name="need_target_chf">Objectif en CHF</string>
+    <string name="map_lake">Lac Léman</string>
+    <string name="show_everyone">Afficher tout le monde</string>
+    <string name="zone_filter">Quartier : %1$s</string>
+    <string name="rewards_title">Vos récompenses</string>
+    <string name="rewards_goals_one">Vous avez aidé à réaliser 1 objectif</string>
+    <string name="rewards_goals_many">Vous avez aidé à réaliser %1$d objectifs</string>
+    <string name="rewards_progress">%1$d objectifs sur %2$d pour un bon partenaire</string>
+    <string name="rewards_unlocked">Bon débloqué. Merci pour votre aide !</string>
 </resources>

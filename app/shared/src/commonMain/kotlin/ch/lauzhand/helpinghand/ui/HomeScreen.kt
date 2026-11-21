@@ -6,6 +6,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
@@ -26,15 +31,57 @@ fun HomeScreen(
     role: Role,
     onOpenPerson: (String) -> Unit,
     onNewPerson: () -> Unit,
+    onRewards: () -> Unit,
 ) {
-    Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    var zoneFilter by remember { mutableStateOf<String?>(null) }
+    val people = repo.people.filter { zoneFilter == null || it.zoneId == zoneFilter }
+
+    @Composable
+    fun Header() {
         Text(stringResource(Res.string.home_title), style = MaterialTheme.typography.headlineSmall)
         if (role == Role.VOLUNTEER) {
             Button(onClick = onNewPerson, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
                 Text(stringResource(Res.string.new_person))
             }
         }
-        PeopleList(repo, repo.people, Modifier.weight(1f), onOpenPerson)
+        if (role == Role.DONOR) {
+            OutlinedButton(onClick = onRewards, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
+                Text(stringResource(Res.string.my_rewards))
+            }
+        }
+    }
+
+    @Composable
+    fun FilterRow() {
+        val zone = repo.zones.firstOrNull { it.id == zoneFilter } ?: return
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                stringResource(Res.string.zone_filter, zone.name),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = { zoneFilter = null }) { Text(stringResource(Res.string.show_everyone)) }
+        }
+    }
+
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth >= 700.dp) {
+            Row(Modifier.fillMaxSize().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                ZoneMap(repo, zoneFilter, { zoneFilter = it }, Modifier.weight(1f).fillMaxHeight())
+                Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Header()
+                    FilterRow()
+                    PeopleList(repo, people, Modifier.weight(1f), onOpenPerson)
+                }
+            }
+        } else {
+            Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                ZoneMap(repo, zoneFilter, { zoneFilter = it }, Modifier.fillMaxWidth().height(300.dp))
+                Header()
+                FilterRow()
+                PeopleList(repo, people, Modifier.weight(1f), onOpenPerson)
+            }
+        }
     }
 }
 
