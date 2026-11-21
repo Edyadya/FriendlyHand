@@ -37,7 +37,6 @@ import ch.lauzhand.helpinghand.location.LocationStatus
 import ch.lauzhand.helpinghand.location.rememberUserLocation
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
-import ch.lauzhand.helpinghand.map.peopleInZone
 import ch.lauzhand.helpinghand.map.isLiveMapSupported
 import ch.lauzhand.helpinghand.model.Need
 import ch.lauzhand.helpinghand.model.NeedStatus
@@ -144,7 +143,7 @@ fun HomeScreen(
                 exit = slideOutVertically { it } + fadeOut(),
             ) {
                 val zoneId = lastZone.id ?: return@AnimatedVisibility
-                AreaSheet(repo, role, zoneId, onClose = { zoneFilter = null }, onOpenPerson = onOpenPerson)
+                AreaSheet(repo, zoneId, onClose = { zoneFilter = null }, onOpenPerson = onOpenPerson)
             }
         }
     }
@@ -164,10 +163,9 @@ private fun FloatingPill(modifier: Modifier = Modifier, onClick: (() -> Unit)? =
 
 /** Bottom sheet for the tapped area: who is there, as round bubbles. Tap one to open their profile. */
 @Composable
-private fun AreaSheet(repo: HelpRepository, role: Role, zoneId: String, onClose: () -> Unit, onOpenPerson: (String) -> Unit) {
+private fun AreaSheet(repo: HelpRepository, zoneId: String, onClose: () -> Unit, onOpenPerson: (String) -> Unit) {
     val zone = repo.zones.firstOrNull { it.id == zoneId }
-    // exactly the people the bubble counted (see peopleInZone), each once, with their needs inside
-    val people = peopleInZone(role, zoneId, repo.people, repo.needs)
+    val people = repo.people.filter { it.zoneId == zoneId }
     Surface(
         Modifier.fillMaxWidth(),
         shape = AppShape.sheet,
