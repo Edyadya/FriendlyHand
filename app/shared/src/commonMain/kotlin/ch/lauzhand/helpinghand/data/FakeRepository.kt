@@ -29,11 +29,11 @@ interface HelpRepository {
     /** The logged-in account, or null. Backed by Compose state, so reading it in a composable recomposes. */
     val currentAccount: Account?
 
-    /** Logs in; DONOR needs no code, VOLUNTEER and NGO need their access code. Failure = wrong code or no connection. */
+    /** Logs in; DONOR needs no code, VOLUNTEER needs the access code. Failure = wrong code or no connection. */
     suspend fun login(name: String, role: Role, code: String? = null): Result<Account>
     fun logout()
 
-    /** Volunteers record where they last saw a person. The exact spot is only shown to VOLUNTEER / NGO. */
+    /** Volunteers record where they last saw a person. The exact spot is only shown to VOLUNTEERs. */
     fun updateLastSeen(personId: String, lat: Double, lng: Double, note: String? = null)
 }
 
@@ -83,7 +83,7 @@ class FakeRepository : HelpRepository {
     override suspend fun login(name: String, role: Role, code: String?): Result<Account> {
         if (name.isBlank()) return Result.failure(IllegalArgumentException("name must not be blank"))
         if (!AccessCodes.isValid(role, code)) return Result.failure(IllegalArgumentException("Wrong access code"))
-        val id = when (role) { Role.DONOR -> ME_DONOR; Role.VOLUNTEER -> ME_VOLUNTEER; Role.NGO -> "ngo-me" }
+        val id = when (role) { Role.DONOR -> ME_DONOR; Role.VOLUNTEER -> ME_VOLUNTEER }
         return Result.success(Account(id, name.trim(), role).also { currentAccount = it })
     }
 

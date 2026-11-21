@@ -13,7 +13,7 @@ import ch.lauzhand.helpinghand.model.Zone
  *
  * - Everyone sees one translucent circle per zone with its number of open needs
  *   (never exact positions).
- * - VOLUNTEER and NGO also see the exact last-seen markers (only recent ones, see lastSeenVisible).
+ * - VOLUNTEERs also see the exact last-seen markers (only recent ones, see lastSeenVisible).
  */
 @Composable
 expect fun LausanneMap(

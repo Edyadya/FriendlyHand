@@ -214,7 +214,7 @@ class RemoteRepository(
                 token = body.token
                 currentAccount = body.account
                 lastError = null
-                refresh() // people now include the exact last-seen data for volunteers / NGOs
+                refresh() // people now include the exact last-seen data for volunteers
                 Result.success(body.account)
             }
         }

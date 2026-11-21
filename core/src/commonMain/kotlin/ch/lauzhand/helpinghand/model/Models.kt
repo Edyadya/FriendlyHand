@@ -3,7 +3,7 @@ package ch.lauzhand.helpinghand.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class Role { VOLUNTEER, DONOR, NGO }
+enum class Role { VOLUNTEER, DONOR }
 
 @Serializable
 enum class NeedType { SMALL, BIG }
@@ -27,7 +27,7 @@ data class Person(
     val ownWords: String? = null,   // short sentence in their own words
     val consentGiven: Boolean,
     val createdByVolunteerId: String,
-    // Exact last-seen spot: only ever shown to VOLUNTEER / NGO, see Person.lastSeenVisible
+    // Exact last-seen spot: only ever shown to VOLUNTEERs, see Person.lastSeenVisible
     val lastSeenLat: Double? = null,
     val lastSeenLng: Double? = null,
     val lastSeenNote: String? = null,

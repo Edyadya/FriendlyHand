@@ -2,8 +2,7 @@
     <string name="login_title">Bienvenue</string>
     <string name="login_subtitle">Qui utilise l’application ?</string>
     <string name="login_role_donor_info">Apporter un objet ou donner de l’argent</string>
-    <string name="login_role_volunteer_info">Rencontrer les personnes et noter leurs besoins</string>
-    <string name="login_role_ngo_info">Livrer les objets payés et assurer le suivi</string>
+    <string name="login_role_volunteer_info">Rencontrer les personnes, noter leurs besoins et livrer les objets payés</string>
     <string name="login_name">Votre prénom</string>
     <string name="login_code">Code d’accès</string>
     <string name="login_code_hint">Code de démo : %1$s</string>

@@ -82,7 +82,7 @@ fun ProfileScreen(
                 }
             }
         }
-        if (role == Role.VOLUNTEER || role == Role.NGO) {
+        if (role == Role.VOLUNTEER) {
             item { LastSeenSection(repo, role, person, zoneOf(repo, person)) { notify(lastSeenSaved) } }
         }
         item { Text(stringResource(Res.string.needs_title), style = MaterialTheme.typography.titleLarge) }
@@ -185,14 +185,17 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
                 }
             }
         }
-        Role.VOLUNTEER -> if (need.status == NeedStatus.FULFILLED) {
-            Button(onClick = { repo.confirmReceived(need.id); notify(msgConfirmed) }, modifier = BigButtonModifier) {
-                Text(stringResource(Res.string.action_confirm, person.firstName), style = MaterialTheme.typography.titleMedium)
+        Role.VOLUNTEER -> {
+            // a donor paid: the volunteer buys the item, brings it and marks it delivered
+            if (need.paid && need.status == NeedStatus.CLAIMED) {
+                Button(onClick = { repo.markFulfilled(need.id); notify(msgDelivered) }, modifier = BigButtonModifier) {
+                    Text(stringResource(Res.string.action_delivered), style = MaterialTheme.typography.titleMedium)
+                }
             }
-        }
-        Role.NGO -> if (need.paid && need.status == NeedStatus.CLAIMED) {
-            Button(onClick = { repo.markFulfilled(need.id); notify(msgDelivered) }, modifier = BigButtonModifier) {
-                Text(stringResource(Res.string.action_delivered), style = MaterialTheme.typography.titleMedium)
+            if (need.status == NeedStatus.FULFILLED) {
+                Button(onClick = { repo.confirmReceived(need.id); notify(msgConfirmed) }, modifier = BigButtonModifier) {
+                    Text(stringResource(Res.string.action_confirm, person.firstName), style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
     }
@@ -201,7 +204,7 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
 private fun zoneOf(repo: HelpRepository, person: Person): Zone? = repo.zones.firstOrNull { it.id == person.zoneId }
 
 /**
- * Exact last-seen spot: ONLY for volunteers and NGOs (donors never get this section, and the
+ * Exact last-seen spot: ONLY for volunteers (donors never get this section, and the
  * server doesn't send the data to them either). Only shown while the sighting is recent.
  */
 @Composable

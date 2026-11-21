@@ -5,13 +5,11 @@ import kotlin.time.Clock
 /** Access codes for login: the one place to change them. DONOR needs no code. */
 object AccessCodes {
     const val VOLUNTEER = "LAUSANNE-2026"
-    const val NGO = "NGO-2026"
 
     /** True if [code] is acceptable for [role]. */
     fun isValid(role: Role, code: String?): Boolean = when (role) {
         Role.DONOR -> true
         Role.VOLUNTEER -> code == VOLUNTEER
-        Role.NGO -> code == NGO
     }
 }
 

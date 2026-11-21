@@ -24,25 +24,23 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /** Order shown on the login screen. */
-private val LoginRoles = listOf(Role.DONOR, Role.VOLUNTEER, Role.NGO)
+private val LoginRoles = listOf(Role.DONOR, Role.VOLUNTEER)
 
 private fun Role.info(): StringResource = when (this) {
     Role.DONOR -> Res.string.login_role_donor_info
     Role.VOLUNTEER -> Res.string.login_role_volunteer_info
-    Role.NGO -> Res.string.login_role_ngo_info
 }
 
 /** Demo hackathon codes, shown as a hint under the code field. */
 private fun Role.demoCode(): String? = when (this) {
     Role.DONOR -> null
     Role.VOLUNTEER -> AccessCodes.VOLUNTEER
-    Role.NGO -> AccessCodes.NGO
 }
 
 private enum class LoginError { WRONG_CODE, NO_CONNECTION }
 
 /**
- * First screen: pick a role, enter a name and (for Volunteer / NGO) the access code.
+ * First screen: pick a role, enter a name and (for Volunteer) the access code.
  * On success the repository's currentAccount is set, and AppShell shows the app.
  */
 @Composable

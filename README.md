@@ -6,12 +6,12 @@ Helping Hand connects people living on the street in Lausanne with neighbours wh
 
 - **Volunteers** meet people on the street. With the person's consent, they add them to the app with a first name, a usual area and time, a few words in their own voice and what would help. Needs can be **small** (a winter coat, a phone charger) or **big** (a money goal, for example a CHF 150 ID renewal fee).
 - **Donors** browse the people in their area. For a small need they can bring the item themselves or pay CHF 20 for it. For a big goal they can give towards it. Completed goals count towards a partner voucher.
-- **The NGO** delivers items that were paid for.
+- When a donor **pays** for an item, a **volunteer buys it and brings it** to the person, then marks it delivered.
 - The volunteer then confirms with the person that they really received it.
 
 Status of a need: `OPEN → CLAIMED / FUNDING → FULFILLED → CONFIRMED`.
 
-People are only ever shown by **area**, never at an exact spot. Only volunteers and the NGO can see a recent "last seen" location.
+People are only ever shown by **area**, never at an exact spot. Only volunteers can see a recent "last seen" location.
 
 It runs on **Android, the web (JS and Wasm) and desktop**, with an optional **Ktor server**, all from one Kotlin Multiplatform codebase.
 
@@ -23,7 +23,6 @@ On the login screen you pick a role and enter your name:
 |-----------|-----------------|
 | Donor     | none            |
 | Volunteer | `LAUSANNE-2026` |
-| NGO       | `NGO-2026`      |
 
 The codes are shown as a hint on the login screen, because this is a hackathon demo. They're defined in one place: `core/.../model/Access.kt` (`AccessCodes`).
 
@@ -98,4 +97,4 @@ server/        Ktor (JVM)
 - `POST /people`, `/people/{id}/last-seen`, `/needs`
 - `POST /needs/{id}/claim | donate | fulfil | confirm`
 
-The server checks the role for each action: volunteers add people and needs and confirm, donors claim and donate, and the NGO or the donor who claimed a need marks it delivered. Donors never receive exact last-seen locations.
+The server checks the role for each action: volunteers add people and needs and confirm, donors claim and donate, and a volunteer marks paid items delivered, while a donor who brings an item marks it delivered themselves. Donors never receive exact last-seen locations.

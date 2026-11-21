@@ -25,7 +25,6 @@ class ApplicationTest {
 
     private suspend fun volunteer(c: io.ktor.client.HttpClient) = login(c, Role.VOLUNTEER, "Vera", AccessCodes.VOLUNTEER)
     private suspend fun donor(c: io.ktor.client.HttpClient, name: String = "Dora") = login(c, Role.DONOR, name)
-    private suspend fun ngo(c: io.ktor.client.HttpClient) = login(c, Role.NGO, "Nora", AccessCodes.NGO)
 
     private fun io.ktor.client.request.HttpRequestBuilder.auth(l: LoginResponse) =
         header(HttpHeaders.Authorization, "Bearer ${l.token}")
@@ -95,7 +94,8 @@ class ApplicationTest {
 
     @Test
     fun unknownNeedIs404() = api { client ->
-        assertEquals(HttpStatusCode.NotFound, client.post("/needs/nope/fulfil") { auth(ngo(client)) }.status)
+        val vol = volunteer(client)
+        assertEquals(HttpStatusCode.NotFound, client.post("/needs/nope/fulfil") { auth(vol) }.status)
     }
 
     @Test
@@ -121,7 +121,7 @@ class ApplicationTest {
 
     @Test
     fun wrongCodeIs401() = api { client ->
-        for ((role, code) in listOf(Role.VOLUNTEER to "nope", Role.VOLUNTEER to null, Role.NGO to AccessCodes.VOLUNTEER)) {
+        for ((role, code) in listOf(Role.VOLUNTEER to "nope", Role.VOLUNTEER to null, Role.VOLUNTEER to "NGO-2026")) {
             val res = client.post("/login") {
                 contentType(ContentType.Application.Json); setBody(LoginRequest("X", role, code))
             }
@@ -137,12 +137,12 @@ class ApplicationTest {
     }
 
     @Test
-    fun donorCannotSeeExactLocationButVolunteerAndNgoCan() = api { client ->
+    fun donorCannotSeeExactLocationButVolunteerCan() = api { client ->
         val d = donor(client)
         val asDonor = client.get("/people") { auth(d) }.body<List<Person>>()
         assertTrue(asDonor.all { it.lastSeenLat == null && it.lastSeenLng == null && it.lastSeenAtMillis == null && it.lastSeenNote == null })
 
-        for (l in listOf(volunteer(client), ngo(client))) {
+        for (l in listOf(volunteer(client))) {
             val jerry = client.get("/people") { auth(l) }.body<List<Person>>().first { it.id == "p-jerry" }
             assertNotNull(jerry.lastSeenLat)
             assertNotNull(jerry.lastSeenLng)
@@ -200,25 +200,35 @@ class ApplicationTest {
             auth(donor(client)); contentType(json); setBody(Need("", "p-luc", NeedType.SMALL, "Hat"))
         }.status)
         assertEquals(HttpStatusCode.Forbidden, client.post("/people") {
-            auth(ngo(client)); contentType(json)
+            auth(donor(client)); contentType(json)
             setBody(Person("", "Marc", null, "flon", "evenings", null, true, "x"))
         }.status)
     }
 
     @Test
-    fun fulfilByNgoOrClaimingDonorOnly() = api { client ->
+    fun fulfilByVolunteerForPaidItemsOrClaimingDonorOnly() = api { client ->
         val json = ContentType.Application.Json
         val claimer = donor(client, "Claire")
         client.post("/needs/n-1/claim") { auth(claimer); contentType(json); setBody(ClaimRequest("x")) }
-        // another donor and a volunteer may not
+        // another donor may not, and a volunteer may not either: this item wasn't paid for
+        val vol = volunteer(client)
         assertEquals(HttpStatusCode.Forbidden, client.post("/needs/n-1/fulfil") { auth(donor(client, "Other")) }.status)
-        assertEquals(HttpStatusCode.Forbidden, client.post("/needs/n-1/fulfil") { auth(volunteer(client)) }.status)
+        assertEquals(HttpStatusCode.Forbidden, client.post("/needs/n-1/fulfil") { auth(vol) }.status)
         assertEquals(HttpStatusCode.Unauthorized, client.post("/needs/n-1/fulfil").status)
         // the claiming donor may
         assertEquals(NeedStatus.FULFILLED, client.post("/needs/n-1/fulfil") { auth(claimer) }.body<Need>().status)
-        // the NGO may fulfil any need
-        client.post("/needs/n-3/claim") { auth(claimer); contentType(json); setBody(ClaimRequest("x")) }
-        assertEquals(NeedStatus.FULFILLED, client.post("/needs/n-3/fulfil") { auth(ngo(client)) }.body<Need>().status)
+        // a donor pays for n-3: a volunteer buys it, delivers it and marks it delivered
+        client.post("/needs/n-3/donate") { auth(claimer); contentType(json); setBody(DonateRequest("x", 20)) }
+        assertEquals(NeedStatus.FULFILLED, client.post("/needs/n-3/fulfil") { auth(vol) }.body<Need>().status)
+    }
+
+    @Test
+    fun ngoRoleIsGone() = api { client ->
+        val res = client.post("/login") {
+            contentType(ContentType.Application.Json)
+            setBody("""{"name":"Nora","role":"NGO","code":"NGO-2026"}""")
+        }
+        assertEquals(HttpStatusCode.BadRequest, res.status)
     }
 
     // --- donor contributions / rewards ---

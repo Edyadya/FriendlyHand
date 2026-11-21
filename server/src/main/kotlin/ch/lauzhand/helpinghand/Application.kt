@@ -81,7 +81,7 @@ class Store {
     /** Creates an account for the login and returns a new token for it. Ids are stable per role and name. */
     fun login(name: String, role: Role): LoginResponse = synchronized(lock) {
         val slug = name.trim().lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifBlank { "user" }
-        val prefix = when (role) { Role.DONOR -> "donor"; Role.VOLUNTEER -> "vol"; Role.NGO -> "ngo" }
+        val prefix = when (role) { Role.DONOR -> "donor"; Role.VOLUNTEER -> "vol" }
         val account = Account("$prefix-$slug", name.trim(), role)
         val token = java.util.UUID.randomUUID().toString()
         tokens[token] = account
@@ -132,10 +132,10 @@ fun Application.module(store: Store = Store()) {
 
         get("/zones") { call.respond(store.zones()) }
         get("/people") {
-            // exact last-seen data only for volunteers and NGOs
+            // exact last-seen data only for volunteers
             val role = call.account(store)?.role
             val people = store.people()
-            call.respond(if (role == Role.VOLUNTEER || role == Role.NGO) people else people.map { it.withoutLastSeen() })
+            call.respond(if (role == Role.VOLUNTEER) people else people.map { it.withoutLastSeen() })
         }
         get("/needs") { call.respond(store.needs()) }
 
@@ -190,9 +190,16 @@ fun Application.module(store: Store = Store()) {
             post("/fulfil") {
                 val account = call.requireAccount(store)
                 val id = call.parameters["id"]!!
-                val allowed = account.role == Role.NGO ||
-                    (account.role == Role.DONOR && store.needs().firstOrNull { it.id == id }?.claimedByDonorId == account.id)
-                if (!allowed) throw ForbiddenException("Only the NGO or the donor who claimed it can mark it delivered")
+                val need = store.needs().firstOrNull { it.id == id }
+                // a volunteer delivers items that a donor paid for (and buys them first);
+                // the donor who claimed an item delivers it themselves
+                val allowed = need != null && (
+                    (account.role == Role.VOLUNTEER && need.paid) ||
+                        (account.role == Role.DONOR && need.claimedByDonorId == account.id)
+                    )
+                if (need != null && !allowed) {
+                    throw ForbiddenException("Only a volunteer (for paid items) or the donor who claimed it can mark it delivered")
+                }
                 call.respondNeed(store.updateNeed(id) { it.fulfilled() })
             }
             post("/confirm") {

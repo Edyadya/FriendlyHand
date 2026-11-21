@@ -80,8 +80,8 @@ actual fun LausanneMap(
         }
     }
 
-    // Exact last-seen markers: only for volunteers / NGOs, and only recent ones.
-    val seesExact = role == Role.VOLUNTEER || role == Role.NGO
+    // Exact last-seen markers: only for volunteers, and only recent ones.
+    val seesExact = role == Role.VOLUNTEER
     val now = remember(people) { nowMillis() }
     val seenData = remember(people, seesExact, now) {
         buildFeatureCollection<Point, JsonObject?> {

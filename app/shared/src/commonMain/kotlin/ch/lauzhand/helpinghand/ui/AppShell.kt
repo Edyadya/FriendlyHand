@@ -26,7 +26,6 @@ sealed interface Screen {
 internal fun Role.label(): StringResource = when (this) {
     Role.VOLUNTEER -> Res.string.role_volunteer
     Role.DONOR -> Res.string.role_donor
-    Role.NGO -> Res.string.role_ngo
 }
 
 @Composable
