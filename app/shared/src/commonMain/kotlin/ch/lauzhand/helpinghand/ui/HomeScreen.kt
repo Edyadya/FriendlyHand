@@ -44,7 +44,7 @@ fun HomeScreen(
     role: Role,
     onOpenPerson: (String) -> Unit,
     onNewPerson: () -> Unit,
-    onRewards: () -> Unit,
+    onRewards: () -> Unit, // kept so callers don't change; rewards live in the Achievements tab now
 ) {
     // Zones are always there once data has arrived, so none means the repository is still loading.
     if (repo.zones.isEmpty()) {
@@ -82,16 +82,6 @@ fun HomeScreen(
                             )
                         }
                     }
-                }
-            }
-            if (role == Role.DONOR) {
-                FloatingPill(onClick = onRewards) {
-                    Text(
-                        stringResource(Res.string.my_rewards),
-                        Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
                 }
             }
         }
