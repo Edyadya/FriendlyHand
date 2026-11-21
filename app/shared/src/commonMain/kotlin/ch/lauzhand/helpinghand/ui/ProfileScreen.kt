@@ -5,6 +5,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalUriHandler
+import ch.lauzhand.helpinghand.map.centerLat
+import ch.lauzhand.helpinghand.map.centerLng
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
@@ -61,6 +68,9 @@ fun ProfileScreen(
                     )
                 }
             }
+        }
+        if (role == Role.VOLUNTEER || role == Role.NGO) {
+            item { LastSeenSection(repo, role, person, zoneOf(repo, person)) }
         }
         item { Text(stringResource(Res.string.needs_title), style = MaterialTheme.typography.titleLarge) }
         if (needs.isEmpty()) {
@@ -139,6 +149,53 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
         Role.NGO -> if (need.paid && need.status == NeedStatus.CLAIMED) {
             Button(onClick = { repo.markFulfilled(need.id) }, modifier = BigButtonModifier) {
                 Text(stringResource(Res.string.action_delivered))
+            }
+        }
+    }
+}
+
+private fun zoneOf(repo: HelpRepository, person: Person): Zone? = repo.zones.firstOrNull { it.id == person.zoneId }
+
+/**
+ * Exact last-seen spot: ONLY for volunteers and NGOs (donors never get this section, and the
+ * server doesn't send the data to them either). Only shown while the sighting is recent.
+ */
+@Composable
+private fun LastSeenSection(repo: HelpRepository, role: Role, person: Person, zone: Zone?) {
+    val now = remember(person.lastSeenAtMillis) { nowMillis() }
+    val visible = person.lastSeenVisible(now)
+    var note by remember { mutableStateOf("") }
+    val uriHandler = LocalUriHandler.current
+
+    Card(
+        Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (visible) {
+                val ago = timeAgo(person.lastSeenAtMillis!!, now)
+                val text = person.lastSeenNote?.takeIf { it.isNotBlank() }
+                    ?.let { stringResource(Res.string.last_seen_with_note, it, ago) }
+                    ?: stringResource(Res.string.last_seen_no_note, ago)
+                Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                OutlinedButton(
+                    onClick = { uriHandler.openUri("https://www.google.com/maps?q=${person.lastSeenLat},${person.lastSeenLng}") },
+                    modifier = BigButtonModifier,
+                ) { Text(stringResource(Res.string.open_in_maps)) }
+            }
+            if (role == Role.VOLUNTEER && zone != null) {
+                OutlinedTextField(
+                    note, { note = it }, Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(Res.string.last_seen_note_field)) }, singleLine = true,
+                )
+                // Demo coordinates: the centre of the zone, never a real GPS fix.
+                Button(
+                    onClick = {
+                        repo.updateLastSeen(person.id, zone.centerLat, zone.centerLng, note.trim().ifBlank { null })
+                        note = ""
+                    },
+                    modifier = BigButtonModifier,
+                ) { Text(stringResource(Res.string.update_last_seen)) }
             }
         }
     }

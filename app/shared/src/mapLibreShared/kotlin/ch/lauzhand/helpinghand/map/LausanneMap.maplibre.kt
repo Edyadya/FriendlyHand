@@ -35,13 +35,7 @@ import org.maplibre.spatialk.geojson.dsl.buildFeatureCollection
 // Free OpenFreeMap style, no API key. "bright" is the friendliest of the free ones.
 private const val STYLE_URL = "https://tiles.openfreemap.org/styles/bright"
 
-// Zone.x / Zone.y (0..1) are laid out on this box around Lausanne. Zones are areas, never exact spots.
-private const val WEST = 6.595
-private const val LON_SPAN = 0.070
-private const val NORTH = 46.535
-private const val LAT_SPAN = 0.032
-
-private fun Zone.position() = Position(longitude = WEST + x * LON_SPAN, latitude = NORTH - y * LAT_SPAN)
+private fun Zone.position() = Position(longitude = centerLng, latitude = centerLat)
 
 private fun JsonObject?.id(): String? = this?.get("id")?.jsonPrimitive?.contentOrNull
 
