@@ -4,7 +4,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,14 +26,6 @@ import helpinghand.app.shared.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-private fun NeedStatus.label(): StringResource = when (this) {
-    NeedStatus.OPEN -> Res.string.status_open
-    NeedStatus.CLAIMED -> Res.string.status_claimed
-    NeedStatus.FUNDING -> Res.string.status_funding
-    NeedStatus.FULFILLED -> Res.string.status_fulfilled
-    NeedStatus.CONFIRMED -> Res.string.status_confirmed
-}
-
 private val BigButtonModifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
 
 @Composable
@@ -45,8 +41,18 @@ fun ProfileScreen(
     val zoneName = repo.zones.firstOrNull { it.id == person.zoneId }?.name.orEmpty()
     val needs = repo.needs.filter { it.personId == personId }
 
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val notify: (String) -> Unit = { msg -> scope.launch { snackbar.currentSnackbarData?.dismiss(); snackbar.showSnackbar(msg) } }
+    val lastSeenSaved = stringResource(Res.string.feedback_last_seen)
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbar) },
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0),
+    ) { inner ->
     LazyColumn(
-        Modifier.fillMaxSize(),
+        Modifier.fillMaxSize().padding(inner),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -70,13 +76,13 @@ fun ProfileScreen(
             }
         }
         if (role == Role.VOLUNTEER || role == Role.NGO) {
-            item { LastSeenSection(repo, role, person, zoneOf(repo, person)) }
+            item { LastSeenSection(repo, role, person, zoneOf(repo, person)) { notify(lastSeenSaved) } }
         }
         item { Text(stringResource(Res.string.needs_title), style = MaterialTheme.typography.titleLarge) }
         if (needs.isEmpty()) {
             item { Text(stringResource(Res.string.no_needs), style = MaterialTheme.typography.bodyLarge) }
         }
-        items(needs, key = { it.id }) { NeedCard(repo, role, person, it) }
+        items(needs, key = { it.id }) { NeedCard(repo, role, person, it, notify) }
         if (role == Role.VOLUNTEER) {
             item {
                 OutlinedButton(onClick = onAddNeed, modifier = BigButtonModifier) {
@@ -85,70 +91,73 @@ fun ProfileScreen(
             }
         }
     }
+    }
 }
 
 @Composable
-private fun NeedCard(repo: HelpRepository, role: Role, person: Person, need: Need) {
+private fun NeedCard(repo: HelpRepository, role: Role, person: Person, need: Need, notify: (String) -> Unit) {
     Card(
-        Modifier.fillMaxWidth(),
+        Modifier.fillMaxWidth().animateContentSize(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(need.title, style = MaterialTheme.typography.titleLarge)
             if (need.type == NeedType.BIG) {
                 val target = (need.targetAmountChf ?: 0).coerceAtLeast(1)
+                val progress by animateFloatAsState((need.fundedAmountChf.toFloat() / target).coerceIn(0f, 1f))
                 LinearProgressIndicator(
-                    progress = { (need.fundedAmountChf.toFloat() / target).coerceIn(0f, 1f) },
+                    progress = { progress },
                     modifier = Modifier.fillMaxWidth().height(10.dp),
                 )
                 Text(
                     stringResource(Res.string.funded_of, need.fundedAmountChf, target),
                     style = MaterialTheme.typography.bodyLarge,
                 )
-            } else {
-                Text(
-                    stringResource(need.status.label()),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                )
             }
-            NeedActions(repo, role, person, need)
+            StatusChip(need.status)
+            NeedActions(repo, role, person, need, notify)
         }
     }
 }
 
 @Composable
-private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: Need) {
+private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: Need, notify: (String) -> Unit) {
     val canGive = need.status == NeedStatus.OPEN || need.status == NeedStatus.FUNDING
+    val msgClaimed = stringResource(Res.string.feedback_claimed, need.title)
+    val msgPaid = stringResource(Res.string.feedback_paid, 20, need.title)
+    val msgGiven = stringResource(Res.string.feedback_given, 50, need.title)
+    val msgHanded = stringResource(Res.string.feedback_handed_over, person.firstName)
+    val msgConfirmed = stringResource(Res.string.feedback_confirmed, person.firstName)
+    val msgDelivered = stringResource(Res.string.feedback_delivered)
     when (role) {
         Role.DONOR -> {
             if (need.type == NeedType.SMALL && need.status == NeedStatus.OPEN) {
-                Button(onClick = { repo.claimNeed(need.id, ME_DONOR) }, modifier = BigButtonModifier) {
-                    Text(stringResource(Res.string.action_bring))
+                Button(onClick = { repo.claimNeed(need.id, ME_DONOR); notify(msgClaimed) }, modifier = BigButtonModifier) {
+                    Text(stringResource(Res.string.action_bring), style = MaterialTheme.typography.titleMedium)
                 }
-                OutlinedButton(onClick = { repo.donate(need.id, ME_DONOR, 20) }, modifier = BigButtonModifier) {
-                    Text(stringResource(Res.string.action_pay))
+                OutlinedButton(onClick = { repo.donate(need.id, ME_DONOR, 20); notify(msgPaid) }, modifier = BigButtonModifier) {
+                    Text(stringResource(Res.string.action_pay), style = MaterialTheme.typography.titleMedium)
                 }
             } else if (need.type == NeedType.BIG && canGive) {
-                Button(onClick = { repo.donate(need.id, ME_DONOR, 50) }, modifier = BigButtonModifier) {
-                    Text(stringResource(Res.string.action_give))
+                Button(onClick = { repo.donate(need.id, ME_DONOR, 50); notify(msgGiven) }, modifier = BigButtonModifier) {
+                    Text(stringResource(Res.string.action_give), style = MaterialTheme.typography.titleMedium)
                 }
             } else if (need.type == NeedType.SMALL && need.status == NeedStatus.CLAIMED &&
                 need.claimedByDonorId == ME_DONOR && !need.paid
             ) {
-                Button(onClick = { repo.markFulfilled(need.id) }, modifier = BigButtonModifier) {
-                    Text(stringResource(Res.string.action_handed_over))
+                Button(onClick = { repo.markFulfilled(need.id); notify(msgHanded) }, modifier = BigButtonModifier) {
+                    Text(stringResource(Res.string.action_handed_over), style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
         Role.VOLUNTEER -> if (need.status == NeedStatus.FULFILLED) {
-            Button(onClick = { repo.confirmReceived(need.id) }, modifier = BigButtonModifier) {
-                Text(stringResource(Res.string.action_confirm, person.firstName))
+            Button(onClick = { repo.confirmReceived(need.id); notify(msgConfirmed) }, modifier = BigButtonModifier) {
+                Text(stringResource(Res.string.action_confirm, person.firstName), style = MaterialTheme.typography.titleMedium)
             }
         }
         Role.NGO -> if (need.paid && need.status == NeedStatus.CLAIMED) {
-            Button(onClick = { repo.markFulfilled(need.id) }, modifier = BigButtonModifier) {
-                Text(stringResource(Res.string.action_delivered))
+            Button(onClick = { repo.markFulfilled(need.id); notify(msgDelivered) }, modifier = BigButtonModifier) {
+                Text(stringResource(Res.string.action_delivered), style = MaterialTheme.typography.titleMedium)
             }
         }
     }
@@ -161,7 +170,7 @@ private fun zoneOf(repo: HelpRepository, person: Person): Zone? = repo.zones.fir
  * server doesn't send the data to them either). Only shown while the sighting is recent.
  */
 @Composable
-private fun LastSeenSection(repo: HelpRepository, role: Role, person: Person, zone: Zone?) {
+private fun LastSeenSection(repo: HelpRepository, role: Role, person: Person, zone: Zone?, onSaved: () -> Unit) {
     val now = remember(person.lastSeenAtMillis) { nowMillis() }
     val visible = person.lastSeenVisible(now)
     var note by remember { mutableStateOf("") }
@@ -193,6 +202,7 @@ private fun LastSeenSection(repo: HelpRepository, role: Role, person: Person, zo
                     onClick = {
                         repo.updateLastSeen(person.id, zone.centerLat, zone.centerLng, note.trim().ifBlank { null })
                         note = ""
+                        onSaved()
                     },
                     modifier = BigButtonModifier,
                 ) { Text(stringResource(Res.string.update_last_seen)) }
