@@ -27,10 +27,10 @@ fun RewardScreen(repo: HelpRepository, onBack: () -> Unit) {
 
 /** Progress towards the partner voucher; also shown on the Achievements tab. */
 @Composable
-fun VoucherCard(completed: Int, modifier: Modifier = Modifier) {
+fun VoucherCard(completed: Int, modifier: Modifier = Modifier, containerAlpha: Float = 1f) {
     Card(
         modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = containerAlpha)),
     ) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             AnimatedContent(completed) { n ->
