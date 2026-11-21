@@ -1,0 +1,15 @@
+<resources>
+    <string name="login_title">Welcome</string>
+    <string name="login_subtitle">Who is using the app?</string>
+    <string name="login_role_donor_info">Bring items or give money</string>
+    <string name="login_role_volunteer_info">Meet people and list what they need</string>
+    <string name="login_role_ngo_info">Deliver paid items and follow up</string>
+    <string name="login_name">Your name</string>
+    <string name="login_code">Access code</string>
+    <string name="login_code_hint">Demo code: %1$s</string>
+    <string name="login_button">Log in</string>
+    <string name="login_wrong_code">Wrong access code. Please check it and try again.</string>
+    <string name="login_no_connection">Can’t reach the server. Check the connection and try again.</string>
+    <string name="logged_in_as">%1$s · %2$s</string>
+    <string name="logout">Log out / switch user</string>
+</resources>

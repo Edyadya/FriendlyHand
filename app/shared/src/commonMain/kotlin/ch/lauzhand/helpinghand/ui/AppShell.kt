@@ -21,7 +21,7 @@ sealed interface Screen {
     data class AddNeed(val personId: String) : Screen
 }
 
-private fun Role.label(): StringResource = when (this) {
+internal fun Role.label(): StringResource = when (this) {
     Role.VOLUNTEER -> Res.string.role_volunteer
     Role.DONOR -> Res.string.role_donor
     Role.NGO -> Res.string.role_ngo
@@ -29,8 +29,15 @@ private fun Role.label(): StringResource = when (this) {
 
 @Composable
 fun AppShell(repo: HelpRepository) {
-    var role by remember { mutableStateOf(Role.VOLUNTEER) }
-    var screen by remember { mutableStateOf<Screen>(Screen.Home) }
+    val account = repo.currentAccount
+    if (account == null) {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Box(Modifier.safeContentPadding().fillMaxSize()) { LoginScreen(repo) }
+        }
+        return
+    }
+    var role by remember(account) { mutableStateOf(account.role) }
+    var screen by remember(account) { mutableStateOf<Screen>(Screen.Home) }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.safeContentPadding().fillMaxSize()) {

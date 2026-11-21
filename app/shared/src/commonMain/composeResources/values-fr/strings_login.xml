@@ -1,0 +1,15 @@
+<resources>
+    <string name="login_title">Bienvenue</string>
+    <string name="login_subtitle">Qui utilise l’application ?</string>
+    <string name="login_role_donor_info">Apporter un objet ou donner de l’argent</string>
+    <string name="login_role_volunteer_info">Rencontrer les personnes et noter leurs besoins</string>
+    <string name="login_role_ngo_info">Livrer les objets payés et assurer le suivi</string>
+    <string name="login_name">Votre prénom</string>
+    <string name="login_code">Code d’accès</string>
+    <string name="login_code_hint">Code de démo : %1$s</string>
+    <string name="login_button">Se connecter</string>
+    <string name="login_wrong_code">Code d’accès incorrect. Vérifiez-le et réessayez.</string>
+    <string name="login_no_connection">Impossible de joindre le serveur. Vérifiez la connexion et réessayez.</string>
+    <string name="logged_in_as">%1$s · %2$s</string>
+    <string name="logout">Se déconnecter / changer d’utilisateur</string>
+</resources>
