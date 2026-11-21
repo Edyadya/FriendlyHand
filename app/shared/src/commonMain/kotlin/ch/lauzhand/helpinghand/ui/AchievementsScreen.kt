@@ -2,8 +2,10 @@ package ch.lauzhand.helpinghand.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -20,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -63,60 +66,64 @@ fun AchievementsScreen(repo: HelpRepository) {
     // the badge whose reward is being shown, or null
     var opened by remember { mutableStateOf<Achievement?>(null) }
 
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 170.dp),
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            Text(stringResource(Res.string.achievements_title), style = MaterialTheme.typography.headlineSmall)
-        }
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            VoucherCard(repo.completedGoalsFor(ME_DONOR))
-        }
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            Text(stringResource(Res.string.badges_title), style = MaterialTheme.typography.titleLarge)
-        }
-        items(achievements, key = { it.id.name }) { a -> BadgeCard(a) { opened = a } }
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(stringResource(Res.string.partners_title), style = MaterialTheme.typography.titleLarge)
-                Text(
-                    stringResource(Res.string.partners_subtitle),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+    Box(Modifier.fillMaxSize()) {
+        // the partners, fixed behind the page; the cards scroll over them
+        PartnerBackdrop(Modifier.fillMaxSize())
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 170.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Text(stringResource(Res.string.achievements_title), style = MaterialTheme.typography.headlineSmall)
             }
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                VoucherCard(repo.completedGoalsFor(ME_DONOR), containerAlpha = 0.82f)
+            }
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Text(stringResource(Res.string.badges_title), style = MaterialTheme.typography.titleLarge)
+            }
+            items(achievements, key = { it.id.name }) { a -> BadgeCard(a) { opened = a } }
         }
-        items(Partner.entries, key = { "partner-${it.name}" }) { PartnerCard(it) }
     }
 
     opened?.let { RewardDialog(it) { opened = null } }
 }
 
+/** A frosted-glass badge: see-through so the partners show behind it, with a lit edge and a glow when unlocked. */
 @Composable
 private fun BadgeCard(a: Achievement, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    Card(
-        Modifier.fillMaxWidth().heightIn(min = 150.dp).clip(CardDefaults.shape).clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = if (a.unlocked) colors.secondaryContainer else colors.surfaceVariant,
-        ),
+    val shape = RoundedCornerShape(24.dp)
+    val tint = if (a.unlocked) colors.secondary else colors.outline
+    val glass = if (a.unlocked) colors.secondaryContainer else colors.surface
+    val text = if (a.unlocked) colors.onSecondaryContainer else colors.onSurface
+    val subText = if (a.unlocked) colors.onSecondaryContainer else colors.onSurfaceVariant
+    Box(
+        Modifier.fillMaxWidth().heightIn(min = 150.dp)
+            .clip(shape)
+            // a sheen from top-left (more opaque) to bottom-right (more see-through)
+            .background(Brush.linearGradient(listOf(glass.copy(alpha = 0.86f), glass.copy(alpha = 0.54f))))
+            // a lit edge: bright at the top-left, tinted at the bottom-right
+            .border(1.dp, Brush.linearGradient(listOf(colors.surface.copy(alpha = 0.95f), tint.copy(alpha = 0.55f))), shape)
+            .clickable(onClick = onClick),
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Medal(a.unlocked, Modifier.size(36.dp))
-            Text(
-                stringResource(a.id.title()),
-                style = MaterialTheme.typography.titleMedium,
-                color = if (a.unlocked) colors.onSecondaryContainer else colors.onSurface,
-            )
-            Text(
-                stringResource(a.id.description()),
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (a.unlocked) colors.onSecondaryContainer else colors.onSurfaceVariant,
-            )
+            Box(Modifier.size(44.dp), contentAlignment = Alignment.Center) {
+                if (a.unlocked) {
+                    Box(
+                        Modifier.matchParentSize().background(
+                            Brush.radialGradient(listOf(colors.secondary.copy(alpha = 0.5f), Color.Transparent)),
+                            CircleShape,
+                        ),
+                    )
+                }
+                Medal(a.unlocked, Modifier.size(36.dp))
+            }
+            Text(stringResource(a.id.title()), style = MaterialTheme.typography.titleMedium, color = text)
+            Text(stringResource(a.id.description()), style = MaterialTheme.typography.bodyMedium, color = subText)
             Text(
                 stringResource(Res.string.reward_on_badge, a.id.reward.partner.displayName),
                 style = MaterialTheme.typography.labelLarge,
@@ -124,11 +131,7 @@ private fun BadgeCard(a: Achievement, onClick: () -> Unit) {
             )
             Spacer(Modifier.weight(1f, fill = false))
             if (a.unlocked) {
-                Text(
-                    stringResource(Res.string.badge_unlocked),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = colors.onSecondaryContainer,
-                )
+                Text(stringResource(Res.string.badge_unlocked), style = MaterialTheme.typography.labelLarge, color = text)
             } else {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     LinearProgressIndicator(
@@ -210,30 +213,6 @@ private fun RewardDialog(a: Achievement, onDismiss: () -> Unit) {
             }
         },
     )
-}
-
-@Composable
-private fun PartnerCard(p: Partner) {
-    Card(
-        Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-    ) {
-        Row(
-            Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            PartnerMonogram(p, Modifier.size(40.dp))
-            Column {
-                Text(p.displayName, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    stringResource(p.kind),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
 }
 
 /** A round badge with the partner's initials (no logos are used). */
