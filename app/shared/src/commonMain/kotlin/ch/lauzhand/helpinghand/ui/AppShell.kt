@@ -52,7 +52,7 @@ fun AppShell(repo: HelpRepository) {
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 when (val s = screen) {
                     Screen.Home -> HomeScreen(repo, onOpenPerson = { screen = Screen.Profile(it) })
-                    is Screen.Profile -> Text("Profile ${s.personId}", Modifier.padding(16.dp))
+                    is Screen.Profile -> ProfileScreen(repo, role, s.personId, onBack = { screen = Screen.Home })
                 }
             }
         }
