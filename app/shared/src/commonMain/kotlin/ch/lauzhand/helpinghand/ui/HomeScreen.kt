@@ -33,6 +33,11 @@ fun HomeScreen(
     onNewPerson: () -> Unit,
     onRewards: () -> Unit,
 ) {
+    // Zones are always there once data has arrived, so none means the repository is still loading.
+    if (repo.zones.isEmpty()) {
+        LoadingScreen()
+        return
+    }
     var zoneFilter by remember { mutableStateOf<String?>(null) }
     val people = repo.people.filter { zoneFilter == null || it.zoneId == zoneFilter }
 
