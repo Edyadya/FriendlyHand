@@ -102,17 +102,28 @@ fun ZoneMap(
                     .offset(x = w * z.x - slot / 2, y = h * z.y - bubble / 2),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                // Nothing open here = dead end: grey, small, no number, not tappable.
+                val hasPeople = open > 0
+                val size = if (hasPeople) bubble else 22.dp
                 Surface(
                     onClick = { onZoneClick(if (selected) null else z.id) },
+                    enabled = hasPeople,
                     shape = CircleShape,
-                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                    contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                    shadowElevation = 6.dp,
+                    color = when {
+                        !hasPeople -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)
+                        selected -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.tertiary   // warm, saturated
+                    },
+                    contentColor = when {
+                        selected -> MaterialTheme.colorScheme.onPrimary
+                        else -> MaterialTheme.colorScheme.onTertiary
+                    },
+                    shadowElevation = if (hasPeople) 6.dp else 0.dp,
                     modifier = Modifier
-                        .size(bubble)
-                        .border(3.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                        .size(size)
+                        .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape),
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
+                    if (hasPeople) Box(contentAlignment = Alignment.Center) {
                         Text(open.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -121,7 +132,7 @@ fun ZoneMap(
                     z.name,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = if (hasPeople) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))

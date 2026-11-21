@@ -18,6 +18,9 @@ private val LightColors = lightColorScheme(
     secondary = Color(0xFF8A5A2B),
     secondaryContainer = Color(0xFFFFDDBB),
     onSecondaryContainer = Color(0xFF2D1600),
+    // Warm saturated accent: map bubbles that have people waiting
+    tertiary = Color(0xFFE8590C),
+    onTertiary = Color(0xFFFFFFFF),
     tertiaryContainer = Color(0xFFCFE4FF),
     onTertiaryContainer = Color(0xFF001D36),
 )
@@ -30,6 +33,8 @@ private val DarkColors = darkColorScheme(
     secondary = Color(0xFFF2BC8A),
     secondaryContainer = Color(0xFF6B4318),
     onSecondaryContainer = Color(0xFFFFDDBB),
+    tertiary = Color(0xFFFF9A3D),
+    onTertiary = Color(0xFF3A1A00),
     tertiaryContainer = Color(0xFF1F4A73),
     onTertiaryContainer = Color(0xFFCFE4FF),
 )

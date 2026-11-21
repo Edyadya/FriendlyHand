@@ -66,15 +66,30 @@ actual fun LausanneMap(
     var focusedZoneId by remember { mutableStateOf<String?>(null) }
     val onPerson by rememberUpdatedState(onPersonClick)
 
-    // One circle per zone with its open-needs count.
-    val zoneData = remember(zones, people, needs) {
+    // Zones with open needs are warm, tappable bubbles with their count. Zones with nothing open are
+    // dead ends: drawn small and grey, no number, and not tappable.
+    val openCounts = remember(zones, people, needs) {
+        zones.associate { z ->
+            z.id to people.filter { it.zoneId == z.id }.sumOf { p -> needs.count { it.personId == p.id && it.isOpen() } }
+        }
+    }
+    val zoneData = remember(zones, openCounts) {
         buildFeatureCollection<Point, JsonObject?> {
             for (z in zones) {
-                val open = people.filter { it.zoneId == z.id }
-                    .sumOf { p -> needs.count { it.personId == p.id && it.isOpen() } }
-                addFeature(
+                val open = openCounts[z.id] ?: 0
+                if (open > 0) addFeature(
                     geometry = Point(z.position()),
                     properties = buildJsonObject { put("id", z.id); put("label", open.toString()) },
+                )
+            }
+        }
+    }
+    val emptyZoneData = remember(zones, openCounts) {
+        buildFeatureCollection<Point, JsonObject?> {
+            for (z in zones) {
+                if ((openCounts[z.id] ?: 0) == 0) addFeature(
+                    geometry = Point(z.position()),
+                    properties = buildJsonObject { put("id", z.id) },
                 )
             }
         }
@@ -97,10 +112,11 @@ actual fun LausanneMap(
         }
     }
 
-    val zoneColor = MaterialTheme.colorScheme.primary
+    val zoneColor = MaterialTheme.colorScheme.tertiary          // warm, saturated: people are waiting
+    val emptyColor = MaterialTheme.colorScheme.onSurfaceVariant  // grey: nothing to do here
     val seenColor = MaterialTheme.colorScheme.secondary
     val outline = MaterialTheme.colorScheme.surface
-    val labelColor = MaterialTheme.colorScheme.onSurface
+    val labelColor = MaterialTheme.colorScheme.onTertiary
     val styleUrl = if (isSystemInDarkTheme()) STYLE_DARK else STYLE_LIGHT
 
     val state = rememberMapState(
@@ -109,14 +125,25 @@ actual fun LausanneMap(
     ) {
         val mapState = LocalMapState.current
         val zoneSource = rememberGeoJsonSource(GeoJsonData.Features(zoneData))
+        val emptyZoneSource = rememberGeoJsonSource(GeoJsonData.Features(emptyZoneData))
         val seenSource = rememberGeoJsonSource(GeoJsonData.Features(seenData))
 
+        // dead ends first (underneath): small, grey, faint, no click handler so the map stays draggable
+        CircleLayer(
+            id = "zones-empty",
+            source = emptyZoneSource,
+            radius = const(14.dp),
+            color = const(emptyColor),
+            opacity = const(0.35f),
+            strokeColor = const(outline),
+            strokeWidth = const(2.dp),
+        )
         CircleLayer(
             id = "zones",
             source = zoneSource,
             radius = const(26.dp),
             color = const(zoneColor),
-            opacity = const(0.45f),
+            opacity = const(0.92f),
             strokeColor = const(outline),
             strokeWidth = const(3.dp),
             hitPadding = 8.dp,
