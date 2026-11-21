@@ -20,7 +20,8 @@ actual fun rememberKeyValueStore(): KeyValueStore = remember {
 }
 
 private fun overrideNavigatorLanguage(tag: String) {
-    js("Object.defineProperty(navigator, 'language', { get: function () { return tag; }, configurable: true })")
+    // Compose's Locale.current reads navigator.languages, the resource library reads navigator.language: set both
+    js("{ Object.defineProperty(navigator, 'language', { get: function () { return tag; }, configurable: true }); Object.defineProperty(navigator, 'languages', { get: function () { return [tag]; }, configurable: true }); }")
 }
 
 actual object LocalAppLocale {

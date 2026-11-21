@@ -14,6 +14,18 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
+/**
+ * Where the user is in the app (screen, donor tab) and the state of the settings menu.
+ * It lives ABOVE the language switch in App(), so changing the language rebuilds the texts but keeps the
+ * user on the same screen with the menu still open.
+ */
+class ShellState {
+    var screen by mutableStateOf<Screen>(Screen.Home)
+    var tab by mutableStateOf(DonorTab.MAP)
+    var menuOpen by mutableStateOf(false)
+    var settingsPage by mutableStateOf<SettingsPage?>(null)
+}
+
 /** Simple state-based navigation, no library. */
 sealed interface Screen {
     data object Home : Screen
@@ -29,7 +41,7 @@ internal fun Role.label(): StringResource = when (this) {
 }
 
 @Composable
-fun AppShell(repo: HelpRepository) {
+fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }) {
     val account = repo.currentAccount
     if (account == null) {
         LoginScreen(repo) // draws its own full-screen gradient and handles the safe areas itself
@@ -37,14 +49,14 @@ fun AppShell(repo: HelpRepository) {
     }
     // The role comes from the logged-in account; logging out returns to LoginScreen.
     val role = account.role
-    var screen by remember(account) { mutableStateOf<Screen>(Screen.Home) }
+    var screen by shell::screen
     // Donors get three tabs in a bottom bar (all screen sizes); Home shows the selected one.
-    var tab by remember(account) { mutableStateOf(DonorTab.MAP) }
+    var tab by shell::tab
     val selectTab: (DonorTab) -> Unit = { tab = it; screen = Screen.Home }
 
     // Settings menu: open state and the page (partners / terms / about) shown as a dialog
-    var menuOpen by remember { mutableStateOf(false) }
-    var settingsPage by remember { mutableStateOf<SettingsPage?>(null) }
+    var menuOpen by shell::menuOpen
+    var settingsPage by shell::settingsPage
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         BoxWithConstraints(Modifier.safeContentPadding().fillMaxSize()) {

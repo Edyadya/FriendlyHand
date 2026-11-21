@@ -2,6 +2,7 @@ package ch.lauzhand.helpinghand
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import ch.lauzhand.helpinghand.data.RepositoryMode
@@ -11,6 +12,7 @@ import ch.lauzhand.helpinghand.settings.LocalAppLocale
 import ch.lauzhand.helpinghand.settings.LocalAppSettings
 import ch.lauzhand.helpinghand.settings.rememberAppSettings
 import ch.lauzhand.helpinghand.ui.HelpTheme
+import ch.lauzhand.helpinghand.ui.ShellState
 
 /**
  * Where the app gets its data:
@@ -34,10 +36,18 @@ fun App() {
     val repo = remember { createRepository(DATA_SOURCE, SERVER_BASE_URL) }
     // The user's choices (language, dark mode) are remembered between runs. Language applies at once.
     val settings = rememberAppSettings()
+    // Where the user is, kept above the language switch so a language change does not move them.
+    // A new login starts from the home screen again.
+    val shell = remember(repo.currentAccount?.id) { ShellState() }
+    val language = settings.effectiveLanguage
     CompositionLocalProvider(
         LocalAppSettings provides settings,
-        LocalAppLocale provides settings.effectiveLanguage.tag,
+        LocalAppLocale provides language.tag,
     ) {
-        HelpTheme(darkOverride = settings.darkMode) { AppShell(repo) }
+        // Desktop and the web read the language once per composition (Locale.current), so the tree below is
+        // rebuilt when the language changes. The data, the settings and the user's position are kept above it.
+        key(language) {
+            HelpTheme(darkOverride = settings.darkMode) { AppShell(repo, shell) }
+        }
     }
 }
