@@ -1,5 +1,4 @@
 <resources>
-    <string name="login_title">Bienvenue</string>
     <string name="login_subtitle">Qui utilise l’application ?</string>
     <string name="login_role_donor_info">Apporter un objet ou donner de l’argent</string>
     <string name="login_role_volunteer_info">Rencontrer les personnes, noter leurs besoins et livrer les objets payés</string>
@@ -11,4 +10,10 @@
     <string name="login_no_connection">Impossible de joindre le serveur. Vérifiez la connexion et réessayez.</string>
     <string name="logged_in_as">%1$s · %2$s</string>
     <string name="logout">Se déconnecter / changer d’utilisateur</string>
+    <string name="login_headline_plain">Aidez quelqu'un</string>
+    <string name="login_headline_highlight">près de vous</string>
+    <string name="footer_made_for">Conçu pour</string>
+    <string name="footer_imc">IMC</string>
+    <string name="footer_built_with">Développé avec</string>
+    <string name="footer_kotlin">Kotlin Multiplatform</string>
 </resources>

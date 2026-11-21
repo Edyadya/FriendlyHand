@@ -52,6 +52,11 @@ class AppColors(
     val lockedContent: Color,
     /** Unselected navigation items. */
     val navUnselected: Color,
+    /** Soft screen gradient (login): strong end at the top, fading to [gradientEnd] behind the form. */
+    val gradientStart: Color,
+    val gradientEnd: Color,
+    /** Pale blue, for confetti and decorative shapes only. */
+    val pale: Color,
 )
 
 private val Navy = Color(0xFF02215E)
@@ -66,6 +71,8 @@ private val LightApp = AppColors(
     surfaceHigh = Color(0xFFFFFFFF), onSurfaceHigh = Navy,
     locked = Color(0xFFC9D3E8), lockedContent = Color(0xFF7A88A8),
     navUnselected = Color(0xFF7A88A8),
+    gradientStart = Color(0xFFDCE6FF), gradientEnd = Color(0xFFF4F7FE),
+    pale = Color(0xFF8EAEFF),
 )
 
 private val DarkApp = AppColors(
@@ -76,9 +83,16 @@ private val DarkApp = AppColors(
     surfaceHigh = Color(0xFF103F9B), onSurfaceHigh = Color(0xFFF4F7FE),
     locked = Color(0xFF2A3F73), lockedContent = Color(0xFF8EA0C8),
     navUnselected = Color(0xFF8EA0C8),
+    gradientStart = Color(0xFF02215E), gradientEnd = Color(0xFF01163F),
+    pale = Color(0xFF8EAEFF),
 )
 
 private val LocalAppColors = staticCompositionLocalOf { LightApp }
+
+/** True while the dark scheme is showing (the system setting, or the user's override in Settings). */
+val LocalDarkTheme = staticCompositionLocalOf { false }
+val MaterialTheme.isDark: Boolean
+    @Composable @ReadOnlyComposable get() = LocalDarkTheme.current
 
 /** Use as MaterialTheme.app.gold, MaterialTheme.app.success, ... */
 val MaterialTheme.app: AppColors
@@ -179,7 +193,10 @@ private fun appTypography(): Typography {
 @Composable
 fun HelpTheme(content: @Composable () -> Unit) {
     val dark = isSystemInDarkTheme()
-    CompositionLocalProvider(LocalAppColors provides if (dark) DarkApp else LightApp) {
+    CompositionLocalProvider(
+        LocalAppColors provides if (dark) DarkApp else LightApp,
+        LocalDarkTheme provides dark,
+    ) {
         MaterialTheme(
             colorScheme = if (dark) DarkColors else LightColors,
             typography = appTypography(),

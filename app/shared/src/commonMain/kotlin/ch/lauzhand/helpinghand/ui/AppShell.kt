@@ -32,9 +32,7 @@ internal fun Role.label(): StringResource = when (this) {
 fun AppShell(repo: HelpRepository) {
     val account = repo.currentAccount
     if (account == null) {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Box(Modifier.safeContentPadding().fillMaxSize()) { LoginScreen(repo) }
-        }
+        LoginScreen(repo) // draws its own full-screen gradient and handles the safe areas itself
         return
     }
     // The role comes from the logged-in account; logging out returns to LoginScreen.
