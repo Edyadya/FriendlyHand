@@ -27,4 +27,17 @@
     <string name="action_handed_over">I handed it over</string>
     <string name="action_confirm">Confirm with %1$s</string>
     <string name="action_delivered">Mark delivered</string>
+    <string name="new_person">New person</string>
+    <string name="onboarding_title">Welcome someone new</string>
+    <string name="field_first_name">First name</string>
+    <string name="field_age">Age (optional)</string>
+    <string name="field_zone">Usual area (never an exact spot)</string>
+    <string name="field_usual_time">Usual time, e.g. mornings</string>
+    <string name="field_own_words">In their own words (optional)</string>
+    <string name="consent_text">This person agreed to be listed here and to receive help.</string>
+    <string name="save">Save</string>
+    <string name="add_need">Add a need</string>
+    <string name="need_title_field">What is needed?</string>
+    <string name="need_big_goal">Bigger goal (money)</string>
+    <string name="need_target_chf">Target in CHF</string>
 </resources>

@@ -12,6 +12,7 @@ import ch.lauzhand.helpinghand.data.HelpRepository
 import ch.lauzhand.helpinghand.model.Need
 import ch.lauzhand.helpinghand.model.NeedStatus
 import ch.lauzhand.helpinghand.model.Person
+import ch.lauzhand.helpinghand.model.Role
 import helpinghand.app.shared.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 
@@ -22,10 +23,17 @@ val Need.isOpenForHelp: Boolean
 @Composable
 fun HomeScreen(
     repo: HelpRepository,
+    role: Role,
     onOpenPerson: (String) -> Unit,
+    onNewPerson: () -> Unit,
 ) {
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(stringResource(Res.string.home_title), style = MaterialTheme.typography.headlineSmall)
+        if (role == Role.VOLUNTEER) {
+            Button(onClick = onNewPerson, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
+                Text(stringResource(Res.string.new_person))
+            }
+        }
         PeopleList(repo, repo.people, Modifier.weight(1f), onOpenPerson)
     }
 }

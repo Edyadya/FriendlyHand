@@ -31,6 +31,7 @@ fun ProfileScreen(
     role: Role,
     personId: String,
     onBack: () -> Unit,
+    onAddNeed: () -> Unit,
 ) {
     val person = repo.people.firstOrNull { it.id == personId }
     if (person == null) { onBack(); return }
@@ -66,6 +67,13 @@ fun ProfileScreen(
             item { Text(stringResource(Res.string.no_needs), style = MaterialTheme.typography.bodyLarge) }
         }
         items(needs, key = { it.id }) { NeedCard(repo, role, person, it) }
+        if (role == Role.VOLUNTEER) {
+            item {
+                OutlinedButton(onClick = onAddNeed, modifier = BigButtonModifier) {
+                    Text(stringResource(Res.string.add_need))
+                }
+            }
+        }
     }
 }
 

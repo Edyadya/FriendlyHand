@@ -16,6 +16,8 @@ import org.jetbrains.compose.resources.stringResource
 sealed interface Screen {
     data object Home : Screen
     data class Profile(val personId: String) : Screen
+    data object Onboarding : Screen
+    data class AddNeed(val personId: String) : Screen
 }
 
 private fun Role.label(): StringResource = when (this) {
@@ -44,15 +46,35 @@ fun AppShell(repo: HelpRepository) {
                 Role.entries.forEach { r ->
                     FilterChip(
                         selected = role == r,
-                        onClick = { role = r },
+                        onClick = {
+                            role = r
+                            if (r != Role.VOLUNTEER && (screen is Screen.Onboarding || screen is Screen.AddNeed)) screen = Screen.Home
+                        },
                         label = { Text(stringResource(r.label())) },
                     )
                 }
             }
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 when (val s = screen) {
-                    Screen.Home -> HomeScreen(repo, onOpenPerson = { screen = Screen.Profile(it) })
-                    is Screen.Profile -> ProfileScreen(repo, role, s.personId, onBack = { screen = Screen.Home })
+                    Screen.Home -> HomeScreen(
+                        repo, role,
+                        onOpenPerson = { screen = Screen.Profile(it) },
+                        onNewPerson = { screen = Screen.Onboarding },
+                    )
+                    is Screen.Profile -> ProfileScreen(
+                        repo, role, s.personId,
+                        onBack = { screen = Screen.Home },
+                        onAddNeed = { screen = Screen.AddNeed(s.personId) },
+                    )
+                    Screen.Onboarding -> OnboardingScreen(
+                        repo,
+                        onBack = { screen = Screen.Home },
+                        onSaved = { screen = Screen.Profile(it) },
+                    )
+                    is Screen.AddNeed -> AddNeedScreen(
+                        repo, s.personId,
+                        onDone = { screen = Screen.Profile(s.personId) },
+                    )
                 }
             }
         }
