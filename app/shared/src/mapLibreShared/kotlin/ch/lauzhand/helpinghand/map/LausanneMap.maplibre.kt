@@ -66,8 +66,8 @@ actual fun LausanneMap(
     var focusedZoneId by remember { mutableStateOf<String?>(null) }
     val onPerson by rememberUpdatedState(onPersonClick)
 
-    // Zones with open needs are warm, tappable bubbles with their count. Zones with nothing open are
-    // dead ends: drawn small and grey, no number, and not tappable.
+    // Only zones with open needs get a bubble (warm, tappable, with the count). Zones with nothing open
+    // are dead ends, so they are not drawn at all.
     val openCounts = remember(zones, people, needs) {
         zones.associate { z ->
             z.id to people.filter { it.zoneId == z.id }.sumOf { p -> needs.count { it.personId == p.id && it.isOpen() } }
@@ -84,17 +84,6 @@ actual fun LausanneMap(
             }
         }
     }
-    val emptyZoneData = remember(zones, openCounts) {
-        buildFeatureCollection<Point, JsonObject?> {
-            for (z in zones) {
-                if ((openCounts[z.id] ?: 0) == 0) addFeature(
-                    geometry = Point(z.position()),
-                    properties = buildJsonObject { put("id", z.id) },
-                )
-            }
-        }
-    }
-
     // Exact last-seen markers: only for volunteers, and only recent ones.
     val seesExact = role == Role.VOLUNTEER
     val now = remember(people) { nowMillis() }
@@ -113,7 +102,6 @@ actual fun LausanneMap(
     }
 
     val zoneColor = MaterialTheme.colorScheme.tertiary          // warm, saturated: people are waiting
-    val emptyColor = MaterialTheme.colorScheme.onSurfaceVariant  // grey: nothing to do here
     val seenColor = MaterialTheme.colorScheme.secondary
     val outline = MaterialTheme.colorScheme.surface
     val labelColor = MaterialTheme.colorScheme.onTertiary
@@ -125,19 +113,8 @@ actual fun LausanneMap(
     ) {
         val mapState = LocalMapState.current
         val zoneSource = rememberGeoJsonSource(GeoJsonData.Features(zoneData))
-        val emptyZoneSource = rememberGeoJsonSource(GeoJsonData.Features(emptyZoneData))
         val seenSource = rememberGeoJsonSource(GeoJsonData.Features(seenData))
 
-        // dead ends first (underneath): small, grey, faint, no click handler so the map stays draggable
-        CircleLayer(
-            id = "zones-empty",
-            source = emptyZoneSource,
-            radius = const(14.dp),
-            color = const(emptyColor),
-            opacity = const(0.35f),
-            strokeColor = const(outline),
-            strokeWidth = const(2.dp),
-        )
         CircleLayer(
             id = "zones",
             source = zoneSource,
