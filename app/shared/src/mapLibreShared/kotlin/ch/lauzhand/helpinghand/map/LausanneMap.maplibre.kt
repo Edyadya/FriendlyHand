@@ -13,7 +13,12 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.launch
+import org.maplibre.compose.camera.CameraAnimation
 import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.camera.CameraUpdate
+import org.maplibre.compose.map.LocalMapState
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.convertToString
 import org.maplibre.compose.expressions.dsl.feature
@@ -37,6 +42,10 @@ import org.maplibre.spatialk.geojson.dsl.buildFeatureCollection
 private const val STYLE_LIGHT = "https://tiles.openfreemap.org/styles/bright"
 private const val STYLE_DARK = "https://tiles.openfreemap.org/styles/dark"
 
+private val OVERVIEW_CENTER = Position(longitude = 6.632, latitude = 46.519)
+private const val OVERVIEW_ZOOM = 12.6
+private const val ZONE_ZOOM = 14.8
+
 private fun Zone.position() = Position(longitude = centerLng, latitude = centerLat)
 
 private fun JsonObject?.id(): String? = this?.get("id")?.jsonPrimitive?.contentOrNull
@@ -52,6 +61,9 @@ actual fun LausanneMap(
     modifier: Modifier,
 ) {
     val onZone by rememberUpdatedState(onZoneClick)
+    val zonesNow by rememberUpdatedState(zones)
+    val scope = rememberCoroutineScope()
+    var focusedZoneId by remember { mutableStateOf<String?>(null) }
     val onPerson by rememberUpdatedState(onPersonClick)
 
     // One circle per zone with its open-needs count.
@@ -93,8 +105,9 @@ actual fun LausanneMap(
 
     val state = rememberMapState(
         baseStyle = BaseStyle.Uri(styleUrl),
-        initialCameraPosition = CameraPosition(center = Position(longitude = 6.632, latitude = 46.519), zoom = 12.6),
+        initialCameraPosition = CameraPosition(center = OVERVIEW_CENTER, zoom = OVERVIEW_ZOOM),
     ) {
+        val mapState = LocalMapState.current
         val zoneSource = rememberGeoJsonSource(GeoJsonData.Features(zoneData))
         val seenSource = rememberGeoJsonSource(GeoJsonData.Features(seenData))
 
@@ -108,7 +121,20 @@ actual fun LausanneMap(
             strokeWidth = const(3.dp),
             hitPadding = 8.dp,
             onClick = { features ->
-                features.firstOrNull()?.properties.id()?.let { onZone(it) }
+                features.firstOrNull()?.properties.id()?.let { id ->
+                    // Tap a zone: fly in on it. Tap the same zone again: fly back out to all of Lausanne.
+                    val zone = zonesNow.firstOrNull { it.id == id }
+                    val zoomingOut = focusedZoneId == id
+                    focusedZoneId = if (zoomingOut) null else id
+                    if (zone != null) scope.launch {
+                        mapState?.animateCamera(
+                            update = if (zoomingOut) CameraUpdate(center = OVERVIEW_CENTER, zoom = OVERVIEW_ZOOM)
+                            else CameraUpdate(center = zone.position(), zoom = ZONE_ZOOM),
+                            animation = CameraAnimation.Fly { duration = 1.seconds },
+                        )
+                    }
+                    onZone(id)
+                }
                 ClickResult.Consume
             },
         )
