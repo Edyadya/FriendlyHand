@@ -41,4 +41,10 @@
     <string name="stage_pledged">Promis</string>
     <string name="stage_picked_up">Récupéré</string>
     <string name="stage_delivered">Remis</string>
+    <string name="platform_helped_one">La plateforme a aidé 1 personne</string>
+    <string name="platform_helped_many">La plateforme a aidé %1$d personnes</string>
+    <string name="platform_helped_caption">Toutes les personnes dont l'aide a été vérifiée par un bénévole</string>
+    <string name="hero_pending">%1$d en attente de vérification par un bénévole</string>
+    <string name="badge_pending">En attente de vérification</string>
+    <string name="badge_pending_hint">Remis. Se débloque quand un bénévole le vérifie.</string>
 </resources>

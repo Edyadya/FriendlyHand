@@ -26,6 +26,8 @@ import ch.lauzhand.helpinghand.data.ME_DONOR
 import ch.lauzhand.helpinghand.model.Achievement
 import ch.lauzhand.helpinghand.model.AchievementId
 import ch.lauzhand.helpinghand.model.donorAchievements
+import ch.lauzhand.helpinghand.model.pendingGoals
+import ch.lauzhand.helpinghand.model.peopleHelpedOverall
 import helpinghand.app.shared.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -60,6 +62,9 @@ fun AchievementsScreen(repo: HelpRepository) {
     // the badge whose reward is being shown, or null
     var opened by remember { mutableStateOf<Achievement?>(null) }
     val completed = repo.completedGoalsFor(ME_DONOR)
+    // delivered but not verified yet by a volunteer: shown as pending, not counted
+    val pending = pendingGoals(repo.contributionsOf(ME_DONOR), repo.needs)
+    val peopleHelped = peopleHelpedOverall(repo.needs)
 
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 170.dp),
@@ -71,8 +76,10 @@ fun AchievementsScreen(repo: HelpRepository) {
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(stringResource(Res.string.achievements_title), style = MaterialTheme.typography.headlineSmall)
         }
-        item(span = { GridItemSpan(maxLineSpan) }) { GoalsHero(completed) }
-        item(span = { GridItemSpan(maxLineSpan) }) { VoucherCard(completed) }
+        // how many people the whole platform has helped (everyone's verified help, not just mine)
+        item(span = { GridItemSpan(maxLineSpan) }) { PlatformHelped(peopleHelped) }
+        item(span = { GridItemSpan(maxLineSpan) }) { GoalsHero(completed, pending = pending) }
+        item(span = { GridItemSpan(maxLineSpan) }) { VoucherCard(completed, pending = pending) }
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(stringResource(Res.string.badges_title), style = MaterialTheme.typography.headlineSmall)
         }
@@ -90,7 +97,7 @@ fun AchievementsScreen(repo: HelpRepository) {
 private fun BadgeCard(a: Achievement, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val app = MaterialTheme.app
-    val container = if (a.unlocked) app.navy else app.locked
+    val container = if (a.unlocked) app.navy else app.locked // pending uses the locked fill, with a gold dashed icon
     val text = if (a.unlocked) app.onNavy else colors.onSurface
     val sub = if (a.unlocked) app.onNavy else colors.onSurface
     Column(
@@ -101,11 +108,14 @@ private fun BadgeCard(a: Achievement, onClick: () -> Unit) {
             .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        BadgeIcon(a.unlocked, Modifier.size(40.dp))
+        BadgeIcon(a.unlocked, Modifier.size(40.dp), pending = a.pending)
         Text(stringResource(a.id.title()), style = MaterialTheme.typography.titleMedium, color = text)
         Text(
-            if (a.unlocked) stringResource(a.id.description())
-            else stringResource(Res.string.badge_unlock_by, stringResource(a.id.description())),
+            when {
+                a.unlocked -> stringResource(a.id.description())
+                a.pending -> stringResource(Res.string.badge_pending_hint)
+                else -> stringResource(Res.string.badge_unlock_by, stringResource(a.id.description()))
+            },
             style = MaterialTheme.typography.bodySmall,
             color = sub,
         )
@@ -132,7 +142,11 @@ private fun BadgeCard(a: Achievement, onClick: () -> Unit) {
                     color = text,
                 )
             }
-            Text(stringResource(Res.string.badge_locked), style = MaterialTheme.typography.labelMedium, color = text)
+            Text(
+                stringResource(if (a.pending) Res.string.badge_pending else Res.string.badge_locked),
+                style = MaterialTheme.typography.labelMedium,
+                color = text,
+            )
         }
     }
 }
@@ -147,7 +161,7 @@ private fun RewardDialog(a: Achievement, onDismiss: () -> Unit) {
         shape = MaterialTheme.shapes.large,
         containerColor = colors.surface,
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.reward_close)) } },
-        icon = { BadgeIcon(a.unlocked, Modifier.size(48.dp)) },
+        icon = { BadgeIcon(a.unlocked, Modifier.size(48.dp), pending = a.pending) },
         title = { Text(stringResource(a.id.title())) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -174,8 +188,11 @@ private fun RewardDialog(a: Achievement, onDismiss: () -> Unit) {
                     }
                 }
                 Text(
-                    if (a.unlocked) stringResource(Res.string.reward_unlocked, r.partner.displayName)
-                    else stringResource(Res.string.reward_locked, a.progress, a.target),
+                    when {
+                        a.unlocked -> stringResource(Res.string.reward_unlocked, r.partner.displayName)
+                        a.pending -> stringResource(Res.string.badge_pending_hint)
+                        else -> stringResource(Res.string.reward_locked, a.progress, a.target)
+                    },
                     style = MaterialTheme.typography.bodyLarge,
                     color = if (a.unlocked) colors.primary else colors.onSurfaceVariant,
                 )
@@ -190,5 +207,26 @@ private fun PartnerMonogram(p: Partner, modifier: Modifier) {
     val colors = MaterialTheme.colorScheme
     Box(modifier.clip(CircleShape).background(colors.primaryContainer), contentAlignment = Alignment.Center) {
         Text(p.monogram, color = colors.onPrimaryContainer, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+    }
+}
+
+/** The whole platform's number: how many different people have had help verified by a volunteer. */
+@Composable
+private fun PlatformHelped(count: Int) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        Modifier.fillMaxWidth().background(colors.primaryContainer, AppShape.card).padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Text(count.toString(), style = MaterialTheme.typography.displaySmall, color = colors.onPrimaryContainer)
+        Column(Modifier.weight(1f)) {
+            Text(
+                if (count == 1) stringResource(Res.string.platform_helped_one) else stringResource(Res.string.platform_helped_many, count),
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.onPrimaryContainer,
+            )
+            Text(stringResource(Res.string.platform_helped_caption), style = MaterialTheme.typography.bodySmall, color = colors.onPrimaryContainer)
+        }
     }
 }

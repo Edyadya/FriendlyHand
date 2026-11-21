@@ -19,6 +19,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -35,7 +36,7 @@ const val VOUCHER_GOAL = 5
  * progress sentence, and five stamp slots below it. Completed stamps are gold, empty ones are outlined.
  */
 @Composable
-fun GoalsHero(completed: Int, modifier: Modifier = Modifier, goal: Int = VOUCHER_GOAL) {
+fun GoalsHero(completed: Int, modifier: Modifier = Modifier, pending: Int = 0, goal: Int = VOUCHER_GOAL) {
     val app = MaterialTheme.app
     val shown by animateIntAsState(completed.coerceAtMost(goal), tween(900))
     Column(
@@ -56,20 +57,28 @@ fun GoalsHero(completed: Int, modifier: Modifier = Modifier, goal: Int = VOUCHER
             style = MaterialTheme.typography.bodyMedium,
             color = app.onNavy,
         )
-        StampRow(completed, goal)
+        if (pending > 0) {
+            // delivered, but no volunteer has verified it yet: it does not count until they do
+            Text(
+                stringResource(Res.string.hero_pending, pending),
+                style = MaterialTheme.typography.labelLarge,
+                color = app.gold,
+            )
+        }
+        StampRow(completed, goal, pending = pending)
     }
 }
 
 /** [goal] stamp slots: completed = solid gold with a navy check, empty = outlined in the accent blue. */
 @Composable
-fun StampRow(completed: Int, goal: Int, modifier: Modifier = Modifier) {
+fun StampRow(completed: Int, goal: Int, modifier: Modifier = Modifier, pending: Int = 0) {
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        repeat(goal) { i -> Stamp(done = i < completed) }
+        repeat(goal) { i -> Stamp(done = i < completed, pending = i >= completed && i < completed + pending) }
     }
 }
 
 @Composable
-private fun Stamp(done: Boolean, size: Dp = 40.dp) {
+private fun Stamp(done: Boolean, pending: Boolean = false, size: Dp = 40.dp) {
     val gold = MaterialTheme.app.gold
     val onGold = MaterialTheme.app.onGold
     val accent = MaterialTheme.app.accent
@@ -79,12 +88,27 @@ private fun Stamp(done: Boolean, size: Dp = 40.dp) {
         val r = this.size.minDimension / 2 - w / 2
         val c = Offset(this.size.width / 2, this.size.height / 2)
         // empty slot outline stays under the gold fill, so a stamp "lands" on its slot
-        drawCircle(accent, r, c, style = Stroke(w))
+        if (pending) {
+            // a dashed gold ring with an hourglass: earned, but waiting for a volunteer's verification
+            drawCircle(gold, r, c, style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(w * 2.2f, w * 1.6f))))
+            drawHourglass(gold, w)
+        } else {
+            drawCircle(accent, r, c, style = Stroke(w))
+        }
         if (fill > 0f) {
             drawCircle(gold, r * fill, c)
             drawCheck(onGold, w * 1.4f, alpha = fill)
         }
     }
+}
+
+private fun DrawScope.drawHourglass(color: Color, width: Float) {
+    val l = size.width * 0.34f; val r = size.width * 0.66f
+    val t = size.height * 0.28f; val b = size.height * 0.72f; val m = size.height * 0.5f
+    val glass = Path().apply {
+        moveTo(l, t); lineTo(r, t); lineTo(size.width * 0.54f, m); lineTo(r, b); lineTo(l, b); lineTo(size.width * 0.46f, m); close()
+    }
+    drawPath(glass, color, style = Stroke(width * 0.8f, join = StrokeJoin.Round))
 }
 
 private fun DrawScope.drawCheck(color: Color, width: Float, alpha: Float = 1f) {
@@ -98,7 +122,7 @@ private fun DrawScope.drawCheck(color: Color, width: Float, alpha: Float = 1f) {
 
 /** Partner voucher: a surface card with a 2 dp gold edge on the left (gold = a reward). */
 @Composable
-fun VoucherCard(completed: Int, modifier: Modifier = Modifier) {
+fun VoucherCard(completed: Int, modifier: Modifier = Modifier, pending: Int = 0) {
     val colors = MaterialTheme.colorScheme
     val progress by animateFloatAsState((completed.toFloat() / VOUCHER_GOAL).coerceIn(0f, 1f), tween(700))
     Row(
@@ -122,6 +146,9 @@ fun VoucherCard(completed: Int, modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = colors.onSurface,
             )
+            if (pending > 0) {
+                Text(stringResource(Res.string.hero_pending, pending), style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
+            }
         }
     }
 }
@@ -131,7 +158,7 @@ fun VoucherCard(completed: Int, modifier: Modifier = Modifier) {
  * The two differ by shape and icon as well as by colour.
  */
 @Composable
-fun BadgeIcon(unlocked: Boolean, modifier: Modifier = Modifier) {
+fun BadgeIcon(unlocked: Boolean, modifier: Modifier = Modifier, pending: Boolean = false) {
     val gold = MaterialTheme.app.gold
     val onGold = MaterialTheme.app.onGold
     val grey = MaterialTheme.app.lockedContent
@@ -141,6 +168,9 @@ fun BadgeIcon(unlocked: Boolean, modifier: Modifier = Modifier) {
         if (unlocked) {
             drawCircle(gold, r, c)
             drawCheck(onGold, 3.dp.toPx())
+        } else if (pending) {
+            drawCircle(gold, r - 1.5.dp.toPx(), c, style = Stroke(2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))))
+            drawHourglass(gold, 2.5.dp.toPx())
         } else {
             drawCircle(grey, r - 1.5.dp.toPx(), c, style = Stroke(2.dp.toPx()))
             // padlock: body + shackle

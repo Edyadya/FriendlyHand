@@ -61,7 +61,7 @@
     <string name="feedback_claimed">Merci. Vous apportez : %1$s</string>
     <string name="feedback_paid">Merci. CHF %1$d payés pour : %2$s</string>
     <string name="feedback_given">Merci. CHF %1$d ajoutés à : %2$s</string>
-    <string name="feedback_handed_over">Marqué comme remis. %1$s peut maintenant confirmer.</string>
+    <string name="feedback_handed_over">Marqué comme remis. Un bénévole va le vérifier avec %1$s, puis cela comptera pour vos objectifs.</string>
     <string name="feedback_confirmed">Confirmé avec %1$s. Merci d'être présent.</string>
     <string name="feedback_delivered">Marqué comme remis.</string>
     <string name="donate_title">Quel montant souhaitez-vous donner ?</string>

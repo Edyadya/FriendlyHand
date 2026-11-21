@@ -61,7 +61,7 @@
     <string name="feedback_claimed">Thank you. You are bringing: %1$s</string>
     <string name="feedback_paid">Thank you. CHF %1$d paid for: %2$s</string>
     <string name="feedback_given">Thank you. CHF %1$d added to: %2$s</string>
-    <string name="feedback_handed_over">Marked as handed over. %1$s can now confirm.</string>
+    <string name="feedback_handed_over">Marked as handed over. A volunteer will now verify it with %1$s, then it counts towards your goals.</string>
     <string name="feedback_confirmed">Confirmed with %1$s. Thank you for being there.</string>
     <string name="feedback_delivered">Marked as delivered.</string>
     <string name="donate_title">How much would you like to give?</string>

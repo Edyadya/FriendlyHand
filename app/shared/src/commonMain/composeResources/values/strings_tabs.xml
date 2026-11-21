@@ -41,4 +41,10 @@
     <string name="stage_pledged">Pledged</string>
     <string name="stage_picked_up">Picked up</string>
     <string name="stage_delivered">Delivered</string>
+    <string name="platform_helped_one">The platform has helped 1 person</string>
+    <string name="platform_helped_many">The platform has helped %1$d people</string>
+    <string name="platform_helped_caption">Everyone whose help a volunteer has verified</string>
+    <string name="hero_pending">%1$d waiting for a volunteer to verify</string>
+    <string name="badge_pending">Pending verification</string>
+    <string name="badge_pending_hint">Delivered. It unlocks when a volunteer verifies it.</string>
 </resources>
