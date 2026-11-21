@@ -8,6 +8,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
@@ -54,6 +55,10 @@ fun ProfileScreen(
     val notify: (String) -> Unit = { msg -> scope.launch { snackbar.currentSnackbarData?.dismiss(); snackbar.showSnackbar(msg) } }
     val lastSeenSaved = stringResource(Res.string.feedback_last_seen)
 
+    // counts up when a goal is completed from a click on this screen; the overlay plays once per change
+    var confetti by remember { mutableIntStateOf(0) }
+
+    Box(Modifier.fillMaxSize()) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbar) },
         containerColor = MaterialTheme.colorScheme.background,
@@ -90,7 +95,7 @@ fun ProfileScreen(
         if (needs.isEmpty()) {
             item { Text(stringResource(Res.string.no_needs), style = MaterialTheme.typography.bodyLarge) }
         }
-        items(needs, key = { it.id }) { NeedCard(repo, role, person, it, notify) }
+        items(needs, key = { it.id }) { NeedCard(repo, role, person, it, notify) { confetti++ } }
         if (role == Role.VOLUNTEER) {
             item {
                 AppOutlinedButton(onClick = onAddNeed, modifier = BigButtonModifier) {
@@ -100,10 +105,12 @@ fun ProfileScreen(
         }
     }
     }
+    ConfettiOverlay(confetti)
+    }
 }
 
 @Composable
-private fun NeedCard(repo: HelpRepository, role: Role, person: Person, need: Need, notify: (String) -> Unit) {
+private fun NeedCard(repo: HelpRepository, role: Role, person: Person, need: Need, notify: (String) -> Unit, onCelebrate: () -> Unit) {
     Card(
         Modifier.fillMaxWidth().animateContentSize(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -126,13 +133,13 @@ private fun NeedCard(repo: HelpRepository, role: Role, person: Person, need: Nee
                 )
             }
             StatusChip(need.status)
-            NeedActions(repo, role, person, need, notify)
+            NeedActions(repo, role, person, need, notify, onCelebrate)
         }
     }
 }
 
 @Composable
-private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: Need, notify: (String) -> Unit) {
+private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: Need, notify: (String) -> Unit, onCelebrate: () -> Unit) {
     val canGive = need.status == NeedStatus.OPEN || need.status == NeedStatus.FUNDING
     val msgClaimed = stringResource(Res.string.feedback_claimed, need.title)
     val msgHanded = stringResource(Res.string.feedback_handed_over, person.firstName)
@@ -146,6 +153,8 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
 
     fun give(amount: Int, type: NeedType) {
         repo.donate(need.id, ME_DONOR, amount)
+        // this gift may have completed a big goal: celebrate once, from this click
+        if (repo.needs.firstOrNull { it.id == need.id }?.isCompleted == true) onCelebrate()
         scope.launch {
             notify(
                 if (type == NeedType.SMALL) getString(Res.string.feedback_paid, amount, need.title)
@@ -188,7 +197,7 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
             } else if (need.type == NeedType.SMALL && need.status == NeedStatus.CLAIMED &&
                 need.claimedByDonorId == ME_DONOR && !need.paid
             ) {
-                AppButton(onClick = { repo.markFulfilled(need.id); notify(msgHanded) }, modifier = BigButtonModifier) {
+                AppButton(onClick = { repo.markFulfilled(need.id); notify(msgHanded); onCelebrate() }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_handed_over), style = MaterialTheme.typography.titleMedium)
                 }
             }

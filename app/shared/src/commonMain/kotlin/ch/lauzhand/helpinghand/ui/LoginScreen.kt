@@ -88,10 +88,18 @@ fun LoginScreen(repo: HelpRepository) {
             Brush.verticalGradient(0f to app.gradientStart, 0.6f to app.gradientEnd, 1f to app.gradientEnd),
         ),
     ) {
-        // Short screens get a compact layout (smaller hero, headline and tiles, no secondary lines)
-        // so the whole form and the Log in button stay above the fold.
+        // Short screens get a compact layout (smaller headline and tiles, no secondary lines). The hero takes
+        // up to 38 % of the height, but never more than what is left after the form, so with the extra
+        // access-code field (Volunteer) the whole form and the Log in button still stay above the fold.
         val short = maxHeight < 700.dp
-        val heroSize = minOf(maxWidth - 48.dp, maxHeight * (if (short) 0.25f else 0.36f)).coerceIn(96.dp, 320.dp)
+        val tight = short || needsCode
+        val reserved = when {
+            short && needsCode -> 520.dp
+            short -> 430.dp
+            needsCode -> 640.dp
+            else -> 560.dp
+        }
+        val heroSize = minOf(maxWidth - 48.dp, maxHeight * 0.38f, maxHeight - reserved).coerceIn(96.dp, 320.dp)
         Column(
             Modifier.fillMaxSize().safeContentPadding().imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -100,7 +108,7 @@ fun LoginScreen(repo: HelpRepository) {
                 Column(
                     Modifier.widthIn(max = 480.dp).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(if (short) 8.dp else 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(if (tight) 10.dp else 16.dp),
                 ) {
                     OrbitHero(heroSize)
                     Text(
@@ -115,7 +123,7 @@ fun LoginScreen(repo: HelpRepository) {
                         color = MaterialTheme.colorScheme.onBackground,
                         textAlign = TextAlign.Center,
                     )
-                    if (!short) {
+                    if (!tight) {
                         Text(
                             stringResource(Res.string.login_subtitle),
                             style = MaterialTheme.typography.bodyLarge,

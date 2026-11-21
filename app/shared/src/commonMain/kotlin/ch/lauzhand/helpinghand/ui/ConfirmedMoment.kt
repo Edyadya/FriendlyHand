@@ -1,6 +1,8 @@
 package ch.lauzhand.helpinghand.ui
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,6 +20,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import helpinghand.app.shared.generated.resources.*
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -35,9 +38,15 @@ fun ConfirmedMoment(confirmedTotal: Int, onDismiss: () -> Unit) {
     LaunchedEffect(Unit) { stamp.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = 220f)) }
     val count by animateIntAsState(confirmedTotal, tween(1100, delayMillis = 350))
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        // Full-screen, so the confetti covers the whole screen; a tap anywhere outside the card closes it.
+        Box(
+            Modifier.fillMaxSize().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onDismiss() },
+            contentAlignment = Alignment.Center,
+        ) {
         Column(
-            Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.large).padding(28.dp),
+            Modifier.padding(horizontal = 32.dp).widthIn(max = 420.dp).fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.large).padding(28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -57,6 +66,8 @@ fun ConfirmedMoment(confirmedTotal: Int, onDismiss: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
+        }
+        ConfettiOverlay(trigger = 1)
         }
     }
 }
