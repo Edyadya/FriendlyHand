@@ -237,6 +237,14 @@ class RemoteRepository(
         }
     }
 
+    override fun setPhoto(personId: String, photoBase64: String?, consent: Boolean) {
+        val i = people.indexOfFirst { it.id == personId }
+        if (i >= 0) people[i] = people[i].copy(photo = photoBase64?.takeIf { consent }, photoConsent = consent)
+        send("/people/$personId/photo") {
+            replacePerson(personId, post<PhotoRequest, Person>("/people/$personId/photo", PhotoRequest(photoBase64, consent)).fromServer())
+        }
+    }
+
     // ---------- helpers ----------
 
     private fun changeNeed(id: String, change: (Need) -> Need) {

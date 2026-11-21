@@ -155,12 +155,26 @@ fun Application.module(store: Store = Store()) {
         post("/people") {
             val account = call.requireRole(store, Role.VOLUNTEER)
             val person = call.receive<Person>()
-            call.respond(HttpStatusCode.Created, store.addPerson(person.copy(createdByVolunteerId = account.id)))
+            val clean = person.copy(
+                createdByVolunteerId = account.id,
+                photo = person.photo?.takeIf { person.photoConsent && it.length <= MAX_PHOTO_CHARS },
+            )
+            call.respond(HttpStatusCode.Created, store.addPerson(clean))
         }
         post("/people/{id}/last-seen") {
             call.requireRole(store, Role.VOLUNTEER)
             val req = call.receive<LastSeenRequest>()
             val person = store.updatePerson(call.parameters["id"]!!) { it.seenAt(req.lat, req.lng, req.note) }
+            if (person == null) call.respond(HttpStatusCode.NotFound, mapOf("error" to "Person not found"))
+            else call.respond(person)
+        }
+        post("/people/{id}/photo") {
+            call.requireRole(store, Role.VOLUNTEER)
+            val req = call.receive<PhotoRequest>()
+            require((req.photo?.length ?: 0) <= MAX_PHOTO_CHARS) { "photo is too large" }
+            // A photo is only ever kept with the person's own consent; without it, none is stored.
+            val keep = req.photo?.takeIf { req.consent }
+            val person = store.updatePerson(call.parameters["id"]!!) { it.copy(photo = keep, photoConsent = req.consent) }
             if (person == null) call.respond(HttpStatusCode.NotFound, mapOf("error" to "Person not found"))
             else call.respond(person)
         }
@@ -210,6 +224,9 @@ fun Application.module(store: Store = Store()) {
         }
     }
 }
+
+/** Largest photo accepted (base64 characters, about 250 KB of JPEG). The app sends much smaller ones. */
+private const val MAX_PHOTO_CHARS = 350_000
 
 class UnauthorizedException(message: String) : RuntimeException(message)
 class ForbiddenException(message: String) : RuntimeException(message)

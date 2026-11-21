@@ -32,6 +32,9 @@ data class Person(
     val lastSeenLng: Double? = null,
     val lastSeenNote: String? = null,
     val lastSeenAtMillis: Long? = null,
+    // Photo: only with the person's own, separate consent. [photo] is a small JPEG, base64 encoded.
+    val photo: String? = null,
+    val photoConsent: Boolean = false,
 )
 
 @Serializable
@@ -98,3 +101,7 @@ data class Contribution(
 /** Answer of GET /donors/{id}/contributions */
 @Serializable
 data class ContributionList(val donorId: String, val contributions: List<Contribution>)
+
+/** Body of POST /people/{id}/photo. [photo] is a base64 JPEG, or null to remove it. Without [consent] no photo is kept. */
+@Serializable
+data class PhotoRequest(val photo: String?, val consent: Boolean)

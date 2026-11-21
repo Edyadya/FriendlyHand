@@ -234,22 +234,83 @@ class ApplicationTest {
     // --- donor contributions / rewards ---
 
     @Test
-    fun completedGoalsCountOnlyFinishedContributions() = api { client ->
+    fun goalsOnlyCountOnceAVolunteerHasVerifiedThem() = api { client ->
         val json = ContentType.Application.Json
         val d = donor(client, "Rita")
+        val vol = volunteer(client)
         suspend fun goals() = client.get("/donors/${d.account.id}/completed-goals") { auth(d) }.body<CompletedGoals>().count
 
         assertEquals(0, goals())
         client.post("/needs/n-1/claim") { auth(d); contentType(json); setBody(ClaimRequest("x")) }
         assertEquals(0, goals())                       // claimed, not delivered yet
         client.post("/needs/n-1/fulfil") { auth(d) }
-        assertEquals(1, goals())
+        assertEquals(0, goals())                       // delivered, but PENDING: no volunteer has verified it
+        client.post("/needs/n-1/confirm") { auth(vol) }
+        assertEquals(1, goals())                       // verified by a volunteer: now it counts
         client.post("/needs/n-2/donate") { auth(d); contentType(json); setBody(DonateRequest("x", 480)) }
-        assertEquals(2, goals())                       // big goal fully funded
+        assertEquals(1, goals())                       // big goal fully funded, still waiting for verification
+        client.post("/needs/n-2/confirm") { auth(vol) }
+        assertEquals(2, goals())
         client.post("/needs/n-2/donate") { auth(d); contentType(json); setBody(DonateRequest("x", 5)) }
         assertEquals(2, goals())                       // same need counted once
         // someone else's rewards are private
         assertEquals(HttpStatusCode.Forbidden,
             client.get("/donors/donor-other/completed-goals") { auth(d) }.status)
+    }
+
+    // --- photos: only with the person's own consent ---
+
+    @Test
+    fun aPhotoIsKeptOnlyWithConsent() = api { client ->
+        val json = ContentType.Application.Json
+        val vol = volunteer(client)
+        suspend fun photoOf(id: String) = client.get("/people") { auth(vol) }.body<List<Person>>().first { it.id == id }
+
+        val withConsent = client.post("/people/p-luc/photo") {
+            auth(vol); contentType(json); setBody(PhotoRequest("AAAA", consent = true))
+        }.body<Person>()
+        assertEquals("AAAA", withConsent.photo)
+        assertTrue(withConsent.photoConsent)
+
+        // no consent: nothing is stored, and an earlier photo is removed
+        val noConsent = client.post("/people/p-luc/photo") {
+            auth(vol); contentType(json); setBody(PhotoRequest("BBBB", consent = false))
+        }.body<Person>()
+        assertNull(noConsent.photo)
+        assertFalse(noConsent.photoConsent)
+        assertNull(photoOf("p-luc").photo)
+    }
+
+    @Test
+    fun onlyVolunteersCanSetAPhoto() = api { client ->
+        val json = ContentType.Application.Json
+        val denied = client.post("/people/p-luc/photo") {
+            auth(donor(client)); contentType(json); setBody(PhotoRequest("AAAA", true))
+        }
+        assertEquals(HttpStatusCode.Forbidden, denied.status)
+        assertEquals(HttpStatusCode.NotFound, client.post("/people/nope/photo") {
+            auth(volunteer(client)); contentType(json); setBody(PhotoRequest(null, false))
+        }.status)
+    }
+
+    @Test
+    fun aNewPersonWithAPhotoButNoConsentGetsNoPhoto() = api { client ->
+        val json = ContentType.Application.Json
+        val vol = volunteer(client)
+        val saved = client.post("/people") {
+            auth(vol); contentType(json)
+            setBody(Person("", "Ines", null, "flon", "evenings", null, true, "x", photo = "AAAA", photoConsent = false))
+        }.body<Person>()
+        assertNull(saved.photo)
+    }
+
+    @Test
+    fun theSeedHasPeopleInEveryZoneAndSomeAlreadyHelped() {
+        val zonesWithPeople = Seed.people.map { it.zoneId }.toSet()
+        assertEquals(Seed.zones.map { it.id }.toSet(), zonesWithPeople)
+        assertTrue(Seed.people.size >= 8)
+        assertTrue(peopleHelpedOverall(Seed.needs) >= 3)
+        // everybody in the seed has consented
+        assertTrue(Seed.people.all { it.consentGiven })
     }
 }

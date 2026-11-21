@@ -35,6 +35,12 @@ interface HelpRepository {
 
     /** Volunteers record where they last saw a person. The exact spot is only shown to VOLUNTEERs. */
     fun updateLastSeen(personId: String, lat: Double, lng: Double, note: String? = null)
+
+    /**
+     * Sets or removes a person's photo (a small base64 JPEG). A photo is only kept with the person's own
+     * [consent]: with consent = false (or photo = null) any photo is removed. Volunteers only.
+     */
+    fun setPhoto(personId: String, photoBase64: String?, consent: Boolean)
 }
 
 fun newId(prefix: String) = "$prefix-${Random.nextInt(1_000_000)}"
@@ -92,6 +98,11 @@ class FakeRepository : HelpRepository {
     override fun updateLastSeen(personId: String, lat: Double, lng: Double, note: String?) {
         val i = people.indexOfFirst { it.id == personId }
         if (i >= 0) people[i] = people[i].seenAt(lat, lng, note)
+    }
+
+    override fun setPhoto(personId: String, photoBase64: String?, consent: Boolean) {
+        val i = people.indexOfFirst { it.id == personId }
+        if (i >= 0) people[i] = people[i].copy(photo = photoBase64?.takeIf { consent }, photoConsent = consent)
     }
 
     private fun update(id: String, change: (Need) -> Need) {

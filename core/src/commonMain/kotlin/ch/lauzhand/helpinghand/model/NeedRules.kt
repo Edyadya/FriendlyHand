@@ -18,7 +18,12 @@ fun Need.withDonation(donorId: String, amountChf: Int): Need = when (type) {
         val target = targetAmountChf ?: funded
         copy(
             fundedAmountChf = funded,
-            status = if (funded >= target) NeedStatus.FULFILLED else NeedStatus.FUNDING,
+            // a goal a volunteer has already verified stays verified, even if more money arrives
+            status = when {
+                status == NeedStatus.CONFIRMED -> NeedStatus.CONFIRMED
+                funded >= target -> NeedStatus.FULFILLED
+                else -> NeedStatus.FUNDING
+            },
         )
     }
 }
@@ -32,3 +37,15 @@ fun Need.confirmed(): Need = copy(status = NeedStatus.CONFIRMED)
 /** Counts towards a donor's completed goals. */
 val Need.isCompleted: Boolean
     get() = status == NeedStatus.FULFILLED || status == NeedStatus.CONFIRMED
+
+/** A volunteer has verified (confirmed with the person) that this was received. Only verified help counts for goals and badges. */
+val Need.isVerified: Boolean
+    get() = status == NeedStatus.CONFIRMED
+
+/** Delivered, but not yet verified by a volunteer. */
+val Need.isPendingVerification: Boolean
+    get() = status == NeedStatus.FULFILLED
+
+/** How many different people the platform has helped overall: people with at least one verified need. */
+fun peopleHelpedOverall(needs: List<Need>): Int =
+    needs.filter { it.isVerified }.map { it.personId }.toSet().size

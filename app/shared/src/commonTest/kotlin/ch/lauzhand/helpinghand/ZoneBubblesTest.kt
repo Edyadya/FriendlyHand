@@ -8,30 +8,43 @@ import ch.lauzhand.helpinghand.model.Role
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ZoneBubblesTest {
     @Test
-    fun donorsOnlySeeZonesWithOpenNeeds() {
+    fun theNumberIsPeopleNotNeeds() {
         val repo = FakeRepository()
-        // the number is PEOPLE, not needs: Jerry has 2 open needs but is one person
-        assertEquals(1, zoneBubbleCount(Role.DONOR, "flon", repo.people, repo.needs))
-        assertEquals(1, zoneBubbleCount(Role.DONOR, "riponne", repo.people, repo.needs))
-        assertNull(zoneBubbleCount(Role.DONOR, "ouchy", repo.people, repo.needs))        // nobody there
+        // Jerry has two open needs but is one person; Tom is the second person in the Flon
+        assertEquals(2, zoneBubbleCount(Role.DONOR, "flon", repo.people, repo.needs))
+        assertEquals(2, repo.needs.count { it.personId == "p-jerry" && it.status.name != "CONFIRMED" })
+        assertEquals(1, zoneBubbleCount(Role.DONOR, "malley", repo.people, repo.needs)) // Karim
+    }
+
+    @Test
+    fun noPeopleNoBubble() {
+        val repo = FakeRepository()
+        assertNull(zoneBubbleCount(Role.DONOR, "ouchy", emptyList(), repo.needs))
+        assertNull(zoneBubbleCount(Role.VOLUNTEER, "ouchy", emptyList(), repo.needs))
+    }
+
+    @Test
+    fun everyAreaHasSomeoneToHelp() {
+        val repo = FakeRepository()
+        for (z in repo.zones) assertTrue((zoneBubbleCount(Role.DONOR, z.id, repo.people, repo.needs) ?: 0) >= 1, z.id)
     }
 
     @Test
     fun volunteerCanStillReachAPersonWhoseNeedsAreDone() {
         val repo = FakeRepository()
-        val socks = repo.needs.first { it.personId == "p-luc" }
-        repo.claimNeed(socks.id, ME_DONOR)
-        repo.markFulfilled(socks.id)   // Luc now has nothing open, only a delivery waiting to be confirmed
+        // Karim (Malley) has one open need; once it is delivered he has nothing open, only a delivery to verify
+        val boots = repo.needs.first { it.personId == "p-karim" && it.title == "Work boots" }
+        repo.claimNeed(boots.id, ME_DONOR)
+        repo.markFulfilled(boots.id)
 
-        // donors have nothing to do in Riponne any more, so no bubble ...
-        assertNull(zoneBubbleCount(Role.DONOR, "riponne", repo.people, repo.needs))
-        // ... but the volunteer must still reach Luc to confirm the delivery
-        assertEquals(1, zoneBubbleCount(Role.VOLUNTEER, "riponne", repo.people, repo.needs))
-        // zones without people never get a bubble
-        assertNull(zoneBubbleCount(Role.VOLUNTEER, "ouchy", repo.people, repo.needs))
+        // donors have nothing to do in Malley any more, so no bubble ...
+        assertNull(zoneBubbleCount(Role.DONOR, "malley", repo.people, repo.needs))
+        // ... but the volunteer must still reach Karim to verify the delivery
+        assertEquals(1, zoneBubbleCount(Role.VOLUNTEER, "malley", repo.people, repo.needs))
     }
 
     @Test
@@ -42,12 +55,5 @@ class ZoneBubblesTest {
             assertEquals(listed.size.takeIf { it > 0 }, zoneBubbleCount(role, z.id, repo.people, repo.needs))
             assertEquals(listed.size, listed.map { it.id }.toSet().size) // each person once
         }
-    }
-
-    @Test
-    fun aPersonWithTwoNeedsCountsOnce() {
-        val repo = FakeRepository()
-        assertEquals(2, repo.needs.count { it.personId == "p-jerry" })
-        assertEquals(1, peopleInZone(Role.DONOR, "flon", repo.people, repo.needs).size)
     }
 }
