@@ -17,7 +17,10 @@ object Seed {
 
     val people: List<Person> = listOf(
         Person("p-jerry", "Jerry", 53, "flon", "mornings",
-            "I used to be a cook. I'd like to work in a kitchen again.", true, ME_VOLUNTEER),
+            "I used to be a cook. I'd like to work in a kitchen again.", true, ME_VOLUNTEER,
+            // last seen about 1 hour ago near the Flon, Lausanne
+            lastSeenLat = 46.5211, lastSeenLng = 6.6268, lastSeenNote = "By the Flon bridge",
+            lastSeenAtMillis = nowMillis() - 3_600_000L),
         Person("p-amina", "Amina", 34, "gare", "evenings",
             "I need my papers sorted to get a job.", true, ME_VOLUNTEER),
         Person("p-luc", "Luc", 61, "riponne", "afternoons", null, true, ME_VOLUNTEER),

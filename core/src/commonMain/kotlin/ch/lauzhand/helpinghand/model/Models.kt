@@ -27,6 +27,11 @@ data class Person(
     val ownWords: String? = null,   // short sentence in their own words
     val consentGiven: Boolean,
     val createdByVolunteerId: String,
+    // Exact last-seen spot: only ever shown to VOLUNTEER / NGO, see Person.lastSeenVisible
+    val lastSeenLat: Double? = null,
+    val lastSeenLng: Double? = null,
+    val lastSeenNote: String? = null,
+    val lastSeenAtMillis: Long? = null,
 )
 
 @Serializable
@@ -52,3 +57,21 @@ data class ClaimRequest(val donorId: String)
 
 @Serializable
 data class DonateRequest(val donorId: String, val amountChf: Int)
+
+// --- Login and last-seen ---
+
+@Serializable
+data class Account(val id: String, val name: String, val role: Role)
+
+@Serializable
+data class LoginRequest(val name: String, val role: Role, val code: String? = null)
+
+@Serializable
+data class LoginResponse(val token: String, val account: Account)
+
+@Serializable
+data class LastSeenRequest(val lat: Double, val lng: Double, val note: String? = null)
+
+/** Answer of GET /donors/{id}/completed-goals */
+@Serializable
+data class CompletedGoals(val donorId: String, val count: Int)
