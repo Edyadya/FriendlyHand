@@ -70,4 +70,7 @@
     <string name="action_other_amount">Other amount</string>
     <string name="donate_amount_chf">CHF %1$d</string>
     <string name="loading">Loading…</string>
+    <string name="location_hint_off">Location is off. Tap to allow it and see where you are.</string>
+    <string name="centre_on_me">Centre the map on my location</string>
+    <string name="location_demo_note">Demo location</string>
 </resources>

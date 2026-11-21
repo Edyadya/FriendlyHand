@@ -3,6 +3,7 @@ package ch.lauzhand.helpinghand.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ch.lauzhand.helpinghand.data.HelpRepository
+import ch.lauzhand.helpinghand.location.UserLocation
 import ch.lauzhand.helpinghand.map.LausanneMap
 import ch.lauzhand.helpinghand.map.isLiveMapSupported
 import ch.lauzhand.helpinghand.model.Role
@@ -20,6 +21,8 @@ fun HomeMap(
     onZoneFilter: (String?) -> Unit,
     onOpenPerson: (String) -> Unit,
     modifier: Modifier = Modifier,
+    userLocation: UserLocation? = null,
+    centreOnUser: Int = 0,
 ) {
     if (isLiveMapSupported) {
         LausanneMap(
@@ -30,8 +33,10 @@ fun HomeMap(
             onZoneClick = { onZoneFilter(if (it == zoneFilter) null else it) },
             onPersonClick = onOpenPerson,
             modifier = modifier,
+            userLocation = userLocation,
+            centreOnUser = centreOnUser,
         )
     } else {
-        ZoneMap(repo, zoneFilter, onZoneFilter, modifier, role = role)
+        ZoneMap(repo, zoneFilter, onZoneFilter, modifier, role = role, userLocation = userLocation)
     }
 }

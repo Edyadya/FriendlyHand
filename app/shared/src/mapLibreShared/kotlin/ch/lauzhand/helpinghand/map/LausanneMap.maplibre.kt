@@ -2,11 +2,17 @@ package ch.lauzhand.helpinghand.map
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ch.lauzhand.helpinghand.location.UserLocation
 import ch.lauzhand.helpinghand.model.*
 import ch.lauzhand.helpinghand.ui.app
 import kotlinx.serialization.json.JsonObject
@@ -46,6 +52,7 @@ private const val STYLE_DARK = "https://tiles.openfreemap.org/styles/dark"
 private val OVERVIEW_CENTER = Position(longitude = 6.632, latitude = 46.519)
 private const val OVERVIEW_ZOOM = 12.6
 private const val ZONE_ZOOM = 14.8
+private const val USER_ZOOM = 15.5
 
 private fun Zone.position() = Position(longitude = centerLng, latitude = centerLat)
 
@@ -60,6 +67,8 @@ actual fun LausanneMap(
     onZoneClick: (zoneId: String) -> Unit,
     onPersonClick: (personId: String) -> Unit,
     modifier: Modifier,
+    userLocation: UserLocation?,
+    centreOnUser: Int,
 ) {
     val onZone by rememberUpdatedState(onZoneClick)
     val zonesNow by rememberUpdatedState(zones)
@@ -106,10 +115,21 @@ actual fun LausanneMap(
         }
     }
 
+    // The user's own position: a blue dot with a white ring and a slow pulsing ring around it.
+    val userData = remember(userLocation) {
+        buildFeatureCollection<Point, JsonObject?> {
+            userLocation?.let { addFeature(geometry = Point(Position(longitude = it.lng, latitude = it.lat)), properties = buildJsonObject { put("id", "me") }) }
+        }
+    }
+    val pulseTransition = rememberInfiniteTransition(label = "me")
+    val pulseRaw by pulseTransition.animateFloat(0f, 1f, infiniteRepeatable(tween(2600, easing = LinearEasing)), label = "pulse")
+    // updated in 16 steps per cycle, so the map is not restyled on every frame
+    val pulse by remember { derivedStateOf { (pulseRaw * 16).toInt() / 16f } }
+
     val zoneColor = MaterialTheme.app.accent                     // solid accent blue bubbles
     val seenColor = MaterialTheme.colorScheme.primary
     val outline = MaterialTheme.app.onNavy                       // white ring
-    val labelColor = MaterialTheme.app.onAccent                  // navy number (never white on the accent blue)
+    val labelColor = MaterialTheme.app.onNavy                    // white number (large and bold, so 3.8:1 is enough)
     val styleUrl = if (isSystemInDarkTheme()) STYLE_DARK else STYLE_LIGHT
 
     val state = rememberMapState(
@@ -120,6 +140,7 @@ actual fun LausanneMap(
         val zoneSource = rememberGeoJsonSource(GeoJsonData.Features(zoneData))
         val seenSource = rememberGeoJsonSource(GeoJsonData.Features(seenData))
         val ringSource = rememberGeoJsonSource(GeoJsonData.Features(ringData))
+        val userSource = rememberGeoJsonSource(GeoJsonData.Features(userData))
 
         CircleLayer(
             id = "zone-selected-ring",
@@ -159,7 +180,7 @@ actual fun LausanneMap(
             id = "zone-counts",
             source = zoneSource,
             textField = feature["label"].convertToString(),
-            textFont = const(listOf("Noto Sans Regular")),
+            textFont = const(listOf("Noto Sans Bold")),
             textSize = const(18.sp),
             textColor = const(labelColor),
         )
@@ -176,6 +197,31 @@ actual fun LausanneMap(
                 ClickResult.Consume
             },
         )
+        CircleLayer(
+            id = "user-pulse",
+            source = userSource,
+            radius = const((20f + 22f * pulse).dp),
+            color = const(zoneColor),
+            opacity = const(0.32f * (1f - pulse)),
+        )
+        CircleLayer(
+            id = "user-dot",
+            source = userSource,
+            radius = const(8.dp),
+            color = const(zoneColor),
+            strokeColor = const(outline),
+            strokeWidth = const(3.dp),
+        )
+    }
+    // Centre on me: fly to the user's position when the counter is bumped.
+    LaunchedEffect(centreOnUser) {
+        val me = userLocation
+        if (centreOnUser > 0 && me != null) {
+            state.animateCamera(
+                update = CameraUpdate(center = Position(longitude = me.lng, latitude = me.lat), zoom = USER_ZOOM),
+                animation = CameraAnimation.Fly { duration = 1.seconds },
+            )
+        }
     }
     MaplibreMap(state = state, modifier = modifier)
 }

@@ -6,20 +6,23 @@ import ch.lauzhand.helpinghand.model.Person
 import ch.lauzhand.helpinghand.model.Role
 
 /**
- * The number on a zone's map bubble, or null when the zone gets no bubble at all. One rule for both maps.
+ * The people shown for a zone: what the bubble counts and what the "People nearby" sheet lists, so the two
+ * always agree. Each person appears once; their needs are shown inside their card, not counted separately.
  *
- * - DONOR: bubbles only where something is still open, and the number is how many needs are open
- *   (zones with nothing to do would be dead ends).
- * - VOLUNTEER: a bubble for every zone that has people, and the number is how many people are there.
- *   A volunteer must always be able to reach a person, to confirm a delivery or to add a need,
- *   even when that person has nothing open any more.
+ * - DONOR: people with something still open (a zone with nobody to help would be a dead end).
+ * - VOLUNTEER: everybody in the zone. A volunteer must always be able to reach a person, to confirm a
+ *   delivery or to add a need, even when that person has nothing open any more.
  */
-fun zoneBubbleCount(role: Role, zoneId: String, people: List<Person>, needs: List<Need>): Int? {
+fun peopleInZone(role: Role, zoneId: String, people: List<Person>, needs: List<Need>): List<Person> {
     val inZone = people.filter { it.zoneId == zoneId }
     return when (role) {
-        Role.VOLUNTEER -> inZone.size.takeIf { it > 0 }
-        Role.DONOR -> inZone
-            .sumOf { p -> needs.count { it.personId == p.id && (it.status == NeedStatus.OPEN || it.status == NeedStatus.FUNDING) } }
-            .takeIf { it > 0 }
+        Role.VOLUNTEER -> inZone
+        Role.DONOR -> inZone.filter { p ->
+            needs.any { it.personId == p.id && (it.status == NeedStatus.OPEN || it.status == NeedStatus.FUNDING) }
+        }
     }
 }
+
+/** The number on a zone's bubble: how many people are there (see [peopleInZone]), or null for no bubble. */
+fun zoneBubbleCount(role: Role, zoneId: String, people: List<Person>, needs: List<Need>): Int? =
+    peopleInZone(role, zoneId, people, needs).size.takeIf { it > 0 }

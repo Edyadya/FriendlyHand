@@ -46,6 +46,8 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.maplibre.compose)
             runtimeOnly(libs.maplibre.compose.runtimeVulkanAndroid)
+            // runtime permission prompt for the user's location
+            implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.clientOkhttp)
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)

@@ -70,4 +70,7 @@
     <string name="action_other_amount">Autre montant</string>
     <string name="donate_amount_chf">CHF %1$d</string>
     <string name="loading">Chargement…</string>
+    <string name="location_hint_off">La localisation est désactivée. Touchez pour l'autoriser et voir où vous êtes.</string>
+    <string name="centre_on_me">Centrer la carte sur ma position</string>
+    <string name="location_demo_note">Position de démonstration</string>
 </resources>

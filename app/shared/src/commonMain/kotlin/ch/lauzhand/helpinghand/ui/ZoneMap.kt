@@ -16,6 +16,9 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import ch.lauzhand.helpinghand.location.UserLocation
+import ch.lauzhand.helpinghand.map.fractionX
+import ch.lauzhand.helpinghand.map.fractionY
 import ch.lauzhand.helpinghand.map.zoneBubbleCount
 import ch.lauzhand.helpinghand.model.Role
 import androidx.compose.runtime.getValue
@@ -47,6 +50,7 @@ fun ZoneMap(
     onZoneClick: (String?) -> Unit,
     modifier: Modifier = Modifier,
     role: Role = Role.DONOR,
+    userLocation: UserLocation? = null,
 ) {
     val land = MaterialTheme.colorScheme.primaryContainer
     val road = MaterialTheme.colorScheme.surface
@@ -119,7 +123,7 @@ fun ZoneMap(
                         onClick = { onZoneClick(if (selected) null else z.id) },
                         shape = CircleShape,
                         color = MaterialTheme.app.accent,          // solid accent bubble
-                        contentColor = MaterialTheme.app.onAccent, // navy number, never white on the accent blue
+                        contentColor = MaterialTheme.app.onNavy,   // white, bold number (large text on the accent blue)
                         shadowElevation = 4.dp,
                         modifier = Modifier
                             .size(bubble)
@@ -143,8 +147,27 @@ fun ZoneMap(
                 )
             }
         }
+
+        // The user's own position: a blue dot with a white ring and a slowly pulsing ring.
+        userLocation?.let { me ->
+            val dot = 16.dp
+            val box = 56.dp
+            val fx = fractionX(me.lng).coerceIn(0.03f, 0.97f)
+            val fy = fractionY(me.lat).coerceIn(0.03f, 0.97f)
+            Box(
+                Modifier.offset(x = w * fx - box / 2, y = h * fy - box / 2).size(box),
+                contentAlignment = Alignment.Center,
+            ) {
+                PulseRing(MaterialTheme.app.accent, dot)
+                Box(
+                    Modifier.size(dot).clip(CircleShape).background(MaterialTheme.app.accent)
+                        .border(3.dp, MaterialTheme.app.onNavy, CircleShape),
+                )
+            }
+        }
     }
 }
+
 
 /** Concentric ring that expands from the bubble and fades out, repeating. */
 @Composable

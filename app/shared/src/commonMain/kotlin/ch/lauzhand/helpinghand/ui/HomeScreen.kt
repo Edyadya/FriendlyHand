@@ -25,8 +25,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.Canvas
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import ch.lauzhand.helpinghand.location.LocationStatus
+import ch.lauzhand.helpinghand.location.rememberUserLocation
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
+import ch.lauzhand.helpinghand.map.peopleInZone
 import ch.lauzhand.helpinghand.map.isLiveMapSupported
 import ch.lauzhand.helpinghand.model.Need
 import ch.lauzhand.helpinghand.model.NeedStatus
@@ -54,6 +65,9 @@ fun HomeScreen(
     }
     // People are only listed for the area whose bubble was tapped; nobody is listed before that.
     var zoneFilter by remember { mutableStateOf<String?>(null) }
+    // The user's own position (real on Android after permission, a fixed demo spot elsewhere).
+    val me = rememberUserLocation()
+    var centreOnMe by remember { mutableIntStateOf(0) }
     val people = repo.people.filter { it.zoneId == zoneFilter }
 
     // The area sheet keeps showing its last area while it slides away.
@@ -62,7 +76,10 @@ fun HomeScreen(
 
     // Zenly-style: the map fills the page; title, actions and the area's people float on top of it.
     Box(Modifier.fillMaxSize()) {
-        HomeMap(repo, role, zoneFilter, { zoneFilter = it }, onOpenPerson, Modifier.fillMaxSize().padding(8.dp))
+        HomeMap(
+            repo, role, zoneFilter, { zoneFilter = it }, onOpenPerson, Modifier.fillMaxSize().padding(8.dp),
+            userLocation = me.location, centreOnUser = centreOnMe,
+        )
 
         // The live map draws its scale bar at the top-left, so the floating row starts just below it.
         Row(
@@ -82,6 +99,15 @@ fun HomeScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
+                        if (me.status == LocationStatus.DENIED) {
+                            // the map works without location; this just offers to turn it on
+                            Text(
+                                stringResource(Res.string.location_hint_off),
+                                Modifier.clickable { me.askPermission() }.heightIn(min = 48.dp).padding(top = 6.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
                     }
                 }
             }
@@ -92,6 +118,17 @@ fun HomeScreen(
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // "centre on me": only where there is a live map to move and a position to move to
+            if (isLiveMapSupported && me.location != null) {
+                val label = stringResource(Res.string.centre_on_me)
+                Surface(
+                    onClick = { centreOnMe++ },
+                    modifier = Modifier.padding(end = 16.dp).size(48.dp).semantics { contentDescription = label },
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surface,
+                    shadowElevation = 6.dp,
+                ) { Box(contentAlignment = Alignment.Center) { CentreIcon(MaterialTheme.colorScheme.primary) } }
+            }
             if (role == Role.VOLUNTEER) {
                 ExtendedFloatingActionButton(
                     onClick = onNewPerson,
@@ -107,7 +144,7 @@ fun HomeScreen(
                 exit = slideOutVertically { it } + fadeOut(),
             ) {
                 val zoneId = lastZone.id ?: return@AnimatedVisibility
-                AreaSheet(repo, zoneId, onClose = { zoneFilter = null }, onOpenPerson = onOpenPerson)
+                AreaSheet(repo, role, zoneId, onClose = { zoneFilter = null }, onOpenPerson = onOpenPerson)
             }
         }
     }
@@ -127,9 +164,10 @@ private fun FloatingPill(modifier: Modifier = Modifier, onClick: (() -> Unit)? =
 
 /** Bottom sheet for the tapped area: who is there, as round bubbles. Tap one to open their profile. */
 @Composable
-private fun AreaSheet(repo: HelpRepository, zoneId: String, onClose: () -> Unit, onOpenPerson: (String) -> Unit) {
+private fun AreaSheet(repo: HelpRepository, role: Role, zoneId: String, onClose: () -> Unit, onOpenPerson: (String) -> Unit) {
     val zone = repo.zones.firstOrNull { it.id == zoneId }
-    val people = repo.people.filter { it.zoneId == zoneId }
+    // exactly the people the bubble counted (see peopleInZone), each once, with their needs inside
+    val people = peopleInZone(role, zoneId, repo.people, repo.needs)
     Surface(
         Modifier.fillMaxWidth(),
         shape = AppShape.sheet,
@@ -272,6 +310,21 @@ private fun PersonCard(repo: HelpRepository, person: Person, onClick: () -> Unit
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
             )
+        }
+    }
+}
+
+/** A small "target" icon: a ring with a dot and four ticks. */
+@Composable
+private fun CentreIcon(color: Color) {
+    Canvas(Modifier.size(24.dp)) {
+        val c = Offset(size.width / 2, size.height / 2)
+        val w = 2.dp.toPx()
+        drawCircle(color, size.minDimension * 0.28f, c, style = Stroke(w))
+        drawCircle(color, size.minDimension * 0.1f, c)
+        val r = size.minDimension / 2
+        for ((dx, dy) in listOf(0f to -1f, 0f to 1f, -1f to 0f, 1f to 0f)) {
+            drawLine(color, Offset(c.x + dx * r * 0.6f, c.y + dy * r * 0.6f), Offset(c.x + dx * r, c.y + dy * r), w, StrokeCap.Round)
         }
     }
 }

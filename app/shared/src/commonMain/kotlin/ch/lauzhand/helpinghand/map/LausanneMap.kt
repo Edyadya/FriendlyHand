@@ -2,6 +2,7 @@ package ch.lauzhand.helpinghand.map
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import ch.lauzhand.helpinghand.location.UserLocation
 import ch.lauzhand.helpinghand.model.Need
 import ch.lauzhand.helpinghand.model.Person
 import ch.lauzhand.helpinghand.model.Role
@@ -24,6 +25,10 @@ expect fun LausanneMap(
     onZoneClick: (zoneId: String) -> Unit,
     onPersonClick: (personId: String) -> Unit,
     modifier: Modifier = Modifier,
+    /** The user's own position, drawn as a blue dot with a pulsing ring (null = not known). */
+    userLocation: UserLocation? = null,
+    /** Bump this counter to fly the camera to [userLocation] (the centre-on-me button). */
+    centreOnUser: Int = 0,
 )
 
 /** True where [LausanneMap] draws a real map (Android, web JS). */
