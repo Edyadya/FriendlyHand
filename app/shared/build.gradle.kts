@@ -11,6 +11,7 @@ plugins {
 kotlin {
     jvm()
     js {
+        useEsModules() // required by MapLibre GL JS
         browser()
         binaries.executable()
     }
@@ -39,7 +40,12 @@ kotlin {
        }
     }
     sourceSets {
+        // The real map (MapLibre) exists on Android and web-JS only; the source is shared by both.
+        androidMain { kotlin.srcDir("src/mapLibreShared/kotlin") }
+        jsMain { kotlin.srcDir("src/mapLibreShared/kotlin") }
         androidMain.dependencies {
+            implementation(libs.maplibre.compose)
+            runtimeOnly(libs.maplibre.compose.runtimeVulkanAndroid)
             implementation(libs.ktor.clientOkhttp)
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)
@@ -69,6 +75,7 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         jsMain.dependencies {
+            implementation(libs.maplibre.compose)
             implementation(libs.ktor.clientJs)
             implementation(libs.wrappers.browser)
         }

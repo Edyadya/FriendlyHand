@@ -48,4 +48,5 @@
     <string name="rewards_goals_many">Vous avez aidé à réaliser %1$d objectifs</string>
     <string name="rewards_progress">%1$d objectifs sur %2$d pour un bon partenaire</string>
     <string name="rewards_unlocked">Bon débloqué. Merci pour votre aide !</string>
+    <string name="map_unavailable">La carte en direct n'est pas disponible sur cet appareil. Utilisez la liste des quartiers.</string>
 </resources>

@@ -8,6 +8,7 @@ plugins {
 
 kotlin {
     js {
+        useEsModules() // required by MapLibre GL JS
         browser()
         binaries.executable()
     }

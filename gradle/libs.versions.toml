@@ -15,6 +15,7 @@ junit = "4.13.2"
 kotlin = "2.4.21"
 kotlin-wrappers = "2026.11.2"
 kotlinx-coroutines = "1.11.0"
+maplibre-compose = "0.20.0"
 kotlinx-serialization = "1.11.0"
 ktor = "3.6.1"
 logback = "1.6.7"
@@ -49,6 +50,8 @@ ktor-serverCors = { module = "io.ktor:ktor-server-cors-jvm", version.ref = "ktor
 ktor-serverStatusPages = { module = "io.ktor:ktor-server-status-pages-jvm", version.ref = "ktor" }
 ktor-serializationKotlinxJson = { module = "io.ktor:ktor-serialization-kotlinx-json-jvm", version.ref = "ktor" }
 ktor-clientContentNegotiation = { module = "io.ktor:ktor-client-content-negotiation-jvm", version.ref = "ktor" }
+maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibre-compose" }
+maplibre-compose-runtimeVulkanAndroid = { module = "org.maplibre.compose:maplibre-compose-runtime-vulkan-android", version.ref = "maplibre-compose" }
 ktor-clientCore = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-clientContentNegotiationCommon = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serializationJsonCommon = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
