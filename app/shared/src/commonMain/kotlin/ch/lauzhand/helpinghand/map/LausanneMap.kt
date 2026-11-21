@@ -30,6 +30,7 @@ expect fun LausanneMap(
 expect val isLiveMapSupported: Boolean
 
 /**
- * Web JS only: must be called once before the Compose viewport is created. No-op elsewhere.
+ * Runs [content] (e.g. creating the Compose viewport) once the platform is ready.
+ * Web JS: waits for Skiko, installs MapLibre, then runs [content]. Elsewhere: just runs [content].
  */
-expect fun installMapSupport()
+expect fun installMapSupport(content: () -> Unit)

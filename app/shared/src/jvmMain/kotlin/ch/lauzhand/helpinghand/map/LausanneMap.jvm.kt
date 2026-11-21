@@ -45,4 +45,4 @@ actual fun LausanneMap(
 
 actual val isLiveMapSupported: Boolean = false
 
-actual fun installMapSupport() {}
+actual fun installMapSupport(content: () -> Unit) = content()

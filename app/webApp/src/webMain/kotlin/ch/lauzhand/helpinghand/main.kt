@@ -8,9 +8,11 @@ import kotlinx.browser.window
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    installMapSupport() // web JS only, needed before the viewport for MapLibre
-    ComposeViewport {
-        // open the page with ?map to see the map preview
-        if (window.location.search.contains("map")) MapPreview() else App()
+    // Web JS: waits for Skiko and installs MapLibre before the viewport is created
+    installMapSupport {
+        ComposeViewport {
+            // open the page with ?map to see the map preview
+            if (window.location.search.contains("map")) MapPreview() else App()
+        }
     }
 }
