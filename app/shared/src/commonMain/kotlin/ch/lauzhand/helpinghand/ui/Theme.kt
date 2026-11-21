@@ -190,9 +190,10 @@ private fun appTypography(): Typography {
     )
 }
 
+/** [darkOverride]: the user's choice in Settings; null follows the system. */
 @Composable
-fun HelpTheme(content: @Composable () -> Unit) {
-    val dark = isSystemInDarkTheme()
+fun HelpTheme(darkOverride: Boolean? = null, content: @Composable () -> Unit) {
+    val dark = darkOverride ?: isSystemInDarkTheme()
     CompositionLocalProvider(
         LocalAppColors provides if (dark) DarkApp else LightApp,
         LocalDarkTheme provides dark,

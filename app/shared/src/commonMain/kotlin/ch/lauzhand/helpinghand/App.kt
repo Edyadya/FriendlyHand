@@ -1,11 +1,15 @@
 package ch.lauzhand.helpinghand
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import ch.lauzhand.helpinghand.data.RepositoryMode
 import ch.lauzhand.helpinghand.data.createRepository
 import ch.lauzhand.helpinghand.ui.AppShell
+import ch.lauzhand.helpinghand.settings.LocalAppLocale
+import ch.lauzhand.helpinghand.settings.LocalAppSettings
+import ch.lauzhand.helpinghand.settings.rememberAppSettings
 import ch.lauzhand.helpinghand.ui.HelpTheme
 
 /**
@@ -28,5 +32,12 @@ const val SERVER_BASE_URL = "http://localhost:8081"
 fun App() {
     // Screens only know HelpRepository, so switching DATA_SOURCE changes nothing else.
     val repo = remember { createRepository(DATA_SOURCE, SERVER_BASE_URL) }
-    HelpTheme { AppShell(repo) }
+    // The user's choices (language, dark mode) are remembered between runs. Language applies at once.
+    val settings = rememberAppSettings()
+    CompositionLocalProvider(
+        LocalAppSettings provides settings,
+        LocalAppLocale provides settings.effectiveLanguage.tag,
+    ) {
+        HelpTheme(darkOverride = settings.darkMode) { AppShell(repo) }
+    }
 }

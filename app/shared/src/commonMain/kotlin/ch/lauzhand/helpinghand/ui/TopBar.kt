@@ -1,30 +1,34 @@
 package ch.lauzhand.helpinghand.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import helpinghand.app.shared.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Light top bar: no heavy fill, a small logo on the left and a round avatar with the user's initial on the
- * right. "Log out / switch user" lives in the avatar's menu.
+ * Light top bar: no heavy fill, a small logo on the left and the menu (hamburger) icon on the right.
+ * The settings menu opens from that icon: as a right-hand drawer on phones, as a drop-down on wide windows.
+ * [menuAnchor] is drawn inside the same box as the icon, so a drop-down menu appears right under it.
  */
 @Composable
-fun AppTopBar(userName: String, roleLabel: String, onLogout: () -> Unit, modifier: Modifier = Modifier) {
-    var open by remember { mutableStateOf(false) }
+fun AppTopBar(onMenuClick: () -> Unit, modifier: Modifier = Modifier, menuAnchor: @Composable () -> Unit = {}) {
+    val label = stringResource(Res.string.settings_open_description)
     Row(
         modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).heightIn(min = 48.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -32,39 +36,25 @@ fun AppTopBar(userName: String, roleLabel: String, onLogout: () -> Unit, modifie
         Image(painterResource(Res.drawable.logo), contentDescription = null, modifier = Modifier.size(30.dp))
         Spacer(Modifier.weight(1f))
         Box {
-            // 48 dp touch target around the 36 dp avatar
+            // 48 dp touch target around the 24 dp icon
             Box(
-                Modifier.size(48.dp).clip(CircleShape).clickable { open = true },
+                Modifier.size(48.dp).clip(CircleShape).clickable(onClick = onMenuClick)
+                    .semantics { contentDescription = label; role = Role.Button },
                 contentAlignment = Alignment.Center,
-            ) {
-                Box(
-                    Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        userName.trim().firstOrNull()?.uppercase() ?: "?",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                    )
-                }
-            }
-            DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            stringResource(Res.string.logged_in_as, userName, roleLabel),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    },
-                    onClick = {},
-                    enabled = false,
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(Res.string.logout), style = MaterialTheme.typography.labelLarge) },
-                    onClick = { open = false; onLogout() },
-                )
-            }
+            ) { HamburgerIcon(MaterialTheme.colorScheme.primary) }
+            menuAnchor()
+        }
+    }
+}
+
+/** Three lines. Drawn, so no icon library is needed. */
+@Composable
+private fun HamburgerIcon(color: androidx.compose.ui.graphics.Color) {
+    Canvas(Modifier.size(24.dp)) {
+        val w = 2.5.dp.toPx()
+        for (i in 0..2) {
+            val y = size.height * (0.22f + 0.28f * i)
+            drawLine(color, Offset(size.width * 0.08f, y), Offset(size.width * 0.92f, y), w, StrokeCap.Round)
         }
     }
 }

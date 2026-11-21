@@ -12,6 +12,9 @@ import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.FakeRepository
 import ch.lauzhand.helpinghand.model.Role
 import ch.lauzhand.helpinghand.ui.HelpTheme
+import helpinghand.app.shared.generated.resources.Res
+import helpinghand.app.shared.generated.resources.preview_clicked
+import org.jetbrains.compose.resources.stringResource
 
 /** Stand-alone preview of [LausanneMap] with demo data, to try the map without touching the app screens. */
 @Composable
@@ -26,7 +29,7 @@ fun MapPreview() {
                     Role.entries.forEach { r ->
                         FilterChip(selected = role == r, onClick = { role = r }, label = { Text(r.name) })
                     }
-                    Text("clicked: $clicked")
+                    Text(stringResource(Res.string.preview_clicked, clicked))
                 }
                 LausanneMap(
                     zones = repo.zones,

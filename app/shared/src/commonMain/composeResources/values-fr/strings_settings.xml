@@ -1,0 +1,21 @@
+<resources>
+    <string name="settings_title">Réglages</string>
+    <string name="settings_open_description">Ouvrir les réglages</string>
+    <string name="settings_language">Langue</string>
+    <string name="language_english">English</string>
+    <string name="language_french">Français</string>
+    <string name="settings_dark_mode">Mode sombre</string>
+    <string name="settings_partners">Nos partenaires</string>
+    <string name="settings_terms">Conditions générales</string>
+    <string name="settings_about">À propos de nous</string>
+    <string name="settings_close">Fermer</string>
+    <string name="partner_imc_name">IMC</string>
+    <string name="partner_imc_desc">Partenaire du hackathon. Une description plus complète suivra.</string>
+    <string name="partner_jetbrains_name">JetBrains</string>
+    <string name="partner_jetbrains_desc">Les créateurs de Kotlin, le langage avec lequel cette application est développée.</string>
+    <string name="terms_body">Ces conditions générales sont un texte provisoire pour la démonstration. Elles seront remplacées avant une utilisation réelle de l'application.\n\nMain tendue n'inscrit une personne qu'avec son accord, n'affiche que son prénom et le quartier où elle se trouve d'habitude, et ne montre jamais de position exacte aux donateurs. Merci d'utiliser l'application avec respect.</string>
+    <string name="about_body">Main tendue met en relation les personnes qui veulent aider et celles qui ont besoin d'un coup de main, dans leur quartier. Les bénévoles rencontrent les personnes dans la rue, avec leur accord, et notent ce qui les aiderait. Les donateurs apportent un objet, le paient ou participent à un objectif plus grand, et la personne confirme l'avoir reçu.</string>
+    <string name="about_credits">Conçu pour IMC, développé avec Kotlin Multiplatform de JetBrains.</string>
+    <string name="about_shared_note">Presque toute cette application est écrite une seule fois, en Kotlin Multiplatform, et fonctionne sur Android, ordinateur et web. Seules quelques petites parties dépendent de la plateforme : la carte en direct, la position de l'appareil, les réglages enregistrés et le changement de langue.</string>
+    <string name="preview_clicked">touché : %1$s</string>
+</resources>

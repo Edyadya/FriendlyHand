@@ -42,9 +42,29 @@ fun AppShell(repo: HelpRepository) {
     var tab by remember(account) { mutableStateOf(DonorTab.MAP) }
     val selectTab: (DonorTab) -> Unit = { tab = it; screen = Screen.Home }
 
+    // Settings menu: open state and the page (partners / terms / about) shown as a dialog
+    var menuOpen by remember { mutableStateOf(false) }
+    var settingsPage by remember { mutableStateOf<SettingsPage?>(null) }
+
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Column(Modifier.safeContentPadding().fillMaxSize()) {
-            AppTopBar(account.name, stringResource(role.label()), onLogout = { repo.logout() })
+        BoxWithConstraints(Modifier.safeContentPadding().fillMaxSize()) {
+        // The one check that picks the menu variant: a drop-down on wide windows, a right-hand drawer on phones.
+        val wide = maxWidth >= SettingsDropdownMinWidth
+        val menuContent: @Composable () -> Unit = {
+            SettingsMenuContent(
+                userLine = stringResource(Res.string.logged_in_as, account.name, stringResource(role.label())),
+                onOpenPage = { menuOpen = false; settingsPage = it },
+                onLogout = { menuOpen = false; repo.logout() },
+            )
+        }
+        Column(Modifier.fillMaxSize()) {
+            AppTopBar(onMenuClick = { menuOpen = !menuOpen }) {
+                if (wide) {
+                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }, modifier = Modifier.width(300.dp)) {
+                        menuContent()
+                    }
+                }
+            }
             val showTabs = role == Role.DONOR
             Column(Modifier.weight(1f).fillMaxWidth()) {
                 Box(Modifier.weight(1f).fillMaxWidth()) {
@@ -81,6 +101,9 @@ fun AppShell(repo: HelpRepository) {
                 }
                 if (showTabs) DonorBottomBar(tab, selectTab)
             }
+        }
+        if (!wide) SettingsDrawer(open = menuOpen, onDismiss = { menuOpen = false }) { menuContent() }
+        settingsPage?.let { SettingsPageDialog(it) { settingsPage = null } }
         }
     }
 }
