@@ -24,6 +24,7 @@ import ch.lauzhand.helpinghand.data.ME_DONOR
 import ch.lauzhand.helpinghand.model.*
 import helpinghand.app.shared.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 
 private val BigButtonModifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
@@ -124,22 +125,38 @@ private fun NeedCard(repo: HelpRepository, role: Role, person: Person, need: Nee
 private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: Need, notify: (String) -> Unit) {
     val canGive = need.status == NeedStatus.OPEN || need.status == NeedStatus.FUNDING
     val msgClaimed = stringResource(Res.string.feedback_claimed, need.title)
-    val msgPaid = stringResource(Res.string.feedback_paid, 20, need.title)
-    val msgGiven = stringResource(Res.string.feedback_given, 50, need.title)
+    // amount dialog: null = closed, otherwise whether this is a "pay instead" (small) or a "give" (big goal)
+    var asking by remember { mutableStateOf<NeedType?>(null) }
+    val scope = rememberCoroutineScope()
     val msgHanded = stringResource(Res.string.feedback_handed_over, person.firstName)
     val msgConfirmed = stringResource(Res.string.feedback_confirmed, person.firstName)
     val msgDelivered = stringResource(Res.string.feedback_delivered)
+    asking?.let { type ->
+        AmountDialog(
+            onDismiss = { asking = null },
+            onConfirm = { amount ->
+                asking = null
+                repo.donate(need.id, ME_DONOR, amount)
+                scope.launch {
+                    notify(
+                        if (type == NeedType.SMALL) getString(Res.string.feedback_paid, amount, need.title)
+                        else getString(Res.string.feedback_given, amount, need.title),
+                    )
+                }
+            },
+        )
+    }
     when (role) {
         Role.DONOR -> {
             if (need.type == NeedType.SMALL && need.status == NeedStatus.OPEN) {
                 Button(onClick = { repo.claimNeed(need.id, ME_DONOR); notify(msgClaimed) }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_bring), style = MaterialTheme.typography.titleMedium)
                 }
-                OutlinedButton(onClick = { repo.donate(need.id, ME_DONOR, 20); notify(msgPaid) }, modifier = BigButtonModifier) {
+                OutlinedButton(onClick = { asking = NeedType.SMALL }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_pay), style = MaterialTheme.typography.titleMedium)
                 }
             } else if (need.type == NeedType.BIG && canGive) {
-                Button(onClick = { repo.donate(need.id, ME_DONOR, 50); notify(msgGiven) }, modifier = BigButtonModifier) {
+                Button(onClick = { asking = NeedType.BIG }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_give), style = MaterialTheme.typography.titleMedium)
                 }
             } else if (need.type == NeedType.SMALL && need.status == NeedStatus.CLAIMED &&
