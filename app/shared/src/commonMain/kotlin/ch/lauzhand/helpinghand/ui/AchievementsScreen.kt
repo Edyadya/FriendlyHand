@@ -155,7 +155,8 @@ private fun RewardDialog(a: Achievement, onDismiss: () -> Unit) {
                 // the reward itself: surface card with the gold edge (gold = reward)
                 Row(
                     Modifier.fillMaxWidth().height(IntrinsicSize.Min)
-                        .background(colors.surface, AppShape.card)
+                        .clip(AppShape.card)
+                        .background(colors.surface)
                         .border(1.dp, colors.outlineVariant, AppShape.card),
                 ) {
                     Box(Modifier.width(2.dp).fillMaxHeight().background(MaterialTheme.app.gold))

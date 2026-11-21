@@ -16,6 +16,8 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import ch.lauzhand.helpinghand.map.zoneBubbleCount
+import ch.lauzhand.helpinghand.model.Role
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.Alignment
@@ -44,6 +46,7 @@ fun ZoneMap(
     selectedZoneId: String?,
     onZoneClick: (String?) -> Unit,
     modifier: Modifier = Modifier,
+    role: Role = Role.DONOR,
 ) {
     val land = MaterialTheme.colorScheme.primaryContainer
     val road = MaterialTheme.colorScheme.surface
@@ -100,10 +103,8 @@ fun ZoneMap(
         val bubble = 40.dp
         val slot = 76.dp
         repo.zones.forEach { z ->
-            val open = repo.people.filter { it.zoneId == z.id }
-                .sumOf { p -> repo.needs.count { it.personId == p.id && it.isOpenForHelp } }
-            // Nothing open here = dead end: not drawn at all.
-            if (open == 0) return@forEach
+            // No bubble where there is nothing to do for this role (see zoneBubbleCount).
+            val open = zoneBubbleCount(role, z.id, repo.people, repo.needs) ?: return@forEach
             val selected = selectedZoneId == z.id
             Column(
                 Modifier

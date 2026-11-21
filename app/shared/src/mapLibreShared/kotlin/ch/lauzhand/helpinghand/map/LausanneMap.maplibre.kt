@@ -67,24 +67,19 @@ actual fun LausanneMap(
     var focusedZoneId by remember { mutableStateOf<String?>(null) }
     val onPerson by rememberUpdatedState(onPersonClick)
 
-    // Only zones with open needs get a bubble (warm, tappable, with the count). Zones with nothing open
-    // are dead ends, so they are not drawn at all.
-    val openCounts = remember(zones, people, needs) {
-        zones.associate { z ->
-            z.id to people.filter { it.zoneId == z.id }.sumOf { p -> needs.count { it.personId == p.id && it.isOpen() } }
-        }
-    }
-    val zoneData = remember(zones, openCounts) {
+    // Which zones get a bubble, and the number on it, depends on the role (see zoneBubbleCount).
+    val zoneData = remember(zones, people, needs, role) {
         buildFeatureCollection<Point, JsonObject?> {
             for (z in zones) {
-                val open = openCounts[z.id] ?: 0
-                if (open > 0) addFeature(
+                val count = zoneBubbleCount(role, z.id, people, needs) ?: continue
+                addFeature(
                     geometry = Point(z.position()),
-                    properties = buildJsonObject { put("id", z.id); put("label", open.toString()) },
+                    properties = buildJsonObject { put("id", z.id); put("label", count.toString()) },
                 )
             }
         }
     }
+
     // Concentric ring around the tapped bubble (accent at 30 %).
     val ringData = remember(focusedZoneId, zones) {
         buildFeatureCollection<Point, JsonObject?> {

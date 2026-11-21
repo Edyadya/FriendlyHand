@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -102,7 +103,8 @@ fun VoucherCard(completed: Int, modifier: Modifier = Modifier) {
     val progress by animateFloatAsState((completed.toFloat() / VOUCHER_GOAL).coerceIn(0f, 1f), tween(700))
     Row(
         modifier.fillMaxWidth().height(IntrinsicSize.Min)
-            .background(colors.surface, AppShape.card)
+            .clip(AppShape.card)
+            .background(colors.surface)
             .border(1.dp, colors.outlineVariant, AppShape.card),
     ) {
         Box(Modifier.width(2.dp).fillMaxHeight().background(MaterialTheme.app.gold))

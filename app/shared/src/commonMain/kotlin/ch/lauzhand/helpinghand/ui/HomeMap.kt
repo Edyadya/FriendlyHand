@@ -32,6 +32,6 @@ fun HomeMap(
             modifier = modifier,
         )
     } else {
-        ZoneMap(repo, zoneFilter, onZoneFilter, modifier)
+        ZoneMap(repo, zoneFilter, onZoneFilter, modifier, role = role)
     }
 }
