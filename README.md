@@ -1,3 +1,4 @@
+LauzHack Lausanne
 This is a Kotlin Multiplatform project targeting Android, Web, Desktop (JVM), Server.
 
 * [/app/shared](./app/shared/src) is for code that will be shared across your Compose Multiplatform applications.
