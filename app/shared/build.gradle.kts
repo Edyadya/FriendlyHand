@@ -40,6 +40,7 @@ kotlin {
     }
     sourceSets {
         androidMain.dependencies {
+            implementation(libs.ktor.clientOkhttp)
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)
         }
@@ -53,11 +54,22 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            // HTTP client for RemoteRepository
+            implementation(libs.ktor.clientCore)
+            implementation(libs.ktor.clientContentNegotiationCommon)
+            implementation(libs.ktor.serializationJsonCommon)
+        }
+        jvmMain.dependencies {
+            implementation(libs.ktor.clientOkhttp)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.ktor.clientJs)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
         jsMain.dependencies {
+            implementation(libs.ktor.clientJs)
             implementation(libs.wrappers.browser)
         }
         getByName("androidDeviceTest").dependencies {
