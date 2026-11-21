@@ -22,8 +22,8 @@
     <string name="status_confirmed">Reçu</string>
     <string name="funded_of">CHF %1$d financés / CHF %2$d</string>
     <string name="action_bring">Je l'apporte</string>
-    <string name="action_pay">Payer à la place</string>
-    <string name="action_give">Donner de l'argent</string>
+    <string name="action_pay">Payer CHF 20</string>
+    <string name="action_give">Donner CHF 50</string>
     <string name="action_handed_over">Je l'ai remis</string>
     <string name="action_confirm">Confirmer avec %1$s</string>
     <string name="action_delivered">Marquer comme remis</string>
@@ -65,7 +65,8 @@
     <string name="feedback_confirmed">Confirmé avec %1$s. Merci d'être présent.</string>
     <string name="feedback_delivered">Marqué comme remis.</string>
     <string name="donate_title">Quel montant souhaitez-vous donner ?</string>
-    <string name="donate_amount_field">Montant en CHF</string>
     <string name="donate_confirm">Donner</string>
     <string name="cancel">Annuler</string>
+    <string name="action_other_amount">Autre montant</string>
+    <string name="donate_amount_chf">CHF %1$d</string>
 </resources>

@@ -27,6 +27,12 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 
+// One-tap amounts, plus the slider range for "Other amount"
+private const val QUICK_PAY_CHF = 20
+private const val QUICK_GIVE_CHF = 50
+private const val MAX_SMALL_CHF = 100
+private const val MAX_BIG_CHF = 1000
+
 private val BigButtonModifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
 
 @Composable
@@ -125,25 +131,31 @@ private fun NeedCard(repo: HelpRepository, role: Role, person: Person, need: Nee
 private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: Need, notify: (String) -> Unit) {
     val canGive = need.status == NeedStatus.OPEN || need.status == NeedStatus.FUNDING
     val msgClaimed = stringResource(Res.string.feedback_claimed, need.title)
-    // amount dialog: null = closed, otherwise whether this is a "pay instead" (small) or a "give" (big goal)
-    var asking by remember { mutableStateOf<NeedType?>(null) }
-    val scope = rememberCoroutineScope()
     val msgHanded = stringResource(Res.string.feedback_handed_over, person.firstName)
     val msgConfirmed = stringResource(Res.string.feedback_confirmed, person.firstName)
     val msgDelivered = stringResource(Res.string.feedback_delivered)
-    asking?.let { type ->
+
+    // slider dialog: null = closed, otherwise whether this is for a small need or a big goal
+    var choosing by remember { mutableStateOf<NeedType?>(null) }
+    val scope = rememberCoroutineScope()
+
+    fun give(amount: Int, type: NeedType) {
+        repo.donate(need.id, ME_DONOR, amount)
+        scope.launch {
+            notify(
+                if (type == NeedType.SMALL) getString(Res.string.feedback_paid, amount, need.title)
+                else getString(Res.string.feedback_given, amount, need.title),
+            )
+        }
+    }
+
+    choosing?.let { type ->
+        val remaining = ((need.targetAmountChf ?: 0) - need.fundedAmountChf).coerceAtLeast(0)
         AmountDialog(
-            onDismiss = { asking = null },
-            onConfirm = { amount ->
-                asking = null
-                repo.donate(need.id, ME_DONOR, amount)
-                scope.launch {
-                    notify(
-                        if (type == NeedType.SMALL) getString(Res.string.feedback_paid, amount, need.title)
-                        else getString(Res.string.feedback_given, amount, need.title),
-                    )
-                }
-            },
+            initial = if (type == NeedType.SMALL) QUICK_PAY_CHF else QUICK_GIVE_CHF,
+            max = if (type == NeedType.SMALL) MAX_SMALL_CHF else maxOf(remaining, QUICK_GIVE_CHF).coerceAtMost(MAX_BIG_CHF),
+            onDismiss = { choosing = null },
+            onConfirm = { amount -> choosing = null; give(amount, type) },
         )
     }
     when (role) {
@@ -152,12 +164,18 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
                 Button(onClick = { repo.claimNeed(need.id, ME_DONOR); notify(msgClaimed) }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_bring), style = MaterialTheme.typography.titleMedium)
                 }
-                OutlinedButton(onClick = { asking = NeedType.SMALL }, modifier = BigButtonModifier) {
+                OutlinedButton(onClick = { give(QUICK_PAY_CHF, NeedType.SMALL) }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_pay), style = MaterialTheme.typography.titleMedium)
                 }
+                TextButton(onClick = { choosing = NeedType.SMALL }, modifier = BigButtonModifier) {
+                    Text(stringResource(Res.string.action_other_amount), style = MaterialTheme.typography.titleMedium)
+                }
             } else if (need.type == NeedType.BIG && canGive) {
-                Button(onClick = { asking = NeedType.BIG }, modifier = BigButtonModifier) {
+                Button(onClick = { give(QUICK_GIVE_CHF, NeedType.BIG) }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_give), style = MaterialTheme.typography.titleMedium)
+                }
+                TextButton(onClick = { choosing = NeedType.BIG }, modifier = BigButtonModifier) {
+                    Text(stringResource(Res.string.action_other_amount), style = MaterialTheme.typography.titleMedium)
                 }
             } else if (need.type == NeedType.SMALL && need.status == NeedStatus.CLAIMED &&
                 need.claimedByDonorId == ME_DONOR && !need.paid
