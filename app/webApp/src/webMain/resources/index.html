@@ -6,16 +6,41 @@
     <title>Helping Hand</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link type="text/css" rel="stylesheet" href="styles.css">
+    <style>
+        /* Loading screen shown until the app has started (replaced by the app when ready) */
+        :root { --bg: #ffffff; --fg: #1b1b1f; --muted: #5b5f66; --accent: #1f6f6b; --track: #d6e3e2; }
+        @media (prefers-color-scheme: dark) {
+            :root { --bg: #121416; --fg: #e3e3e6; --muted: #a9adb4; --accent: #7fd6cf; --track: #2a3a39; }
+        }
+        body { background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+        #loading { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+        #loading img { width: 112px; height: 112px; }
+        #loading h1 { margin: 0; font-size: 28px; font-weight: 600; }
+        #loading p { margin: 0; font-size: 18px; color: var(--muted); }
+        .spinner { width: 36px; height: 36px; border-radius: 50%; border: 4px solid var(--track);
+                   border-top-color: var(--accent); animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
-<body style="text-align: center; align-content: center">
-    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 50 50" role="presentation">
-        <circle cx="25" cy="25" r="20" stroke="#ccc" stroke-width="4" fill="none"/>
-        <circle cx="25" cy="25" r="20" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"
-                stroke-dasharray="90 125">
-            <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s"
-                              repeatCount="indefinite"/>
-        </circle>
-    </svg>
+<body>
+    <div id="loading" role="status" aria-live="polite">
+        <img src="loading-logo.png" alt="">
+        <h1>Helping Hand</h1>
+        <div class="spinner"></div>
+        <p>Loading…</p>
+    </div>
+    <script>
+        // Remove the loading screen as soon as the app has created its canvas.
+        new MutationObserver(function (_, observer) {
+            if (document.querySelector("canvas")) {
+                observer.disconnect();
+                setTimeout(function () {
+                    var el = document.getElementById("loading");
+                    if (el) el.remove();
+                }, 150);
+            }
+        }).observe(document.body, { childList: true, subtree: true });
+    </script>
     <script type="application/javascript" src="webApp.js"></script>
 </body>
 </html>

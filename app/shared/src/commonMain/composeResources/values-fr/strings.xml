@@ -69,4 +69,5 @@
     <string name="cancel">Annuler</string>
     <string name="action_other_amount">Autre montant</string>
     <string name="donate_amount_chf">CHF %1$d</string>
+    <string name="loading">Chargement…</string>
 </resources>
