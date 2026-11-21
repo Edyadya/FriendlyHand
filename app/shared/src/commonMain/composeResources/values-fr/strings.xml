@@ -4,7 +4,7 @@
     <string name="role_donor">Donateur</string>
     <string name="role_ngo">ONG</string>
     <string name="back">Retour</string>
-    <string name="home_title">Les personnes que nous aidons</string>
+    <string name="home_title">Personnes à proximité</string>
     <string name="person_age">%1$s, %2$d ans</string>
     <string name="zone_time">%1$s · %2$s</string>
     <string name="open_needs_one">1 besoin ouvert</string>
@@ -49,4 +49,24 @@
     <string name="rewards_progress">%1$d objectifs sur %2$d pour un bon partenaire</string>
     <string name="rewards_unlocked">Bon débloqué. Merci pour votre aide !</string>
     <string name="map_unavailable">La carte en direct n'est pas disponible sur cet appareil. Utilisez la liste des quartiers.</string>
+    <string name="last_seen_with_note">Vu pour la dernière fois : %1$s · %2$s</string>
+    <string name="last_seen_no_note">Vu pour la dernière fois %1$s</string>
+    <string name="time_just_now">à l'instant</string>
+    <string name="time_minutes_ago">il y a %1$d min</string>
+    <string name="time_hours_ago">il y a %1$d h</string>
+    <string name="open_in_maps">Ouvrir dans Maps</string>
+    <string name="update_last_seen">Mettre à jour le dernier lieu</string>
+    <string name="last_seen_note_field">Où ? Quelques mots</string>
+    <string name="feedback_last_seen">Dernier lieu mis à jour</string>
+    <string name="feedback_claimed">Merci. Vous apportez : %1$s</string>
+    <string name="feedback_paid">Merci. CHF %1$d payés pour : %2$s</string>
+    <string name="feedback_given">Merci. CHF %1$d ajoutés à : %2$s</string>
+    <string name="feedback_handed_over">Marqué comme remis. %1$s peut maintenant confirmer.</string>
+    <string name="feedback_confirmed">Confirmé avec %1$s. Merci d'être présent.</string>
+    <string name="feedback_delivered">Marqué comme remis.</string>
+    <string name="donate_title">Quel montant souhaitez-vous donner ?</string>
+    <string name="donate_confirm">Donner</string>
+    <string name="cancel">Annuler</string>
+    <string name="action_other_amount">Autre montant</string>
+    <string name="donate_amount_chf">CHF %1$d</string>
 </resources>

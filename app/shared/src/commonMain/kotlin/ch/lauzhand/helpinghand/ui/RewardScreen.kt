@@ -1,8 +1,11 @@
 package ch.lauzhand.helpinghand.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
@@ -23,14 +26,17 @@ fun RewardScreen(repo: HelpRepository, onBack: () -> Unit) {
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
         ) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    if (completed == 1) stringResource(Res.string.rewards_goals_one)
-                    else stringResource(Res.string.rewards_goals_many, completed),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
+                AnimatedContent(completed) { n ->
+                    Text(
+                        if (n == 1) stringResource(Res.string.rewards_goals_one)
+                        else stringResource(Res.string.rewards_goals_many, n),
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
+                val progress by animateFloatAsState((completed.toFloat() / VOUCHER_GOAL).coerceIn(0f, 1f))
                 LinearProgressIndicator(
-                    progress = { (completed.toFloat() / VOUCHER_GOAL).coerceIn(0f, 1f) },
+                    progress = { progress },
                     modifier = Modifier.fillMaxWidth().height(12.dp),
                 )
                 Text(

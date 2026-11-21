@@ -67,7 +67,7 @@ fun HomeScreen(
     BoxWithConstraints(Modifier.fillMaxSize()) {
         if (maxWidth >= 700.dp) {
             Row(Modifier.fillMaxSize().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                ZoneMap(repo, zoneFilter, { zoneFilter = it }, Modifier.weight(1f).fillMaxHeight())
+                HomeMap(repo, role, zoneFilter, { zoneFilter = it }, onOpenPerson, Modifier.weight(1f).fillMaxHeight())
                 Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Header()
                     FilterRow()
@@ -76,7 +76,7 @@ fun HomeScreen(
             }
         } else {
             Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                ZoneMap(repo, zoneFilter, { zoneFilter = it }, Modifier.fillMaxWidth().height(300.dp))
+                HomeMap(repo, role, zoneFilter, { zoneFilter = it }, onOpenPerson, Modifier.fillMaxWidth().height(300.dp))
                 Header()
                 FilterRow()
                 PeopleList(repo, people, Modifier.weight(1f), onOpenPerson)
