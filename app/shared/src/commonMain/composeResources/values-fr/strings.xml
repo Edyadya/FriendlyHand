@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Main tendue</string>
+    <string name="role_volunteer">Bénévole</string>
+    <string name="role_donor">Donateur</string>
+    <string name="role_ngo">ONG</string>
+    <string name="back">Retour</string>
+</resources>

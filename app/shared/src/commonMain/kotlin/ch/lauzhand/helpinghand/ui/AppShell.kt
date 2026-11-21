@@ -1,0 +1,60 @@
+package ch.lauzhand.helpinghand.ui
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import ch.lauzhand.helpinghand.data.HelpRepository
+import ch.lauzhand.helpinghand.model.Role
+import helpinghand.app.shared.generated.resources.*
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+
+/** Simple state-based navigation, no library. */
+sealed interface Screen {
+    data object Home : Screen
+    data class Profile(val personId: String) : Screen
+}
+
+private fun Role.label(): StringResource = when (this) {
+    Role.VOLUNTEER -> Res.string.role_volunteer
+    Role.DONOR -> Res.string.role_donor
+    Role.NGO -> Res.string.role_ngo
+}
+
+@Composable
+fun AppShell(repo: HelpRepository) {
+    var role by remember { mutableStateOf(Role.VOLUNTEER) }
+    var screen by remember { mutableStateOf<Screen>(Screen.Home) }
+
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Column(Modifier.safeContentPadding().fillMaxSize()) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    stringResource(Res.string.app_name),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.weight(1f),
+                )
+                Role.entries.forEach { r ->
+                    FilterChip(
+                        selected = role == r,
+                        onClick = { role = r },
+                        label = { Text(stringResource(r.label())) },
+                    )
+                }
+            }
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                when (val s = screen) {
+                    Screen.Home -> Text("Home", Modifier.padding(16.dp))
+                    is Screen.Profile -> Text("Profile ${s.personId}", Modifier.padding(16.dp))
+                }
+            }
+        }
+    }
+}
