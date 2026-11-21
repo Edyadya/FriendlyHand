@@ -59,7 +59,17 @@ class ApplicationTest {
         val need = res.body<Need>()
         assertEquals(800, need.fundedAmountChf)
         assertEquals(NeedStatus.FULFILLED, need.status)
-        assertEquals(NeedStatus.CONFIRMED, client.post("/needs/n-2/confirm").body<Need>().status)
+        val vol = volunteer(client)
+        assertEquals(NeedStatus.CONFIRMED, client.post("/needs/n-2/confirm") { auth(vol) }.body<Need>().status)
+    }
+
+    @Test
+    fun onlyVolunteerConfirms() = api { client ->
+        val d = donor(client)
+        val vol = volunteer(client)
+        assertEquals(HttpStatusCode.Unauthorized, client.post("/needs/n-1/confirm").status)
+        assertEquals(HttpStatusCode.Forbidden, client.post("/needs/n-1/confirm") { auth(d) }.status)
+        assertEquals(HttpStatusCode.OK, client.post("/needs/n-1/confirm") { auth(vol) }.status)
     }
 
     @Test

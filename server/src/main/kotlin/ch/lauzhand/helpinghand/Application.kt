@@ -187,6 +187,8 @@ fun Application.module(store: Store = Store()) {
                 call.respondNeed(store.updateNeed(id) { it.fulfilled() })
             }
             post("/confirm") {
+                // the volunteer confirms with the person that they received it
+                call.requireRole(store, Role.VOLUNTEER)
                 call.respondNeed(store.updateNeed(call.parameters["id"]!!) { it.confirmed() })
             }
         }
