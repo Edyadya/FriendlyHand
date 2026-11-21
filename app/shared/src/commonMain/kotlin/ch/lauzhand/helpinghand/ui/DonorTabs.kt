@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import helpinghand.app.shared.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
@@ -29,13 +30,28 @@ enum class DonorTab(val label: StringResource) {
 @Composable
 fun DonorBottomBar(selected: DonorTab, onSelect: (DonorTab) -> Unit) {
     // AppShell already pads for system bars, so no extra insets here
-    NavigationBar(windowInsets = WindowInsets(0)) {
+    NavigationBar(containerColor = MaterialTheme.colorScheme.surface, windowInsets = WindowInsets(0)) {
         DonorTab.entries.forEach { tab ->
             NavigationBarItem(
                 selected = tab == selected,
                 onClick = { onSelect(tab) },
                 icon = { TabIcon(tab) },
-                label = { Text(stringResource(tab.label)) },
+                label = {
+                    Text(
+                        stringResource(tab.label),
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+                // selected: primary icon + label on a soft primary pill (12 %); unselected: muted
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    unselectedIconColor = MaterialTheme.app.navUnselected,
+                    unselectedTextColor = MaterialTheme.app.navUnselected,
+                ),
             )
         }
     }

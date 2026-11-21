@@ -92,7 +92,7 @@ fun ProfileScreen(
         items(needs, key = { it.id }) { NeedCard(repo, role, person, it, notify) }
         if (role == Role.VOLUNTEER) {
             item {
-                OutlinedButton(onClick = onAddNeed, modifier = BigButtonModifier) {
+                AppOutlinedButton(onClick = onAddNeed, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.add_need))
                 }
             }
@@ -161,17 +161,17 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
     when (role) {
         Role.DONOR -> {
             if (need.type == NeedType.SMALL && need.status == NeedStatus.OPEN) {
-                Button(onClick = { repo.claimNeed(need.id, ME_DONOR); notify(msgClaimed) }, modifier = BigButtonModifier) {
+                AppButton(onClick = { repo.claimNeed(need.id, ME_DONOR); notify(msgClaimed) }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_bring), style = MaterialTheme.typography.titleMedium)
                 }
-                OutlinedButton(onClick = { give(QUICK_PAY_CHF, NeedType.SMALL) }, modifier = BigButtonModifier) {
+                AppOutlinedButton(onClick = { give(QUICK_PAY_CHF, NeedType.SMALL) }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_pay), style = MaterialTheme.typography.titleMedium)
                 }
                 TextButton(onClick = { choosing = NeedType.SMALL }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_other_amount), style = MaterialTheme.typography.titleMedium)
                 }
             } else if (need.type == NeedType.BIG && canGive) {
-                Button(onClick = { give(QUICK_GIVE_CHF, NeedType.BIG) }, modifier = BigButtonModifier) {
+                AppButton(onClick = { give(QUICK_GIVE_CHF, NeedType.BIG) }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_give), style = MaterialTheme.typography.titleMedium)
                 }
                 TextButton(onClick = { choosing = NeedType.BIG }, modifier = BigButtonModifier) {
@@ -180,7 +180,7 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
             } else if (need.type == NeedType.SMALL && need.status == NeedStatus.CLAIMED &&
                 need.claimedByDonorId == ME_DONOR && !need.paid
             ) {
-                Button(onClick = { repo.markFulfilled(need.id); notify(msgHanded) }, modifier = BigButtonModifier) {
+                AppButton(onClick = { repo.markFulfilled(need.id); notify(msgHanded) }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_handed_over), style = MaterialTheme.typography.titleMedium)
                 }
             }
@@ -188,12 +188,12 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
         Role.VOLUNTEER -> {
             // a donor paid: the volunteer buys the item, brings it and marks it delivered
             if (need.paid && need.status == NeedStatus.CLAIMED) {
-                Button(onClick = { repo.markFulfilled(need.id); notify(msgDelivered) }, modifier = BigButtonModifier) {
+                AppButton(onClick = { repo.markFulfilled(need.id); notify(msgDelivered) }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_delivered), style = MaterialTheme.typography.titleMedium)
                 }
             }
             if (need.status == NeedStatus.FULFILLED) {
-                Button(onClick = { repo.confirmReceived(need.id); notify(msgConfirmed) }, modifier = BigButtonModifier) {
+                AppButton(onClick = { repo.confirmReceived(need.id); notify(msgConfirmed) }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_confirm, person.firstName), style = MaterialTheme.typography.titleMedium)
                 }
             }
@@ -225,7 +225,7 @@ private fun LastSeenSection(repo: HelpRepository, role: Role, person: Person, zo
                     ?.let { stringResource(Res.string.last_seen_with_note, it, ago) }
                     ?: stringResource(Res.string.last_seen_no_note, ago)
                 Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSecondaryContainer)
-                OutlinedButton(
+                AppOutlinedButton(
                     onClick = { uriHandler.openUri("https://www.google.com/maps?q=${person.lastSeenLat},${person.lastSeenLng}") },
                     modifier = BigButtonModifier,
                 ) { Text(stringResource(Res.string.open_in_maps)) }
@@ -236,7 +236,7 @@ private fun LastSeenSection(repo: HelpRepository, role: Role, person: Person, zo
                     label = { Text(stringResource(Res.string.last_seen_note_field)) }, singleLine = true,
                 )
                 // Demo coordinates: the centre of the zone, never a real GPS fix.
-                Button(
+                AppButton(
                     onClick = {
                         repo.updateLastSeen(person.id, zone.centerLat, zone.centerLng, note.trim().ifBlank { null })
                         note = ""

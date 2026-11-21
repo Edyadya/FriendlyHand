@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
 import ch.lauzhand.helpinghand.map.isLiveMapSupported
@@ -73,7 +74,7 @@ fun HomeScreen(
             Box(Modifier.weight(1f)) {
                 FloatingPill {
                     Column(Modifier.padding(horizontal = 18.dp, vertical = 10.dp)) {
-                        Text(stringResource(Res.string.home_title), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(Res.string.home_title), style = MaterialTheme.typography.headlineSmall)
                         if (zoneFilter == null) {
                             Text(
                                 stringResource(Res.string.map_tap_bubble),
@@ -87,14 +88,15 @@ fun HomeScreen(
         }
 
         Column(
-            Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (role == Role.VOLUNTEER) {
                 ExtendedFloatingActionButton(
                     onClick = onNewPerson,
-                    shape = RoundedCornerShape(28.dp),
+                    modifier = Modifier.padding(end = 16.dp, bottom = 16.dp),
+                    shape = AppShape.button,
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                 ) { Text(stringResource(Res.string.new_person), style = MaterialTheme.typography.titleMedium) }
@@ -114,8 +116,8 @@ fun HomeScreen(
 /** Rounded, slightly see-through card floating over the map. */
 @Composable
 private fun FloatingPill(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, content: @Composable () -> Unit) {
-    val shape = RoundedCornerShape(24.dp)
-    val color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f)
+    val shape = AppShape.card
+    val color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
     if (onClick != null) {
         Surface(onClick = onClick, modifier = modifier, shape = shape, color = color, shadowElevation = 6.dp) { content() }
     } else {
@@ -129,12 +131,12 @@ private fun AreaSheet(repo: HelpRepository, zoneId: String, onClose: () -> Unit,
     val zone = repo.zones.firstOrNull { it.id == zoneId }
     val people = repo.people.filter { it.zoneId == zoneId }
     Surface(
-        Modifier.widthIn(max = 560.dp).fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        Modifier.fillMaxWidth(),
+        shape = AppShape.sheet,
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 12.dp,
     ) {
-        Column(Modifier.padding(top = 10.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.padding(top = 12.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(
                 Modifier.align(Alignment.CenterHorizontally).size(width = 40.dp, height = 4.dp)
                     .clip(CircleShape).background(MaterialTheme.colorScheme.outlineVariant),
@@ -175,14 +177,11 @@ private fun AreaSheet(repo: HelpRepository, zoneId: String, onClose: () -> Unit,
 @Composable
 private fun PersonBubble(repo: HelpRepository, person: Person, index: Int, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val (bg, fg) = when (index % 3) {
-        0 -> colors.primaryContainer to colors.onPrimaryContainer
-        1 -> colors.secondaryContainer to colors.onSecondaryContainer
-        else -> colors.tertiaryContainer to colors.onTertiaryContainer
-    }
-    val open = repo.needs.count { it.personId == person.id && it.isOpenForHelp }
+    val (bg, fg) = if (index % 2 == 0) colors.primaryContainer to colors.onPrimaryContainer
+    else colors.secondaryContainer to colors.onSecondaryContainer
+    val openNeeds = repo.needs.filter { it.personId == person.id && it.isOpenForHelp }
     Column(
-        Modifier.width(132.dp).clip(RoundedCornerShape(20.dp)).clickable(onClick = onClick).padding(8.dp),
+        Modifier.width(140.dp).clip(AppShape.card).clickable(onClick = onClick).padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
@@ -197,18 +196,38 @@ private fun PersonBubble(repo: HelpRepository, person: Person, index: Int, onCli
             person.age?.let { stringResource(Res.string.person_age, person.firstName, it) } ?: person.firstName,
             style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
-        Text(
-            when (open) {
-                0 -> stringResource(Res.string.no_open_needs)
-                1 -> stringResource(Res.string.open_needs_one)
-                else -> stringResource(Res.string.open_needs_many, open)
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.primary,
-            maxLines = 2,
-        )
+        if (openNeeds.isEmpty()) {
+            Text(
+                stringResource(Res.string.no_open_needs),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.onSurfaceVariant,
+                maxLines = 2,
+            )
+        } else {
+            // what they need, as outline chips (navy text); long titles are cut with an ellipsis
+            openNeeds.take(2).forEach { NeedChip(it.title) }
+            if (openNeeds.size > 2) {
+                Text("+${openNeeds.size - 2}", style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
+            }
+        }
     }
+}
+
+/** A need as a small outlined chip. */
+@Composable
+fun NeedChip(title: String, modifier: Modifier = Modifier) {
+    Text(
+        title,
+        modifier
+            .border(1.dp, MaterialTheme.colorScheme.outline, AppShape.chip)
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
 
 @Composable

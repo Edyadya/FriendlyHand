@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ch.lauzhand.helpinghand.model.*
+import ch.lauzhand.helpinghand.ui.app
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -84,6 +85,15 @@ actual fun LausanneMap(
             }
         }
     }
+    // Concentric ring around the tapped bubble (accent at 30 %).
+    val ringData = remember(focusedZoneId, zones) {
+        buildFeatureCollection<Point, JsonObject?> {
+            zones.firstOrNull { it.id == focusedZoneId }?.let { z ->
+                addFeature(geometry = Point(z.position()), properties = buildJsonObject { put("id", z.id) })
+            }
+        }
+    }
+
     // Exact last-seen markers: only for volunteers, and only recent ones.
     val seesExact = role == Role.VOLUNTEER
     val now = remember(people) { nowMillis() }
@@ -101,10 +111,10 @@ actual fun LausanneMap(
         }
     }
 
-    val zoneColor = MaterialTheme.colorScheme.tertiary          // warm, saturated: people are waiting
-    val seenColor = MaterialTheme.colorScheme.secondary
-    val outline = MaterialTheme.colorScheme.surface
-    val labelColor = MaterialTheme.colorScheme.onTertiary
+    val zoneColor = MaterialTheme.app.accent                     // solid accent blue bubbles
+    val seenColor = MaterialTheme.colorScheme.primary
+    val outline = MaterialTheme.app.onNavy                       // white ring
+    val labelColor = MaterialTheme.app.onAccent                  // navy number (never white on the accent blue)
     val styleUrl = if (isSystemInDarkTheme()) STYLE_DARK else STYLE_LIGHT
 
     val state = rememberMapState(
@@ -114,13 +124,21 @@ actual fun LausanneMap(
         val mapState = LocalMapState.current
         val zoneSource = rememberGeoJsonSource(GeoJsonData.Features(zoneData))
         val seenSource = rememberGeoJsonSource(GeoJsonData.Features(seenData))
+        val ringSource = rememberGeoJsonSource(GeoJsonData.Features(ringData))
 
+        CircleLayer(
+            id = "zone-selected-ring",
+            source = ringSource,
+            radius = const(44.dp),
+            color = const(zoneColor),
+            opacity = const(0.30f),
+        )
         CircleLayer(
             id = "zones",
             source = zoneSource,
             radius = const(26.dp),
             color = const(zoneColor),
-            opacity = const(0.92f),
+            opacity = const(1f),
             strokeColor = const(outline),
             strokeWidth = const(3.dp),
             hitPadding = 8.dp,

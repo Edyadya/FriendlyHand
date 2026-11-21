@@ -10,7 +10,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,10 +45,10 @@ fun ZoneMap(
     onZoneClick: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val land = MaterialTheme.colorScheme.surfaceVariant
+    val land = MaterialTheme.colorScheme.primaryContainer
     val road = MaterialTheme.colorScheme.surface
-    val park = MaterialTheme.colorScheme.primaryContainer
-    val lake = MaterialTheme.colorScheme.tertiaryContainer
+    val park = MaterialTheme.app.success.copy(alpha = 0.18f)
+    val lake = MaterialTheme.app.accent.copy(alpha = 0.28f)
     val lakeText = MaterialTheme.colorScheme.onTertiaryContainer
 
     BoxWithConstraints(modifier.clip(RoundedCornerShape(28.dp)).background(land)) {
@@ -104,18 +111,22 @@ fun ZoneMap(
                     .offset(x = w * z.x - slot / 2, y = h * z.y - bubble / 2),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Surface(
-                    onClick = { onZoneClick(if (selected) null else z.id) },
-                    shape = CircleShape,
-                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary, // warm, saturated
-                    contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onTertiary,
-                    shadowElevation = 6.dp,
-                    modifier = Modifier
-                        .size(bubble)
-                        .border(3.dp, MaterialTheme.colorScheme.surface, CircleShape),
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(open.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Box(Modifier.size(bubble), contentAlignment = Alignment.Center) {
+                    // selected: concentric ring in accent (30 %) that expands outwards and fades
+                    if (selected) PulseRing(MaterialTheme.app.accent, bubble)
+                    Surface(
+                        onClick = { onZoneClick(if (selected) null else z.id) },
+                        shape = CircleShape,
+                        color = MaterialTheme.app.accent,          // solid accent bubble
+                        contentColor = MaterialTheme.app.onAccent, // navy number, never white on the accent blue
+                        shadowElevation = 4.dp,
+                        modifier = Modifier
+                            .size(bubble)
+                            .border(3.dp, MaterialTheme.app.onNavy, CircleShape), // white ring
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(open.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
                 Spacer(Modifier.height(2.dp))
@@ -131,5 +142,20 @@ fun ZoneMap(
                 )
             }
         }
+    }
+}
+
+/** Concentric ring that expands from the bubble and fades out, repeating. */
+@Composable
+private fun PulseRing(color: Color, bubble: Dp) {
+    val t by rememberInfiniteTransition().animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(1600, easing = LinearEasing)),
+    )
+    Canvas(Modifier.requiredSize(bubble + 64.dp)) {
+        val start = bubble.toPx() / 2
+        val end = size.minDimension / 2
+        drawCircle(color.copy(alpha = 0.30f * (1f - t)), radius = start + (end - start) * t)
     }
 }

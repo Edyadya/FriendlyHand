@@ -43,7 +43,7 @@ fun AmountDialog(
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(amount) }) {
+            AppButton(onClick = { onConfirm(amount) }) {
                 Text(stringResource(Res.string.donate_confirm), style = MaterialTheme.typography.titleMedium)
             }
         },

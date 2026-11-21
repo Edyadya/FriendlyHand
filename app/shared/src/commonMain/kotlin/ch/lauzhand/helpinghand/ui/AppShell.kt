@@ -46,28 +46,7 @@ fun AppShell(repo: HelpRepository) {
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.safeContentPadding().fillMaxSize()) {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Image(
-                    painterResource(Res.drawable.logo),
-                    contentDescription = null,
-                    modifier = Modifier.size(40.dp),
-                )
-                Column(Modifier.weight(1f)) {
-                    Text(stringResource(Res.string.app_name), style = MaterialTheme.typography.titleLarge)
-                    Text(
-                        stringResource(Res.string.logged_in_as, account.name, stringResource(role.label())),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                OutlinedButton(onClick = { repo.logout() }) {
-                    Text(stringResource(Res.string.logout))
-                }
-            }
+            AppTopBar(account.name, stringResource(role.label()), onLogout = { repo.logout() })
             val showTabs = role == Role.DONOR
             Column(Modifier.weight(1f).fillMaxWidth()) {
                 Box(Modifier.weight(1f).fillMaxWidth()) {

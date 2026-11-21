@@ -71,7 +71,7 @@ fun OnboardingScreen(
             Checkbox(consent, { consent = it })
             Text(stringResource(Res.string.consent_text), style = MaterialTheme.typography.bodyLarge)
         }
-        Button(
+        AppButton(
             onClick = {
                 val id = newId("p")
                 repo.addPerson(
@@ -127,7 +127,7 @@ fun AddNeedScreen(
                 label = { Text(stringResource(Res.string.need_target_chf)) }, singleLine = true,
             )
         }
-        Button(
+        AppButton(
             onClick = {
                 repo.addNeed(
                     Need(

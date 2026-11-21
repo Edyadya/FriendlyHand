@@ -16,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role as SemanticsRole
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -141,7 +140,7 @@ fun LoginScreen(repo: HelpRepository) {
                 )
             }
 
-            Button(
+            AppButton(
                 onClick = { submit() },
                 enabled = canSubmit,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
@@ -156,21 +155,22 @@ fun LoginScreen(repo: HelpRepository) {
 @Composable
 private fun RoleTile(role: Role, selected: Boolean, modifier: Modifier = Modifier, onSelect: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val shape = RoundedCornerShape(20.dp)
-    val container by animateColorAsState(if (selected) colors.primaryContainer else Color.Transparent)
-    val accent by animateColorAsState(if (selected) colors.primary else colors.onSurfaceVariant)
+    val shape = AppShape.card
+    // unselected: surface with an outline; selected: primary fill with onPrimary text and icon
+    val container by animateColorAsState(if (selected) colors.primary else colors.surface)
+    val content by animateColorAsState(if (selected) colors.onPrimary else colors.onSurface)
     Column(
         modifier
             .heightIn(min = 120.dp)
             .clip(shape)
             .background(container)
-            .border(if (selected) 2.dp else 1.dp, if (selected) colors.primary else colors.outlineVariant, shape)
+            .border(1.dp, if (selected) colors.primary else colors.outlineVariant, shape)
             .selectable(selected = selected, onClick = onSelect, role = SemanticsRole.RadioButton)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
     ) {
-        RoleIcon(role, accent)
-        Text(stringResource(role.label()), style = MaterialTheme.typography.titleMedium, color = accent)
+        RoleIcon(role, content)
+        Text(stringResource(role.label()), style = MaterialTheme.typography.titleMedium, color = content)
     }
 }
