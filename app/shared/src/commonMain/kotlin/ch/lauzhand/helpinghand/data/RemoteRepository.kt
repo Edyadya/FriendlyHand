@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
+import androidx.compose.runtime.snapshots.SnapshotApplyConflictException
 import ch.lauzhand.helpinghand.model.*
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -13,11 +14,16 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
+import kotlin.concurrent.Volatile
 
 /**
  * HelpRepository backed by the Ktor server. Same interface as FakeRepository, so screens don't change.
@@ -25,6 +31,7 @@ import kotlinx.serialization.json.Json
  * The lists are Compose state: screens read them synchronously, the data is loaded in the background.
  * Actions update the local list immediately (optimistic) and then tell the server; if the server
  * refuses (wrong role, offline) the lists are reloaded and [lastError] is set.
+ * The lists are also reloaded every few seconds, so changes made on other devices show up.
  *
  * The UI uses the constants ME_DONOR / ME_VOLUNTEER as "me". The server uses real account ids,
  * so ids are translated here: ME_* <-> currentAccount.id.
@@ -37,6 +44,9 @@ class RemoteRepository(
     companion object {
         /** Android emulator: use "http://10.0.2.2:8081" instead of localhost. */
         const val DEFAULT_BASE_URL = "http://localhost:8081"
+
+        /** How often the lists are reloaded to pick up changes from other devices. */
+        const val POLL_MILLIS = 3_000L
     }
 
     private val client = HttpClient {
@@ -58,31 +68,71 @@ class RemoteRepository(
     var lastError: String? by mutableStateOf(null)
         private set
 
-    init { refresh() }
+    // Server calls (reloads and actions) run one at a time, so an older answer never
+    // overwrites a newer one.
+    private val serverLock = Mutex()
+
+    // Actions started (UI thread) and finished (under serverLock). A poll is skipped while
+    // they differ, so it can't undo an optimistic change before the server has answered.
+    @Volatile private var actionsStarted = 0
+    @Volatile private var actionsDone = 0
+
+    init {
+        refresh()
+        scope.launch {
+            while (true) {
+                delay(POLL_MILLIS)
+                reload(skipIfActionPending = true)
+            }
+        }
+    }
 
     // ---------- loading ----------
 
     fun refresh() {
-        scope.launch {
+        scope.launch { reload(skipIfActionPending = false) }
+    }
+
+    private suspend fun reload(skipIfActionPending: Boolean) = serverLock.withLock {
+        if (skipIfActionPending && actionsStarted != actionsDone) return@withLock
+        try {
+            val z: List<Zone> = get("/zones")
+            val p: List<Person> = get("/people")
+            val n: List<Need> = get("/needs")
+            val account = currentAccount
+            val c = if (account?.role == Role.DONOR) {
+                runCatching { get<CompletedGoals>("/donors/${account.id}/completed-goals").count }.getOrNull()
+            } else null
+            if (skipIfActionPending && actionsStarted != actionsDone) return@withLock
+            applyAtomically {
+                zones.replaceAll(z)
+                people.replaceAll(p.map { it.fromServer() })
+                needs.replaceAll(n.map { it.fromServer() })
+                if (account != null && c != null) completed[account.id] = c
+                lastError = null
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            lastError = e.message ?: "No connection"
+        }
+    }
+
+    /**
+     * Applies all list changes at once, so the UI never sees half-updated lists. If the UI
+     * changed the same lists meanwhile, Compose refuses the snapshot: retry, and as a last
+     * resort write directly.
+     */
+    private fun applyAtomically(block: () -> Unit) {
+        repeat(3) {
             try {
-                val z: List<Zone> = get("/zones")
-                val p: List<Person> = get("/people")
-                val n: List<Need> = get("/needs")
-                val account = currentAccount
-                val c = if (account?.role == Role.DONOR) {
-                    runCatching { get<CompletedGoals>("/donors/${account.id}/completed-goals").count }.getOrNull()
-                } else null
-                Snapshot.withMutableSnapshot {
-                    zones.replaceAll(z)
-                    people.replaceAll(p.map { it.fromServer() })
-                    needs.replaceAll(n.map { it.fromServer() })
-                    if (account != null && c != null) completed[account.id] = c
-                    lastError = null
-                }
-            } catch (e: Exception) {
-                lastError = e.message ?: "No connection"
+                Snapshot.withMutableSnapshot(block)
+                return
+            } catch (_: SnapshotApplyConflictException) {
+                // someone else wrote meanwhile; try again on fresh state
             }
         }
+        block()
     }
 
     // ---------- actions ----------
@@ -200,13 +250,20 @@ class RemoteRepository(
 
     /** Runs a server call in the background; on failure reloads the lists so the screen shows the truth. */
     private fun send(what: String, block: suspend () -> Unit) {
+        actionsStarted++
         scope.launch {
-            try {
-                block()
-                lastError = null
-            } catch (e: Exception) {
-                lastError = "$what: ${e.message ?: "failed"}"
-                refresh()
+            serverLock.withLock {
+                try {
+                    block()
+                    lastError = null
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    lastError = "$what: ${e.message ?: "failed"}"
+                    refresh()
+                } finally {
+                    actionsDone++
+                }
             }
         }
     }
