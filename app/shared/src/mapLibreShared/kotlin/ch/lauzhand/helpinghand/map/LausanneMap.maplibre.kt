@@ -1,5 +1,6 @@
 package ch.lauzhand.helpinghand.map
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -32,8 +33,9 @@ import org.maplibre.spatialk.geojson.dsl.buildFeatureCollection
 
 // Shared by the Android and web-JS targets (see app/shared/build.gradle.kts).
 
-// Free OpenFreeMap style, no API key. "bright" is the friendliest of the free ones.
-private const val STYLE_URL = "https://tiles.openfreemap.org/styles/bright"
+// Free OpenFreeMap styles, no API key. "bright" is the friendliest light one; "dark" for dark mode.
+private const val STYLE_LIGHT = "https://tiles.openfreemap.org/styles/bright"
+private const val STYLE_DARK = "https://tiles.openfreemap.org/styles/dark"
 
 private fun Zone.position() = Position(longitude = centerLng, latitude = centerLat)
 
@@ -85,10 +87,12 @@ actual fun LausanneMap(
 
     val zoneColor = MaterialTheme.colorScheme.primary
     val seenColor = MaterialTheme.colorScheme.secondary
-    val outline = Color.White
+    val outline = MaterialTheme.colorScheme.surface
+    val labelColor = MaterialTheme.colorScheme.onSurface
+    val styleUrl = if (isSystemInDarkTheme()) STYLE_DARK else STYLE_LIGHT
 
     val state = rememberMapState(
-        baseStyle = BaseStyle.Uri(STYLE_URL),
+        baseStyle = BaseStyle.Uri(styleUrl),
         initialCameraPosition = CameraPosition(center = Position(longitude = 6.632, latitude = 46.519), zoom = 12.6),
     ) {
         val zoneSource = rememberGeoJsonSource(GeoJsonData.Features(zoneData))
@@ -114,7 +118,7 @@ actual fun LausanneMap(
             textField = feature["label"].convertToString(),
             textFont = const(listOf("Noto Sans Regular")),
             textSize = const(18.sp),
-            textColor = const(Color.Black),
+            textColor = const(labelColor),
         )
         CircleLayer(
             id = "last-seen",
