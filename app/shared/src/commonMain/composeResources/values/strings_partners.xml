@@ -1,0 +1,26 @@
+<resources>
+    <string name="partners_title">Our partners</string>
+    <string name="partners_subtitle">They thank you for helping</string>
+    <string name="partner_kind_jetbrains">Developer tools</string>
+    <string name="partner_kind_ims">Partner</string>
+    <string name="partner_kind_wamazon">Online shop</string>
+    <string name="partner_kind_kolibri">Café</string>
+    <string name="partner_kind_velolac">Bike workshop</string>
+    <string name="partner_kind_pagina">Bookshop</string>
+    <string name="reward_coffee">A free coffee</string>
+    <string name="reward_gift_20">CHF 20 gift card</string>
+    <string name="reward_gift_50">CHF 50 gift card</string>
+    <string name="reward_bike">A free bike check-up</string>
+    <string name="reward_book">CHF 15 book voucher</string>
+    <string name="reward_breakfast">Breakfast for two</string>
+    <string name="reward_jetbrains">JetBrains goodies pack</string>
+    <string name="reward_ims">IMS goodie bag</string>
+    <string name="reward_label">Reward</string>
+    <string name="reward_from">from %1$s</string>
+    <string name="reward_on_badge">Reward from %1$s</string>
+    <string name="reward_unlocked">Unlocked! Show this screen at %1$s to get your reward.</string>
+    <string name="reward_locked">Keep going: %1$d of %2$d done.</string>
+    <string name="reward_close">Close</string>
+    <string name="map_people_here_one">1 person here</string>
+    <string name="map_people_here_many">%1$d people here</string>
+</resources>
