@@ -57,6 +57,31 @@ private val RingRadius = floatArrayOf(0.40f, 0.68f, 0.96f) // fractions of the h
 private val RingAlpha = floatArrayOf(0.40f, 0.32f, 0.25f)
 private val RingDirection = floatArrayOf(1f, -1f, 1f)
 
+// Size of an icon: a fraction of the half-diameter, but never smaller than MinDisc.
+private const val DiscFraction = 0.15f
+private val MinDisc = 13.dp
+private val EdgeMargin = 1.5.dp // room for the 1dp outline of the outer icons
+
+/**
+ * The half-diameter the rings are drawn with, for a hero box of [diameter].
+ * The icons sit ON the rings, so the outermost ones stick out by their own radius: with the box's own
+ * half-diameter they were cut off by its edge. This picks the largest ring size whose outer icons
+ * still fit inside the box, so nothing is cropped at any angle.
+ */
+internal fun orbitHalf(diameter: Dp): Dp {
+    val avail = diameter / 2 - EdgeMargin
+    val outer = RingRadius.max()
+    val scaled = avail / (outer + DiscFraction)
+    val half = if (scaled * DiscFraction >= MinDisc) scaled else (avail - MinDisc) / outer
+    return half.coerceAtLeast(0.dp)
+}
+
+/** How far from the centre the artwork reaches (the outer ring's icons, outline included). */
+internal fun orbitExtent(diameter: Dp): Dp {
+    val half = orbitHalf(diameter)
+    return half * RingRadius.max() + maxOf(half * DiscFraction, MinDisc) + EdgeMargin
+}
+
 /**
  * The login hero: the logo in the middle, three thin accent rings, and a few small flat icons (a coat, a book, a heart)
  * together with the IMC and JetBrains logos slowly orbiting on them. With reduce-motion on, the icons stand still.
@@ -79,14 +104,16 @@ fun OrbitHero(diameter: Dp, modifier: Modifier = Modifier, reduceMotion: Boolean
     val middle by transition.animateFloat(0f, 360f, infiniteRepeatable(tween(40_000, easing = LinearEasing)), label = "middle")
     val outer by transition.animateFloat(0f, 360f, infiniteRepeatable(tween(58_000, easing = LinearEasing)), label = "outer")
 
+    // the rings are drawn a little smaller than the box so the outer icons are not cropped by its edge
+    val ringHalf = orbitHalf(diameter)
     Box(modifier.size(diameter), contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
-            val half = size.minDimension / 2
+            val half = ringHalf.toPx()
             val c = Offset(size.width / 2, size.height / 2)
             val stroke = Stroke(1.dp.toPx())
             for (i in 0..2) drawCircle(accent.copy(alpha = RingAlpha[i]), RingRadius[i] * half, c, style = stroke)
 
-            val discRadius = (half * 0.15f).coerceAtLeast(13.dp.toPx())
+            val discRadius = (half * DiscFraction).coerceAtLeast(MinDisc.toPx())
             val angles = floatArrayOf(inner, middle, outer)
             Orbiters.forEach { o ->
                 val moved = if (reduceMotion) 0f else angles[o.ring] * RingDirection[o.ring]
@@ -113,7 +140,7 @@ fun OrbitHero(diameter: Dp, modifier: Modifier = Modifier, reduceMotion: Boolean
                 }
             }
         }
-        Image(painterResource(Res.drawable.logo), contentDescription = null, modifier = Modifier.size(diameter * 0.26f))
+        Image(painterResource(Res.drawable.logo), contentDescription = null, modifier = Modifier.size(ringHalf * 2 * 0.26f))
     }
 }
 
