@@ -84,14 +84,18 @@ fun OrbitHero(diameter: Dp, modifier: Modifier = Modifier, reduceMotion: Boolean
             val half = size.minDimension / 2
             val c = Offset(size.width / 2, size.height / 2)
             val stroke = Stroke(1.dp.toPx())
-            for (i in 0..2) drawCircle(accent.copy(alpha = RingAlpha[i]), RingRadius[i] * half, c, style = stroke)
-
             val discRadius = (half * 0.15f).coerceAtLeast(13.dp.toPx())
+            // Everything must fit inside the container: an icon sits ON a ring, so the outer ring is kept one icon
+            // radius (plus a hair for its outline) inside the edge. The rings keep their proportions to each other.
+            val reach = half - discRadius - 1.dp.toPx()
+            fun ringRadius(i: Int) = reach * RingRadius[i] / RingRadius[2]
+            for (i in 0..2) drawCircle(accent.copy(alpha = RingAlpha[i]), ringRadius(i), c, style = stroke)
+
             val angles = floatArrayOf(inner, middle, outer)
             Orbiters.forEach { o ->
                 val moved = if (reduceMotion) 0f else angles[o.ring] * RingDirection[o.ring]
                 val rad = (o.startDeg + moved) * (PI.toFloat() / 180f)
-                val at = Offset(c.x + RingRadius[o.ring] * half * cos(rad), c.y + RingRadius[o.ring] * half * sin(rad))
+                val at = Offset(c.x + ringRadius(o.ring) * cos(rad), c.y + ringRadius(o.ring) * sin(rad))
                 val logo = when (o.kind) { OrbitKind.LOGO_IMC -> imc; OrbitKind.LOGO_JETBRAINS -> jetbrains; else -> null }
                 val isLogo = logo != null || o.kind == OrbitKind.LOGO_KOTLIN
                 // logos sit on a white disc so they stay readable in dark mode too
