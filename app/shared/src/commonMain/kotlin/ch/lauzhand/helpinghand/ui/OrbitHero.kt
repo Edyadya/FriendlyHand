@@ -49,15 +49,15 @@ private class Orbiter(val ring: Int, val startDeg: Float, val kind: OrbitKind)
 private val Orbiters = listOf(
     Orbiter(0, 30f, OrbitKind.HEART), Orbiter(0, 210f, OrbitKind.LOGO_IMC),
     Orbiter(1, 0f, OrbitKind.COAT), Orbiter(1, 180f, OrbitKind.BOOK),
-    Orbiter(2, 80f, OrbitKind.LOGO_JETBRAINS), Orbiter(2, 260f, OrbitKind.PIN),
+    Orbiter(2, 80f, OrbitKind.LOGO_JETBRAINS), Orbiter(2, 260f, OrbitKind.LOGO_IMC),
 )
 private val RingRadius = floatArrayOf(0.40f, 0.68f, 0.96f) // fractions of the half-diameter
 private val RingAlpha = floatArrayOf(0.40f, 0.32f, 0.25f)
 private val RingDirection = floatArrayOf(1f, -1f, 1f)
 
 /**
- * The login hero: the logo in the middle, three thin accent rings, and a few small flat icons (a coat, a book, a heart,
- * a pin) together with the IMC and JetBrains logos slowly orbiting on them. With reduce-motion on, the icons stand still.
+ * The login hero: the logo in the middle, three thin accent rings, and a few small flat icons (a coat, a book, a heart)
+ * together with the IMC and JetBrains logos slowly orbiting on them. With reduce-motion on, the icons stand still.
  * Everything is drawn in one canvas, so the animation never recomposes anything.
  */
 @Composable
