@@ -30,6 +30,7 @@ import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.convertToString
 import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.interaction.ClickResult
+import org.maplibre.compose.interaction.MapInteractions
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.map.MaplibreMap
@@ -69,6 +70,7 @@ actual fun LausanneMap(
     userLocation: UserLocation?,
     centreOnUser: Int,
     city: City,
+    onMapClick: ((lat: Double, lng: Double) -> Unit)?,
 ) {
     val onZone by rememberUpdatedState(onZoneClick)
     val zonesNow by rememberUpdatedState(zones)
@@ -237,7 +239,26 @@ actual fun LausanneMap(
             )
         }
     }
-    MaplibreMap(state = state, modifier = modifier)
+    if (onMapClick == null) {
+        MaplibreMap(state = state, modifier = modifier)
+    } else {
+        // Picking a spot: a tap on the map reports where it was
+        val clicked by rememberUpdatedState(onMapClick)
+        MaplibreMap(
+            state = state,
+            modifier = modifier,
+            interactions = MapInteractions {
+                callbacks {
+                    click {
+                        onEvent { event ->
+                            event.position?.let { clicked(it.latitude, it.longitude) }
+                            ClickResult.Consume
+                        }
+                    }
+                }
+            },
+        )
+    }
 }
 
 private fun Need.isOpen() = status == NeedStatus.OPEN || status == NeedStatus.FUNDING

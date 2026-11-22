@@ -84,4 +84,13 @@
     <string name="photo_replace">Remplacer la photo</string>
     <string name="photo_remove">Supprimer la photo</string>
     <string name="photo_unsupported">L'ajout de photos n'est pas encore disponible sur cet appareil.</string>
+    <string name="spot_title">Où l'avez-vous vu ?</string>
+    <string name="spot_tap_hint">Touchez la carte pour placer le lieu exact. Seuls les bénévoles peuvent le voir.</string>
+    <string name="spot_use_this">Utiliser ce lieu</string>
+    <string name="spot_pick_on_map">Choisir le lieu sur la carte</string>
+    <string name="spot_use_my_position">Utiliser ma position</string>
+    <string name="spot_saved">Lieu exact enregistré</string>
+    <string name="spot_clear">Supprimer le lieu</string>
+    <string name="spot_section">Lieu exact où vous l'avez rencontré (facultatif)</string>
+    <string name="cancel_action">Annuler</string>
 </resources>

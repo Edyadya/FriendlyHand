@@ -33,6 +33,8 @@ expect fun LausanneMap(
     centreOnUser: Int = 0,
     /** The city shown: where the camera starts and where it returns to. */
     city: City = Cities.LAUSANNE,
+    /** When set, a tap on the empty map reports the exact latitude and longitude (used to pick a spot). */
+    onMapClick: ((lat: Double, lng: Double) -> Unit)? = null,
 )
 
 /** True where [LausanneMap] draws a real map (Android, web JS). */

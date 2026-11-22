@@ -236,6 +236,7 @@ private fun LastSeenSection(repo: HelpRepository, role: Role, person: Person, zo
     val now = remember(person.lastSeenAtMillis) { nowMillis() }
     val visible = person.lastSeenVisible(now)
     var note by remember { mutableStateOf("") }
+    var picking by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
 
     Card(
@@ -273,6 +274,22 @@ private fun LastSeenSection(repo: HelpRepository, role: Role, person: Person, zo
                     enabled = here != null,
                     modifier = BigButtonModifier,
                 ) { Text(stringResource(Res.string.last_seen_here)) }
+                AppOutlinedButton(onClick = { picking = true }, modifier = BigButtonModifier) {
+                    Text(stringResource(Res.string.spot_pick_on_map))
+                }
+                if (picking) {
+                    val city = zone?.let { Cities.byId(it.cityId) } ?: Cities.LAUSANNE
+                    SpotPickerDialog(
+                        repo, city, start = here,
+                        onPick = { lat, lng ->
+                            repo.updateLastSeen(person.id, lat, lng, note.trim().ifBlank { null })
+                            note = ""
+                            picking = false
+                            onSaved()
+                        },
+                        onDismiss = { picking = false },
+                    )
+                }
                 Text(
                     when {
                         here == null -> stringResource(Res.string.last_seen_no_location)

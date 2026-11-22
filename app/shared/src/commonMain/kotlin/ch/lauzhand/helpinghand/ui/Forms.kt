@@ -12,6 +12,11 @@ import ch.lauzhand.helpinghand.data.HelpRepository
 import ch.lauzhand.helpinghand.data.ME_VOLUNTEER
 import ch.lauzhand.helpinghand.data.newId
 import ch.lauzhand.helpinghand.model.Need
+import ch.lauzhand.helpinghand.location.UserLocation
+import ch.lauzhand.helpinghand.location.rememberUserLocation
+import ch.lauzhand.helpinghand.model.Cities
+import ch.lauzhand.helpinghand.model.nowMillis
+import androidx.compose.material3.TextButton
 import ch.lauzhand.helpinghand.model.NeedType
 import ch.lauzhand.helpinghand.model.Person
 import helpinghand.app.shared.generated.resources.*
@@ -34,6 +39,10 @@ fun OnboardingScreen(
     var consent by remember { mutableStateOf(false) }
     var photoConsent by remember { mutableStateOf(false) }
     var photo by remember { mutableStateOf<String?>(null) }
+    // the exact spot where the volunteer met them (optional): their own position, or a point picked on the map
+    var spot by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+    var pickingSpot by remember { mutableStateOf(false) }
+    val me = rememberUserLocation()
 
     val canSave = consent && firstName.isNotBlank() && zoneId != null
 
@@ -73,6 +82,34 @@ fun OnboardingScreen(
             Checkbox(consent, { consent = it })
             Text(stringResource(Res.string.consent_text), style = MaterialTheme.typography.bodyLarge)
         }
+        // the exact spot (optional); only volunteers can ever see it
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(Res.string.spot_section), style = MaterialTheme.typography.titleSmall)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                AppOutlinedButton(
+                    onClick = { me.location?.let { spot = it.lat to it.lng } },
+                    enabled = me.location != null,
+                    modifier = Modifier.weight(1f),
+                ) { Text(stringResource(Res.string.spot_use_my_position)) }
+                AppOutlinedButton(onClick = { pickingSpot = true }, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(Res.string.spot_pick_on_map))
+                }
+            }
+            if (spot != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(Res.string.spot_saved), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+                    TextButton(onClick = { spot = null }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(Res.string.spot_clear)) }
+                }
+            }
+        }
+        if (pickingSpot) {
+            val city = repo.zones.firstOrNull { it.id == zoneId }?.let { Cities.byId(it.cityId) } ?: Cities.LAUSANNE
+            SpotPickerDialog(
+                repo, city, start = spot?.let { UserLocation(it.first, it.second, 0f, false) } ?: me.location,
+                onPick = { lat, lng -> spot = lat to lng; pickingSpot = false },
+                onDismiss = { pickingSpot = false },
+            )
+        }
         // a photo has its own, separate consent
         PhotoSection(
             consent = photoConsent,
@@ -95,6 +132,9 @@ fun OnboardingScreen(
                         createdByVolunteerId = ME_VOLUNTEER,
                         photo = photo.takeIf { photoConsent },
                         photoConsent = photoConsent,
+                        lastSeenLat = spot?.first,
+                        lastSeenLng = spot?.second,
+                        lastSeenAtMillis = if (spot != null) nowMillis() else null,
                     )
                 )
                 onSaved(id)

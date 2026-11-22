@@ -34,6 +34,7 @@ actual fun LausanneMap(
     userLocation: UserLocation?,
     centreOnUser: Int,
     city: City,
+    onMapClick: ((lat: Double, lng: Double) -> Unit)?,
 ) {
     Box(
         modifier.clip(RoundedCornerShape(28.dp)).background(MaterialTheme.colorScheme.surfaceVariant),

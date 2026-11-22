@@ -54,6 +54,7 @@ fun ZoneMap(
     role: Role = Role.DONOR,
     userLocation: UserLocation? = null,
     city: City = Cities.LAUSANNE,
+    showBubbles: Boolean = true,
 ) {
     val land = MaterialTheme.colorScheme.primaryContainer
     val road = MaterialTheme.colorScheme.surface
@@ -109,7 +110,7 @@ fun ZoneMap(
 
         val bubble = 40.dp
         val slot = 76.dp
-        repo.zones.filter { it.cityId == city.id }.forEach { z ->
+        repo.zones.filter { showBubbles && it.cityId == city.id }.forEach { z ->
             // No bubble where there is nothing to do for this role (see zoneBubbleCount).
             val open = zoneBubbleCount(role, z.id, repo.people, repo.needs) ?: return@forEach
             val selected = selectedZoneId == z.id

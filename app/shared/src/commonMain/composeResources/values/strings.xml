@@ -84,4 +84,13 @@
     <string name="photo_replace">Replace the photo</string>
     <string name="photo_remove">Remove the photo</string>
     <string name="photo_unsupported">Adding photos is not available on this device yet.</string>
+    <string name="spot_title">Where did you see them?</string>
+    <string name="spot_tap_hint">Tap the map to place the exact spot. Only volunteers can ever see it.</string>
+    <string name="spot_use_this">Use this spot</string>
+    <string name="spot_pick_on_map">Pick the spot on the map</string>
+    <string name="spot_use_my_position">Use my position</string>
+    <string name="spot_saved">Exact spot saved</string>
+    <string name="spot_clear">Remove the spot</string>
+    <string name="spot_section">Exact spot where you met them (optional)</string>
+    <string name="cancel_action">Cancel</string>
 </resources>
