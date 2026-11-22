@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import helpinghand.app.shared.generated.resources.*
@@ -41,7 +42,9 @@ fun DonorBottomBar(selected: DonorTab, onSelect: (DonorTab) -> Unit) {
                     Text(
                         stringResource(tab.label),
                         style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
+                        // four tabs are narrow: let a long name (also in French) wrap onto a second line
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                 },
