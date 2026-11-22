@@ -1,7 +1,12 @@
 package ch.lauzhand.helpinghand.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -35,12 +40,8 @@ import org.jetbrains.compose.resources.stringResource
 /** The pages behind the menu. */
 enum class SettingsPage { PARTNERS, TERMS, ABOUT }
 
-/** Window width from which the menu is a drop-down (Desktop, web, tablets); narrower it is a right-hand drawer (phones). */
-val SettingsDropdownMinWidth = 700.dp
-
 /**
- * The content of the settings menu, written once. The drawer (phones) and the drop-down (wide windows) both show
- * exactly this: language, dark mode, partners, terms, about, and log out.
+ * The content of the settings menu, written once. The side bar shows exactly this: language, dark mode, partners, terms, about, and log out.
  */
 @Composable
 fun SettingsMenuContent(
@@ -153,6 +154,8 @@ private fun MenuRow(label: StringResource, emphasised: Boolean = false, onClick:
 fun SettingsDrawer(open: Boolean, onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     val visible = remember { MutableTransitionState(false) }
     visible.targetState = open
+    // a smooth ease; no animation at all when the user has asked for reduced motion
+    val slideSpec: FiniteAnimationSpec<IntOffset> = if (rememberReduceMotion()) snap() else tween(durationMillis = 320, easing = FastOutSlowInEasing)
     if (!visible.currentState && !visible.targetState) return // fully closed
 
     Box(Modifier.fillMaxSize()) {
@@ -165,8 +168,9 @@ fun SettingsDrawer(open: Boolean, onDismiss: () -> Unit, content: @Composable Co
         }
         AnimatedVisibility(
             visibleState = visible,
-            enter = slideInHorizontally { it },
-            exit = slideOutHorizontally { it },
+            // slides in from the right edge to the left, and back out to the right
+            enter = slideInHorizontally(animationSpec = slideSpec) { it },
+            exit = slideOutHorizontally(animationSpec = slideSpec) { it },
             modifier = Modifier.align(Alignment.CenterEnd),
         ) {
             var drag by remember { mutableStateOf(0f) }

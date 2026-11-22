@@ -23,8 +23,8 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * Light top bar: no heavy fill, a small logo on the left and the menu (hamburger) icon on the right.
- * The settings menu opens from that icon: as a right-hand drawer on phones, as a drop-down on wide windows.
- * [menuAnchor] is drawn inside the same box as the icon, so a drop-down menu appears right under it.
+ * The settings side bar slides in from the right when that icon is pressed.
+ * [menuAnchor] is drawn inside the same box as the icon (not used by the side bar, kept for callers).
  */
 @Composable
 fun AppTopBar(onMenuClick: () -> Unit, modifier: Modifier = Modifier, profile: @Composable () -> Unit = {}, menuAnchor: @Composable () -> Unit = {}) {

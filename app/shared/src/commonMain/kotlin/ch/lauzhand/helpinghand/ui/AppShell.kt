@@ -68,8 +68,7 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         BoxWithConstraints(Modifier.safeContentPadding().fillMaxSize()) {
-        // The one check that picks the menu variant: a drop-down on wide windows, a right-hand drawer on phones.
-        val wide = maxWidth >= SettingsDropdownMinWidth
+        // The menu is a side bar that slides in from the right, on every screen size.
         val menuContent: @Composable () -> Unit = {
             SettingsMenuContent(
                 accountRole = stringResource(if (account.isGuest) Res.string.role_guest else role.label()),
@@ -89,13 +88,7 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
             AppTopBar(
                 onMenuClick = { menuOpen = !menuOpen },
                 profile = { AccountAvatar(account.name, repo.accountPhotoOf(account.id), 32.dp, Modifier.clickable { shell.pictureOpen = true }) },
-            ) {
-                if (wide) {
-                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }, modifier = Modifier.width(300.dp)) {
-                        menuContent()
-                    }
-                }
-            }
+            )
             val showTabs = role == Role.DONOR
             Column(Modifier.weight(1f).fillMaxWidth()) {
                 Box(Modifier.weight(1f).fillMaxWidth()) {
@@ -142,7 +135,7 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                 if (showTabs) DonorBottomBar(tab, selectTab)
             }
         }
-        if (!wide) SettingsDrawer(open = menuOpen, onDismiss = { menuOpen = false }) { menuContent() }
+        SettingsDrawer(open = menuOpen, onDismiss = { menuOpen = false }) { menuContent() }
         settingsPage?.let { SettingsPageDialog(it) { settingsPage = null } }
         if (shell.pictureOpen) ProfilePictureDialog(repo, account) { shell.pictureOpen = false }
         }
