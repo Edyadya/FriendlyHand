@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
 import ch.lauzhand.helpinghand.map.peopleInZone
 import ch.lauzhand.helpinghand.map.isLiveMapSupported
+import ch.lauzhand.helpinghand.model.Cities
+import ch.lauzhand.helpinghand.model.City
 import ch.lauzhand.helpinghand.model.Need
 import ch.lauzhand.helpinghand.model.NeedStatus
 import ch.lauzhand.helpinghand.model.Person
@@ -59,6 +61,8 @@ fun HomeScreen(
     onOpenPerson: (String) -> Unit,
     onNewPerson: () -> Unit,
     onRewards: () -> Unit, // kept so callers don't change; rewards live in the Achievements tab now
+    city: City = Cities.LAUSANNE,
+    onCityChange: (City) -> Unit = {},
 ) {
     // Zones are always there once data has arrived, so none means the repository is still loading.
     if (repo.zones.isEmpty()) {
@@ -80,7 +84,7 @@ fun HomeScreen(
     Box(Modifier.fillMaxSize()) {
         HomeMap(
             repo, role, zoneFilter, { zoneFilter = it }, onOpenPerson, Modifier.fillMaxSize().padding(8.dp),
-            userLocation = me.location, centreOnUser = centreOnMe,
+            userLocation = me.location, centreOnUser = centreOnMe, city = city,
         )
 
         // The live map draws its scale bar at the top-left, so the floating row starts just below it.
@@ -94,6 +98,16 @@ fun HomeScreen(
                 FloatingPill {
                     Column(Modifier.padding(horizontal = 18.dp, vertical = 10.dp)) {
                         Text(stringResource(Res.string.home_title), style = MaterialTheme.typography.headlineSmall)
+                        // which city: the map flies there and only its areas and people are shown
+                        Row(Modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Cities.all.forEach { c ->
+                                FilterChip(
+                                    selected = c.id == city.id,
+                                    onClick = { if (c.id != city.id) { zoneFilter = null; onCityChange(c) } },
+                                    label = { Text(c.name) },
+                                )
+                            }
+                        }
                         if (zoneFilter == null) {
                             Text(
                                 stringResource(Res.string.map_tap_bubble),

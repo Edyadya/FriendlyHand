@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.location.UserLocation
+import ch.lauzhand.helpinghand.model.City
 import ch.lauzhand.helpinghand.model.Need
 import ch.lauzhand.helpinghand.model.Person
 import ch.lauzhand.helpinghand.model.Role
@@ -32,6 +33,7 @@ actual fun LausanneMap(
     modifier: Modifier,
     userLocation: UserLocation?,
     centreOnUser: Int,
+    city: City,
 ) {
     Box(
         modifier.clip(RoundedCornerShape(28.dp)).background(MaterialTheme.colorScheme.surfaceVariant),

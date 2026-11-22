@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ch.lauzhand.helpinghand.data.HelpRepository
 import ch.lauzhand.helpinghand.location.UserLocation
+import ch.lauzhand.helpinghand.model.Cities
+import ch.lauzhand.helpinghand.model.City
 import ch.lauzhand.helpinghand.map.LausanneMap
 import ch.lauzhand.helpinghand.map.isLiveMapSupported
 import ch.lauzhand.helpinghand.model.Role
@@ -23,10 +25,11 @@ fun HomeMap(
     modifier: Modifier = Modifier,
     userLocation: UserLocation? = null,
     centreOnUser: Int = 0,
+    city: City = Cities.LAUSANNE,
 ) {
     if (isLiveMapSupported) {
         LausanneMap(
-            zones = repo.zones,
+            zones = repo.zones.filter { it.cityId == city.id },
             people = repo.people,
             needs = repo.needs,
             role = role,
@@ -35,8 +38,9 @@ fun HomeMap(
             modifier = modifier,
             userLocation = userLocation,
             centreOnUser = centreOnUser,
+            city = city,
         )
     } else {
-        ZoneMap(repo, zoneFilter, onZoneFilter, modifier, role = role, userLocation = userLocation)
+        ZoneMap(repo, zoneFilter, onZoneFilter, modifier, role = role, userLocation = userLocation, city = city)
     }
 }

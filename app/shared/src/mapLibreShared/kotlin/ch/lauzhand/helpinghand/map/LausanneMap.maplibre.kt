@@ -49,8 +49,7 @@ import org.maplibre.spatialk.geojson.dsl.buildFeatureCollection
 private const val STYLE_LIGHT = "https://tiles.openfreemap.org/styles/bright"
 private const val STYLE_DARK = "https://tiles.openfreemap.org/styles/dark"
 
-private val OVERVIEW_CENTER = Position(longitude = 6.632, latitude = 46.519)
-private const val OVERVIEW_ZOOM = 12.6
+private fun City.overview() = Position(longitude = lng, latitude = lat)
 private const val ZONE_ZOOM = 14.8
 private const val USER_ZOOM = 15.5
 
@@ -69,9 +68,11 @@ actual fun LausanneMap(
     modifier: Modifier,
     userLocation: UserLocation?,
     centreOnUser: Int,
+    city: City,
 ) {
     val onZone by rememberUpdatedState(onZoneClick)
     val zonesNow by rememberUpdatedState(zones)
+    val cityNow by rememberUpdatedState(city)
     val scope = rememberCoroutineScope()
     var focusedZoneId by remember { mutableStateOf<String?>(null) }
     val onPerson by rememberUpdatedState(onPersonClick)
@@ -134,7 +135,7 @@ actual fun LausanneMap(
 
     val state = rememberMapState(
         baseStyle = BaseStyle.Uri(styleUrl),
-        initialCameraPosition = CameraPosition(center = OVERVIEW_CENTER, zoom = OVERVIEW_ZOOM),
+        initialCameraPosition = CameraPosition(center = city.overview(), zoom = city.zoom),
     ) {
         val mapState = LocalMapState.current
         val zoneSource = rememberGeoJsonSource(GeoJsonData.Features(zoneData))
@@ -166,7 +167,7 @@ actual fun LausanneMap(
                     focusedZoneId = if (zoomingOut) null else id
                     if (zone != null) scope.launch {
                         mapState?.animateCamera(
-                            update = if (zoomingOut) CameraUpdate(center = OVERVIEW_CENTER, zoom = OVERVIEW_ZOOM)
+                            update = if (zoomingOut) CameraUpdate(center = cityNow.overview(), zoom = cityNow.zoom)
                             else CameraUpdate(center = zone.position(), zoom = ZONE_ZOOM),
                             animation = CameraAnimation.Fly { duration = 1.seconds },
                         )
@@ -213,6 +214,19 @@ actual fun LausanneMap(
             strokeWidth = const(3.dp),
         )
     }
+    // Another city was chosen: fly there (not on the first frame, the map starts there already).
+    var shownCity by remember { mutableStateOf(city.id) }
+    LaunchedEffect(city.id) {
+        if (shownCity != city.id) {
+            shownCity = city.id
+            focusedZoneId = null
+            state.animateCamera(
+                update = CameraUpdate(center = city.overview(), zoom = city.zoom),
+                animation = CameraAnimation.Fly { duration = 1.5.seconds },
+            )
+        }
+    }
+
     // Centre on me: fly to the user's position when the counter is bumped.
     LaunchedEffect(centreOnUser) {
         val me = userLocation

@@ -17,6 +17,8 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import ch.lauzhand.helpinghand.location.UserLocation
+import ch.lauzhand.helpinghand.model.Cities
+import ch.lauzhand.helpinghand.model.City
 import ch.lauzhand.helpinghand.map.fractionX
 import ch.lauzhand.helpinghand.map.fractionY
 import ch.lauzhand.helpinghand.map.zoneBubbleCount
@@ -51,6 +53,7 @@ fun ZoneMap(
     modifier: Modifier = Modifier,
     role: Role = Role.DONOR,
     userLocation: UserLocation? = null,
+    city: City = Cities.LAUSANNE,
 ) {
     val land = MaterialTheme.colorScheme.primaryContainer
     val road = MaterialTheme.colorScheme.surface
@@ -106,7 +109,7 @@ fun ZoneMap(
 
         val bubble = 40.dp
         val slot = 76.dp
-        repo.zones.forEach { z ->
+        repo.zones.filter { it.cityId == city.id }.forEach { z ->
             // No bubble where there is nothing to do for this role (see zoneBubbleCount).
             val open = zoneBubbleCount(role, z.id, repo.people, repo.needs) ?: return@forEach
             val selected = selectedZoneId == z.id
@@ -149,11 +152,12 @@ fun ZoneMap(
         }
 
         // The user's own position: a blue dot with a white ring and a slowly pulsing ring.
-        userLocation?.let { me ->
+        // only when the position is actually inside this city's map
+        userLocation?.takeIf { fractionX(it.lng, city) in 0f..1f && fractionY(it.lat, city) in 0f..1f }?.let { me ->
             val dot = 16.dp
             val box = 56.dp
-            val fx = fractionX(me.lng).coerceIn(0.03f, 0.97f)
-            val fy = fractionY(me.lat).coerceIn(0.03f, 0.97f)
+            val fx = fractionX(me.lng, city)
+            val fy = fractionY(me.lat, city)
             Box(
                 Modifier.offset(x = w * fx - box / 2, y = h * fy - box / 2).size(box),
                 contentAlignment = Alignment.Center,

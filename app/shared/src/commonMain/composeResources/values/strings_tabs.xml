@@ -59,4 +59,16 @@
     <string name="charity_cartons_desc">Free parcels of basic food for people in need. The organisation depends entirely on the solidarity and generosity of the public.</string>
     <string name="charity_cultive_name">Cultive toi</string>
     <string name="charity_cultive_desc">A Lausanne association, active since 2018, that fights food waste: it harvests unused fruit and vegetables, turns them into preserves in workshops and sells them to fund its work, combining ecology and social inclusion.</string>
+    <string name="charities_radius">Within %1$d km of %2$s</string>
+    <string name="charities_none">No charities listed within %1$d km of %2$s yet.</string>
+    <string name="charity_crisis_name">Crisis</string>
+    <string name="charity_crisis_desc">The national charity for people experiencing homelessness in Britain. It runs year-round support, advice and training, and campaigns for change.</string>
+    <string name="charity_shelter_name">Shelter</string>
+    <string name="charity_shelter_desc">A housing and homelessness charity. It gives free advice and support to people in bad housing or without a home, and campaigns for safe and secure homes.</string>
+    <string name="charity_stmungos_name">St Mungo's</string>
+    <string name="charity_stmungos_desc">A homelessness charity that provides housing, support and advice for people who sleep rough, and works to end rough sleeping.</string>
+    <string name="charity_passage_name">The Passage</string>
+    <string name="charity_passage_desc">A homelessness charity in Westminster, London. Its centre offers meals, advice and support to help people move away from the streets.</string>
+    <string name="charity_centrepoint_name">Centrepoint</string>
+    <string name="charity_centrepoint_desc">A charity for young people facing homelessness. It provides a safe place to stay, support and help towards education and work.</string>
 </resources>

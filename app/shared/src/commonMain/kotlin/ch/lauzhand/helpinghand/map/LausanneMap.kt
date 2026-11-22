@@ -3,6 +3,8 @@ package ch.lauzhand.helpinghand.map
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ch.lauzhand.helpinghand.location.UserLocation
+import ch.lauzhand.helpinghand.model.Cities
+import ch.lauzhand.helpinghand.model.City
 import ch.lauzhand.helpinghand.model.Need
 import ch.lauzhand.helpinghand.model.Person
 import ch.lauzhand.helpinghand.model.Role
@@ -29,6 +31,8 @@ expect fun LausanneMap(
     userLocation: UserLocation? = null,
     /** Bump this counter to fly the camera to [userLocation] (the centre-on-me button). */
     centreOnUser: Int = 0,
+    /** The city shown: where the camera starts and where it returns to. */
+    city: City = Cities.LAUSANNE,
 )
 
 /** True where [LausanneMap] draws a real map (Android, web JS). */

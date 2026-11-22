@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
+import ch.lauzhand.helpinghand.model.Cities
 import ch.lauzhand.helpinghand.model.Role
 import helpinghand.app.shared.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
@@ -22,6 +23,7 @@ import org.jetbrains.compose.resources.stringResource
 class ShellState {
     var screen by mutableStateOf<Screen>(Screen.Home)
     var tab by mutableStateOf(DonorTab.MAP)
+    var city by mutableStateOf(Cities.LAUSANNE)
     var menuOpen by mutableStateOf(false)
     var settingsPage by mutableStateOf<SettingsPage?>(null)
 }
@@ -87,12 +89,14 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                         Screen.Home -> when (if (showTabs) tab else DonorTab.MAP) {
                             DonorTab.MAP -> HomeScreen(
                                 repo, role,
+                                city = shell.city,
+                                onCityChange = { shell.city = it },
                                 onOpenPerson = { screen = Screen.Profile(it) },
                                 onNewPerson = { screen = Screen.Onboarding },
                                 onRewards = { selectTab(DonorTab.ACHIEVEMENTS) },
                             )
                             DonorTab.CONTRIBUTIONS -> ContributionsScreen(repo, onOpenPerson = { screen = Screen.Profile(it) })
-                            DonorTab.CHARITIES -> CharitiesScreen()
+                            DonorTab.CHARITIES -> CharitiesScreen(shell.city)
                             DonorTab.ACHIEVEMENTS -> AchievementsScreen(repo)
                         }
                         is Screen.Profile -> ProfileScreen(

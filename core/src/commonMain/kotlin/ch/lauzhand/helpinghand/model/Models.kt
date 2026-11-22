@@ -15,7 +15,16 @@ enum class NeedStatus { OPEN, CLAIMED, FUNDING, FULFILLED, CONFIRMED }
 
 // x, y = position on the zone map, from 0 to 1 (0,0 = top-left)
 @Serializable
-data class Zone(val id: String, val name: String, val x: Float, val y: Float)
+data class Zone(
+    val id: String,
+    val name: String,
+    val x: Float,
+    val y: Float,
+    /** Real centre of the area (an area, never a street address). Null = derive it from x/y inside the city's box. */
+    val lat: Double? = null,
+    val lng: Double? = null,
+    val cityId: String = "lausanne",
+)
 
 @Serializable
 data class Person(

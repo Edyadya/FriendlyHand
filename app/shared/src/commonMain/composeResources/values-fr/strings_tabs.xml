@@ -59,4 +59,16 @@
     <string name="charity_cartons_desc">Des colis gratuits de produits de base pour les personnes dans le besoin. L'organisation fonctionne uniquement grâce à la solidarité et à la générosité du public.</string>
     <string name="charity_cultive_name">Cultive toi</string>
     <string name="charity_cultive_desc">Une association lausannoise, active depuis 2018, qui lutte contre le gaspillage alimentaire : elle récolte des fruits et légumes inutilisés, les transforme en conserves lors d'ateliers et les vend pour financer son action, en alliant écologie et inclusion sociale.</string>
+    <string name="charities_radius">À moins de %1$d km de %2$s</string>
+    <string name="charities_none">Aucune association listée à moins de %1$d km de %2$s pour le moment.</string>
+    <string name="charity_crisis_name">Crisis</string>
+    <string name="charity_crisis_desc">L'association nationale pour les personnes sans abri en Grande-Bretagne. Elle propose soutien, conseils et formations toute l'année, et plaide pour le changement.</string>
+    <string name="charity_shelter_name">Shelter</string>
+    <string name="charity_shelter_desc">Une association pour le logement et contre le sans-abrisme. Elle offre des conseils et un soutien gratuits aux personnes mal logées ou sans logement, et plaide pour des logements sûrs.</string>
+    <string name="charity_stmungos_name">St Mungo's</string>
+    <string name="charity_stmungos_desc">Une association qui offre logement, soutien et conseils aux personnes qui dorment dans la rue, et agit pour mettre fin au sans-abrisme de rue.</string>
+    <string name="charity_passage_name">The Passage</string>
+    <string name="charity_passage_desc">Une association contre le sans-abrisme à Westminster, Londres. Son centre propose repas, conseils et soutien pour aider à quitter la rue.</string>
+    <string name="charity_centrepoint_name">Centrepoint</string>
+    <string name="charity_centrepoint_desc">Une association pour les jeunes confrontés au sans-abrisme. Elle offre un lieu sûr, un soutien et une aide vers les études et le travail.</string>
 </resources>
