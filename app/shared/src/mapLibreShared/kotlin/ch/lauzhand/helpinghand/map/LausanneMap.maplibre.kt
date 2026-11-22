@@ -35,6 +35,7 @@ import org.maplibre.compose.interaction.ClickResult
 import org.maplibre.compose.interaction.MapInteractions
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.SymbolLayer
+import org.maplibre.compose.map.MapUiOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.rememberMapState
 import org.maplibre.compose.overlay.AttributionDefaults
@@ -51,9 +52,7 @@ import org.maplibre.spatialk.geojson.dsl.buildFeatureCollection
 
 // Shared by the Android and web-JS targets (see app/shared/build.gradle.kts).
 
-// Free OpenFreeMap styles, no API key. "bright" is the friendliest light one; "dark" for dark mode.
-private const val STYLE_LIGHT = "https://tiles.openfreemap.org/styles/bright"
-private const val STYLE_DARK = "https://tiles.openfreemap.org/styles/fiord"
+// The light and dark base styles are defined once in MapStyles (commonMain).
 
 private fun City.overview() = Position(longitude = lng, latitude = lat)
 private const val ZONE_ZOOM = 14.8
@@ -81,8 +80,9 @@ actual fun LausanneMap(
     // so it is rebuilt when the theme flips, starting from where the camera was.
     val dark = MaterialTheme.isDark
     val camera = remember { arrayOfNulls<CameraPosition>(1) }
+    val focused = remember { mutableStateOf<String?>(null) } // the tapped bubble
     key(dark) {
-        LausanneMapStyled(zones, people, needs, role, onZoneClick, onPersonClick, modifier, userLocation, centreOnUser, city, onMapClick, dark, camera)
+        LausanneMapStyled(zones, people, needs, role, onZoneClick, onPersonClick, modifier, userLocation, centreOnUser, city, onMapClick, dark, camera, focused)
     }
 }
 
@@ -101,12 +101,13 @@ private fun LausanneMapStyled(
     onMapClick: ((lat: Double, lng: Double) -> Unit)?,
     dark: Boolean,
     camera: Array<CameraPosition?>,
+    focused: MutableState<String?>,
 ) {
     val onZone by rememberUpdatedState(onZoneClick)
     val zonesNow by rememberUpdatedState(zones)
     val cityNow by rememberUpdatedState(city)
     val scope = rememberCoroutineScope()
-    var focusedZoneId by remember { mutableStateOf<String?>(null) }
+    var focusedZoneId by focused
 
     // Which zones get a bubble, and the number on it, depends on the role (see zoneBubbleCount).
     val zoneData = remember(zones, people, needs, role) {
@@ -146,7 +147,7 @@ private fun LausanneMapStyled(
     val bubbleColor = if (role == Role.VOLUNTEER) MaterialTheme.app.volunteer else MaterialTheme.app.accent
     val outline = MaterialTheme.app.onNavy                       // white ring
     val labelColor = MaterialTheme.app.onNavy                    // white number (large and bold, so 3.8:1 is enough)
-    val styleUrl = if (dark) STYLE_DARK else STYLE_LIGHT
+    val styleUrl = MapStyles.forTheme(dark)
 
     val state = rememberMapState(
         baseStyle = BaseStyle.Uri(styleUrl),
@@ -255,14 +256,18 @@ private fun LausanneMapStyled(
             ),
         )
     }
+    // While the style loads the map shows the theme's background, so there is no white flash in dark mode
+    val loadColor = MaterialTheme.colorScheme.background
+    val mapUi = remember(loadColor) { MapUiOptions(MapUiOptions.Standard) { this.loadColor = loadColor } }
     if (onMapClick == null) {
-        MaplibreMap(state = state, modifier = modifier, overlay = creditOverlay)
+        MaplibreMap(state = state, modifier = modifier, uiOptions = mapUi, overlay = creditOverlay)
     } else {
         // Picking a spot: a tap on the map reports where it was
         val clicked by rememberUpdatedState(onMapClick)
         MaplibreMap(
             state = state,
             modifier = modifier,
+            uiOptions = mapUi,
             overlay = creditOverlay,
             interactions = MapInteractions {
                 callbacks {
