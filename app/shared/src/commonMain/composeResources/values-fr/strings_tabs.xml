@@ -49,7 +49,7 @@
     <string name="badge_pending_hint">Remis. Se débloque quand un bénévole le vérifie.</string>
     <string name="tab_charities">Associations</string>
     <string name="charities_title">Associations reconnues près de chez vous</string>
-    <string name="charities_intro">Des organisations établies de la région lausannoise qui aident les personnes dans le besoin. Vous donnez directement à elles, sur leur propre site.</string>
+    <string name="charities_intro">Des organisations établies près de la ville choisie qui aident les personnes dans le besoin. Vous donnez directement à elles, sur leur propre site.</string>
     <string name="charity_donate">Donner ou aider</string>
     <string name="charity_caritas_name">Caritas Vaud</string>
     <string name="charity_caritas_desc">Une association à but non lucratif qui agit pour et avec les personnes en difficulté sociale ou économique, pour améliorer leurs conditions de vie et favoriser leur participation à la société. À Lausanne, elle gère les Épiceries Caritas et la centrale alimentaire régionale.</string>
