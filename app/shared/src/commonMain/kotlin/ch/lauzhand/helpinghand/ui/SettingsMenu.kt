@@ -105,13 +105,6 @@ fun SettingsMenuContent(
                     }
                 }
             }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        }
-
-        features.forEach { (label, onClick) -> MenuRow(label, onClick = onClick) }
-        if (features.isNotEmpty()) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-        if (settings != null) {
             // Dark mode: a switch; it starts from the system setting and the choice is remembered
             Row(
                 Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 16.dp),
@@ -122,6 +115,9 @@ fun SettingsMenuContent(
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
+
+        features.forEach { (label, onClick) -> MenuRow(label, onClick = onClick) }
+        if (features.isNotEmpty()) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         MenuRow(Res.string.settings_partners) { onOpenPage(SettingsPage.PARTNERS) }
         MenuRow(Res.string.settings_terms) { onOpenPage(SettingsPage.TERMS) }
