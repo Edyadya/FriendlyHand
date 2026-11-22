@@ -14,19 +14,27 @@ fun Need.donationContribution(donorId: String, amountChf: Int, atMillis: Long = 
         amountChf, atMillis,
     )
 
+/** Money (paying for an item, giving to a goal) is never verified: it counts at once. Only bringing a physical item is. */
+val Contribution.isMoney: Boolean get() = kind != ContributionKind.BROUGHT
+
+/** True if this contribution counts: it is money, or the item it brought was verified by a volunteer. */
+private fun Contribution.counts(need: Need): Boolean = isMoney || need.isVerified
+
 /**
- * Number of distinct VERIFIED needs among [contributions] (what the voucher counts). A need counts once a
- * volunteer has confirmed it with the person; until then it is pending (see [pendingGoals]).
+ * Number of distinct needs among [contributions] that count towards goals and the voucher. Money counts at once;
+ * an item a patron brought counts once a volunteer has confirmed it with the person (until then it is pending,
+ * see [pendingGoals]).
  */
 fun completedGoals(contributions: List<Contribution>, needs: List<Need>): Int {
-    val helped = contributions.map { it.needId }.toSet()
-    return needs.count { it.id in helped && it.isVerified }
+    val byId = needs.associateBy { it.id }
+    return contributions.filter { c -> byId[c.needId]?.let { c.counts(it) } == true }.map { it.needId }.toSet().size
 }
 
-/** Number of distinct needs among [contributions] that are delivered and waiting for a volunteer to verify them. */
+/** Number of distinct needs where an item was brought and handed over but no volunteer has verified it yet. */
 fun pendingGoals(contributions: List<Contribution>, needs: List<Need>): Int {
-    val helped = contributions.map { it.needId }.toSet()
-    return needs.count { it.id in helped && it.isPendingVerification }
+    val byId = needs.associateBy { it.id }
+    val counted = contributions.filter { c -> byId[c.needId]?.let { c.counts(it) } == true }.map { it.needId }.toSet()
+    return contributions.map { it.needId }.toSet().count { id -> id !in counted && byId[id]?.isPendingVerification == true }
 }
 
 enum class AchievementId {
@@ -74,8 +82,10 @@ fun donorAchievements(
         return Tally(subset, helpedNeeds, helpedPeople, areas, subset.sumOf { it.amountChf ?: 0 })
     }
     // verified: the need was confirmed by a volunteer. delivered: handed over (verified or not).
-    val verified = tally(contributions.filter { needById[it.needId]?.isVerified == true })
-    val delivered = tally(contributions.filter { needById[it.needId]?.isCompleted == true })
+    // Money counts at once (nothing to verify). A brought item counts once a volunteer verified it; delivered but
+    // not yet verified items only make a badge pending.
+    val verified = tally(contributions.filter { c -> needById[c.needId]?.let { c.counts(it) } == true })
+    val delivered = tally(contributions.filter { c -> needById[c.needId]?.let { c.isMoney || it.isCompleted } == true })
 
     fun a(id: AchievementId, v: Int, d: Int, target: Int) = Achievement(id, v.coerceAtMost(target), target, d.coerceAtMost(target))
     return listOf(
@@ -83,14 +93,14 @@ fun donorAchievements(
         a(AchievementId.HELPED_3, verified.helpedPeople.size, delivered.helpedPeople.size, 3),
         a(AchievementId.HELPED_10, verified.helpedPeople.size, delivered.helpedPeople.size, 10),
         a(AchievementId.HAND_TO_HAND, verified.contributions.count { it.kind == ContributionKind.BROUGHT }, delivered.contributions.count { it.kind == ContributionKind.BROUGHT }, 1),
-        a(AchievementId.GOAL_REACHED, verified.helpedNeeds.count { it.type == NeedType.BIG }, delivered.helpedNeeds.count { it.type == NeedType.BIG }, 1),
+        a(AchievementId.GOAL_REACHED, verified.helpedNeeds.count { it.type == NeedType.BIG && it.isCompleted }, delivered.helpedNeeds.count { it.type == NeedType.BIG && it.isCompleted }, 1),
         a(AchievementId.GAVE_50, verified.given + giveawayChf, delivered.given + giveawayChf, 50),
         a(AchievementId.GAVE_100, verified.given + giveawayChf, delivered.given + giveawayChf, 100),
         a(AchievementId.GAVE_250, verified.given + giveawayChf, delivered.given + giveawayChf, 250),
         a(AchievementId.GAVE_500, verified.given + giveawayChf, delivered.given + giveawayChf, 500),
         a(AchievementId.GAVE_1000, verified.given + giveawayChf, delivered.given + giveawayChf, 1000),
         a(AchievementId.THREE_AREAS, verified.areas.size, delivered.areas.size, 3),
-        // "confirmed as received" is verification itself, so there is nothing pending for this one
-        a(AchievementId.THANKS_3, verified.helpedNeeds.size, verified.helpedNeeds.size, 3),
+        // "confirmed as received" is verification itself (only for items), so there is nothing pending for this one
+        a(AchievementId.THANKS_3, verified.helpedNeeds.count { it.isVerified }, verified.helpedNeeds.count { it.isVerified }, 3),
     )
 }

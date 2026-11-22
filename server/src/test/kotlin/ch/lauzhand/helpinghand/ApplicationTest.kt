@@ -234,7 +234,7 @@ class ApplicationTest {
     // --- donor contributions / rewards ---
 
     @Test
-    fun goalsOnlyCountOnceAVolunteerHasVerifiedThem() = api { client ->
+    fun itemsNeedAVolunteerButMoneyCountsAtOnce() = api { client ->
         val json = ContentType.Application.Json
         val d = donor(client, "Rita")
         val vol = volunteer(client)
@@ -244,13 +244,11 @@ class ApplicationTest {
         client.post("/needs/n-1/claim") { auth(d); contentType(json); setBody(ClaimRequest("x")) }
         assertEquals(0, goals())                       // claimed, not delivered yet
         client.post("/needs/n-1/fulfil") { auth(d) }
-        assertEquals(0, goals())                       // delivered, but PENDING: no volunteer has verified it
+        assertEquals(0, goals())                       // an item was handed over, but no volunteer has verified it
         client.post("/needs/n-1/confirm") { auth(vol) }
         assertEquals(1, goals())                       // verified by a volunteer: now it counts
         client.post("/needs/n-2/donate") { auth(d); contentType(json); setBody(DonateRequest("x", 480)) }
-        assertEquals(1, goals())                       // big goal fully funded, still waiting for verification
-        client.post("/needs/n-2/confirm") { auth(vol) }
-        assertEquals(2, goals())
+        assertEquals(2, goals())                       // money counts at once: nothing to verify
         client.post("/needs/n-2/donate") { auth(d); contentType(json); setBody(DonateRequest("x", 5)) }
         assertEquals(2, goals())                       // same need counted once
         // someone else's rewards are private

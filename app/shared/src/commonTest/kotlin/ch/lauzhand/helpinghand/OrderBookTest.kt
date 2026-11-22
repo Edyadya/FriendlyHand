@@ -91,4 +91,19 @@ class OrderBookTest {
         assertFalse(AccessCodes.isValid(Role.VOLUNTEER, null))
         assertTrue(AccessCodes.isValid(Role.DONOR, null)) // a patron needs no password (account or guest)
     }
+
+    @Test
+    fun payingMoneyCountsAtOnceButABroughtItemWaitsForAVolunteer() {
+        val repo = FakeRepository()
+        repo.donate("n-1", ME_DONOR, 20)                 // pay for an item: no volunteer needed
+        assertEquals(1, repo.completedGoalsFor(ME_DONOR))
+        assertEquals(0, pendingGoals(repo.contributionsOf(ME_DONOR), repo.needs))
+
+        repo.claimNeed("n-3", ME_DONOR)                  // bring an item
+        repo.markFulfilled("n-3")
+        assertEquals(1, repo.completedGoalsFor(ME_DONOR)) // still just the paid one
+        assertEquals(1, pendingGoals(repo.contributionsOf(ME_DONOR), repo.needs))
+        repo.confirmReceived("n-3")
+        assertEquals(2, repo.completedGoalsFor(ME_DONOR))
+    }
 }

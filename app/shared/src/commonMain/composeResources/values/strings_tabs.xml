@@ -46,7 +46,7 @@
     <string name="platform_helped_caption">Everyone whose help a volunteer has verified</string>
     <string name="hero_pending">%1$d waiting for a volunteer to verify</string>
     <string name="badge_pending">Pending verification</string>
-    <string name="badge_pending_hint">Delivered. It unlocks when a volunteer verifies it.</string>
+    <string name="badge_pending_hint">The item was handed over. It unlocks when a volunteer verifies it. Money counts at once.</string>
     <string name="tab_charities">Charities</string>
     <string name="charities_title">Reputable charities nearby</string>
     <string name="charities_intro">Established organisations near the chosen city that help people in need. You give directly to them, on their own website.</string>

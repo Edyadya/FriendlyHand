@@ -155,3 +155,45 @@ class MoneyAndOrdersTest {
         assertEquals(OrderStatus.DELIVERED, taken.pickedUp().delivered().status)
     }
 }
+
+class MoneyIsNeverVerifiedTest {
+    private val needs = Seed.needs
+    private val people = Seed.people
+    private fun need(id: String) = needs.first { it.id == id }
+    private fun List<Achievement>.of(id: AchievementId) = first { it.id == id }
+
+    @Test
+    fun payingForAnItemCountsAtOnceWithoutAVolunteer() {
+        val c = listOf(need("n-1").donationContribution("d", 20)) // paid: still CLAIMED, nobody verified anything
+        assertEquals(1, completedGoals(c, needs))
+        assertEquals(0, pendingGoals(c, needs))
+        val a = donorAchievements(c, needs, people)
+        assertTrue(a.of(AchievementId.FIRST_HELP).unlocked)
+        assertFalse(a.of(AchievementId.FIRST_HELP).pending)
+    }
+
+    @Test
+    fun givingToABigGoalCountsAtOnce() {
+        val c = listOf(need("n-2").donationContribution("d", 50))
+        assertEquals(1, completedGoals(c, needs))
+        assertTrue(donorAchievements(c, needs, people).of(AchievementId.FIRST_HELP).unlocked)
+        // but the big goal itself is only "reached" once it is fully funded
+        assertFalse(donorAchievements(c, needs, people).of(AchievementId.GOAL_REACHED).unlocked)
+    }
+
+    @Test
+    fun aBroughtItemStillWaitsForAVolunteer() {
+        val c = listOf(need("n-1").claimContribution("d"))
+        val handedOver = needs.map { if (it.id == "n-1") it.fulfilled() else it }
+        assertEquals(0, completedGoals(c, handedOver))
+        assertEquals(1, pendingGoals(c, handedOver))
+        assertTrue(donorAchievements(c, handedOver, people).of(AchievementId.HAND_TO_HAND).pending)
+    }
+
+    @Test
+    fun thankYouBadgeStillNeedsRealConfirmations() {
+        // money only: nobody confirmed receiving anything, so the "confirmed" badge makes no progress
+        val c = listOf(need("n-1").donationContribution("d", 20), need("n-3").donationContribution("d", 20), need("n-5").donationContribution("d", 20))
+        assertEquals(0, donorAchievements(c, needs, people).of(AchievementId.THANKS_3).progress)
+    }
+}

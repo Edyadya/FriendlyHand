@@ -46,7 +46,7 @@
     <string name="platform_helped_caption">Toutes les personnes dont l'aide a été vérifiée par un bénévole</string>
     <string name="hero_pending">%1$d en attente de vérification par un bénévole</string>
     <string name="badge_pending">En attente de vérification</string>
-    <string name="badge_pending_hint">Remis. Se débloque quand un bénévole le vérifie.</string>
+    <string name="badge_pending_hint">L'objet a été remis. Le badge se débloque quand un bénévole le vérifie. L'argent compte tout de suite.</string>
     <string name="tab_charities">Associations</string>
     <string name="charities_title">Associations reconnues près de chez vous</string>
     <string name="charities_intro">Des organisations établies près de la ville choisie qui aident les personnes dans le besoin. Vous donnez directement à elles, sur leur propre site.</string>
