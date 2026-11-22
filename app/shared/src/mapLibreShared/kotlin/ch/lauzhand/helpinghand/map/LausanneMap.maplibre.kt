@@ -53,7 +53,7 @@ import org.maplibre.spatialk.geojson.dsl.buildFeatureCollection
 
 // Free OpenFreeMap styles, no API key. "bright" is the friendliest light one; "dark" for dark mode.
 private const val STYLE_LIGHT = "https://tiles.openfreemap.org/styles/bright"
-private const val STYLE_DARK = "https://tiles.openfreemap.org/styles/dark"
+private const val STYLE_DARK = "https://tiles.openfreemap.org/styles/fiord"
 
 private fun City.overview() = Position(longitude = lng, latitude = lat)
 private const val ZONE_ZOOM = 14.8
