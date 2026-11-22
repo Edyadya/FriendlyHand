@@ -129,10 +129,6 @@ fun HomeScreen(
                     }
                 }
             }
-            // Top right, in one column so everything lines up: add a person (volunteers), then "centre on me"
-            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (role == Role.VOLUNTEER) AddPersonButton(compact, onNewPerson)
-            }
         }
 
         Column(
@@ -140,6 +136,8 @@ fun HomeScreen(
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // Volunteers: "+ Add person", bottom right, right above the location button
+            if (role == Role.VOLUNTEER) Box(Modifier.padding(end = 16.dp)) { AddPersonButton(compact, onNewPerson) }
             // "centre on me": only where there is a live map to move and a position to move to
             if (isLiveMapSupported && me.location != null) {
                 val label = stringResource(Res.string.centre_on_me)
