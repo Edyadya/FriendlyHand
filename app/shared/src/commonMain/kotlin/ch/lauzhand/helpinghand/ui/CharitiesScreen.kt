@@ -36,7 +36,6 @@ private const val LONDON_LNG = -0.110
 // page explains how to give time or money.
 private val Charities = listOf(
     // Lausanne and the canton of Vaud
-    Charity(Res.string.charity_caritas_name, Res.string.charity_caritas_desc, "https://caritas-regio.ch/fr/offrir-son-aide/dons/donner-de-largent", LAUSANNE_LAT, LAUSANNE_LNG),
     Charity(Res.string.charity_solidere_name, Res.string.charity_solidere_desc, "https://solid-ere.ch/", LAUSANNE_LAT, LAUSANNE_LNG),
     Charity(Res.string.charity_cartons_name, Res.string.charity_cartons_desc, "https://www.cartons-du-coeur.swiss/faire-un-don-aux-cartons-du-coeur", LAUSANNE_LAT, LAUSANNE_LNG),
     Charity(Res.string.charity_cultive_name, Res.string.charity_cultive_desc, "https://cultive-toi.ch/", LAUSANNE_LAT, LAUSANNE_LNG),

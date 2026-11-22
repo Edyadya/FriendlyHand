@@ -51,8 +51,6 @@
     <string name="charities_title">Reputable charities nearby</string>
     <string name="charities_intro">Established organisations near the chosen city that help people in need. You give directly to them, on their own website.</string>
     <string name="charity_donate">Donate or help</string>
-    <string name="charity_caritas_name">Caritas Vaud</string>
-    <string name="charity_caritas_desc">A non-profit working for and with people in social or economic hardship, to improve their living conditions and help them take part in society. In Lausanne it runs the Épiceries Caritas and the regional food centre.</string>
     <string name="charity_solidere_name">Solid-ère</string>
     <string name="charity_solidere_desc">A Lausanne association, active since 2020, that runs a free grocery shop at La Bourdonnette for more than 350 people a week. Food is given out without conditions, mostly by volunteers.</string>
     <string name="charity_cartons_name">Cartons du Cœur Lausanne</string>
