@@ -80,11 +80,10 @@ fun SettingsMenuContent(
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        features.forEach { (label, onClick) -> MenuRow(label, onClick = onClick) }
-        if (features.isNotEmpty()) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         if (settings != null) {
-            // Language: a segmented control, applied at once and remembered
+            // Language: a segmented control, applied at once and remembered. It sits right under the profile,
+            // above the charities and the other pages.
             Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(Res.string.settings_language), style = MaterialTheme.typography.titleSmall)
                 SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
@@ -100,6 +99,13 @@ fun SettingsMenuContent(
                     }
                 }
             }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        }
+
+        features.forEach { (label, onClick) -> MenuRow(label, onClick = onClick) }
+        if (features.isNotEmpty()) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        if (settings != null) {
             // Dark mode: a switch; it starts from the system setting and the choice is remembered
             Row(
                 Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 16.dp),
