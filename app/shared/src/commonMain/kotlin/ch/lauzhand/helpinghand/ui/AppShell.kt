@@ -96,7 +96,7 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                                 onRewards = { selectTab(DonorTab.ACHIEVEMENTS) },
                             )
                             DonorTab.CONTRIBUTIONS -> ContributionsScreen(repo, onOpenPerson = { screen = Screen.Profile(it) })
-                            DonorTab.CHARITIES -> CharitiesScreen(shell.city)
+                            DonorTab.CHARITIES -> CharitiesScreen(shell.city) { shell.city = it }
                             DonorTab.ACHIEVEMENTS -> AchievementsScreen(repo)
                         }
                         is Screen.Profile -> ProfileScreen(

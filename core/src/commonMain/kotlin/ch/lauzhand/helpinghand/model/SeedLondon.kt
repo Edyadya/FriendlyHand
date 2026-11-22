@@ -61,16 +61,10 @@ internal object SeedLondon {
         names.forEachIndexed { i, name ->
             val area = areas[i % areas.size]
             val id = "p-ldn-${(i + 1).toString().padStart(2, '0')}"
-            // every third person was seen recently: a spot a little off the middle of the area
-            val seen = i % 3 == 0
             ps += Person(
                 id = id, firstName = name, age = 19 + (i * 7) % 56, zoneId = area.id, usualTime = times[i % times.size],
                 ownWords = if (i % 4 == 3) null else words[i % words.size],
                 consentGiven = true, createdByVolunteerId = Seed.ME_VOLUNTEER,
-                lastSeenLat = if (seen) area.lat + ((i % 5) - 2) * 0.0011 else null,
-                lastSeenLng = if (seen) area.lng + ((i % 7) - 3) * 0.0013 else null,
-                lastSeenNote = if (seen) "Near the usual spot" else null,
-                lastSeenAtMillis = if (seen) now - (i % 5 + 1) * 1_200_000L else null,
             )
             var n = 0
             fun nid() = "n-ldn-${(i + 1).toString().padStart(2, '0')}-${++n}"

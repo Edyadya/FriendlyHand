@@ -93,4 +93,7 @@
     <string name="spot_clear">Supprimer le lieu</string>
     <string name="spot_section">Lieu exact où vous l'avez rencontré (facultatif)</string>
     <string name="cancel_action">Annuler</string>
+    <string name="spot_pending">Nouveau lieu prêt. Appuyez sur Enregistrer pour le garder.</string>
+    <string name="changes_unsaved">Vous avez des modifications non enregistrées.</string>
+    <string name="changes_saved">Enregistré</string>
 </resources>

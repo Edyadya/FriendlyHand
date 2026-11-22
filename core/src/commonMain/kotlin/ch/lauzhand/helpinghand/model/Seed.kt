@@ -72,6 +72,33 @@ object Seed {
 
     // Lausanne and London together (declared last, so the lists above are ready).
     val zones: List<Zone> = lausanneZones + SeedLondon.zones
-    val people: List<Person> = lausannePeople + SeedLondon.people
+    val people: List<Person> = withSetSpots(lausannePeople + SeedLondon.people, zones)
     val needs: List<Need> = lausanneNeeds + SeedLondon.needs
+
+    /**
+     * Everybody starts at their own set spot (a position inside their area, different for every person),
+     * unless the data already gives one. Spread on a spiral around the middle of the area, so two people in the
+     * same area never share a place. Only volunteers ever see these spots.
+     */
+    private fun withSetSpots(all: List<Person>, zones: List<Zone>): List<Person> {
+        val now = nowMillis()
+        val seen = mutableMapOf<String, Int>()
+        return all.map { p ->
+            val k = seen.getOrElse(p.zoneId) { 0 }
+            seen[p.zoneId] = k + 1
+            if (p.lastSeenLat != null && p.lastSeenLng != null) return@map p
+            val z = zones.first { it.id == p.zoneId }
+            val c = Cities.byId(z.cityId)
+            val lat = z.lat ?: (c.north - z.y * c.latSpan)
+            val lng = z.lng ?: (c.west + z.x * c.lonSpan)
+            val angle = (k * 2.399963 + z.id.length) // golden angle: points never line up
+            val r = 0.0010 + 0.00032 * k
+            p.copy(
+                lastSeenLat = lat + r * kotlin.math.sin(angle),
+                lastSeenLng = lng + r * 1.5 * kotlin.math.cos(angle),
+                lastSeenNote = p.lastSeenNote ?: "At their usual spot",
+                lastSeenAtMillis = now - (15L + 9 * k) * 60_000L,
+            )
+        }
+    }
 }

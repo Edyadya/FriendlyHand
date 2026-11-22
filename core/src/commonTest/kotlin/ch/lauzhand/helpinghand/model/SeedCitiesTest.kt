@@ -54,3 +54,25 @@ class SeedCitiesTest {
         for (w in banned) assertFalse(w in withoutKnown, "found '$w'")
     }
 }
+
+class SeedSpotsTest {
+    @Test
+    fun everyoneHasTheirOwnSetSpotInsideTheirArea() {
+        val spots = Seed.people.map { it.lastSeenLat to it.lastSeenLng }
+        assertTrue(Seed.people.all { it.lastSeenLat != null && it.lastSeenLng != null }, "someone has no spot")
+        assertEquals(spots.size, spots.toSet().size, "two people share a spot")
+        for (p in Seed.people) {
+            val z = Seed.zones.first { it.id == p.zoneId }
+            val c = Cities.byId(z.cityId)
+            val lat = z.lat ?: (c.north - z.y * c.latSpan)
+            val lng = z.lng ?: (c.west + z.x * c.lonSpan)
+            assertTrue(distanceKm(lat, lng, p.lastSeenLat!!, p.lastSeenLng!!) < 1.0, "${p.id} is far from ${z.id}")
+        }
+    }
+
+    @Test
+    fun theSpotsAreRecentSoVolunteersSeeThem() {
+        val now = nowMillis()
+        assertTrue(Seed.people.all { it.lastSeenVisible(now) })
+    }
+}

@@ -93,4 +93,7 @@
     <string name="spot_clear">Remove the spot</string>
     <string name="spot_section">Exact spot where you met them (optional)</string>
     <string name="cancel_action">Cancel</string>
+    <string name="spot_pending">New spot ready. Press Save to keep it.</string>
+    <string name="changes_unsaved">You have changes that are not saved yet.</string>
+    <string name="changes_saved">Saved</string>
 </resources>

@@ -61,14 +61,17 @@
     <string name="charity_cultive_desc">A Lausanne association, active since 2018, that fights food waste: it harvests unused fruit and vegetables, turns them into preserves in workshops and sells them to fund its work, combining ecology and social inclusion.</string>
     <string name="charities_radius">Within %1$d km of %2$s</string>
     <string name="charities_none">No charities listed within %1$d km of %2$s yet.</string>
-    <string name="charity_crisis_name">Crisis</string>
-    <string name="charity_crisis_desc">The national charity for people experiencing homelessness in Britain. It runs year-round support, advice and training, and campaigns for change.</string>
-    <string name="charity_shelter_name">Shelter</string>
-    <string name="charity_shelter_desc">A housing and homelessness charity. It gives free advice and support to people in bad housing or without a home, and campaigns for safe and secure homes.</string>
     <string name="charity_stmungos_name">St Mungo's</string>
     <string name="charity_stmungos_desc">A homelessness charity that provides housing, support and advice for people who sleep rough, and works to end rough sleeping.</string>
-    <string name="charity_passage_name">The Passage</string>
-    <string name="charity_passage_desc">A homelessness charity in Westminster, London. Its centre offers meals, advice and support to help people move away from the streets.</string>
     <string name="charity_centrepoint_name">Centrepoint</string>
     <string name="charity_centrepoint_desc">A charity for young people facing homelessness. It provides a safe place to stay, support and help towards education and work.</string>
+    <string name="charity_londonyouth_name">London Youth</string>
+    <string name="charity_londonyouth_desc">A registered charity that supports hundreds of youth clubs and community groups across London, so young people have safe places to learn, play and grow.</string>
+    <string name="charity_kingstrust_name">The King's Trust</string>
+    <string name="charity_kingstrust_desc">A registered youth charity that helps 11 to 30 year olds into education, training and work through free courses, mentoring and start-up support.</string>
+    <string name="charity_magicbreakfast_name">Magic Breakfast</string>
+    <string name="charity_magicbreakfast_desc">A registered charity that provides healthy breakfasts in schools, so hunger is not a barrier to learning for children.</string>
+    <string name="charity_felix_name">The Felix Project</string>
+    <string name="charity_felix_desc">A registered charity that rescues good surplus food and gives it for free to charities, schools and community groups across London, for people facing food poverty.</string>
+    <string name="charities_criteria">Registered non-profits only: apolitical, with a focus on homelessness, youth, education and inclusion. No religious groups, businesses, alumni groups or personal benefit.</string>
 </resources>

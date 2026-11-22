@@ -54,7 +54,15 @@ fun ProfileScreen(
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val notify: (String) -> Unit = { msg -> scope.launch { snackbar.currentSnackbarData?.dismiss(); snackbar.showSnackbar(msg) } }
-    val lastSeenSaved = stringResource(Res.string.feedback_last_seen)
+    val lastSeenSaved = stringResource(Res.string.changes_saved)
+
+    // Volunteer edits are drafts until the volunteer presses Save: a new exact spot (+ note) and the photo.
+    var draftSpot by remember(personId) { mutableStateOf<Pair<Double, Double>?>(null) }
+    var draftNote by remember(personId) { mutableStateOf("") }
+    var draftConsent by remember(personId) { mutableStateOf(person.photoConsent) }
+    var draftPhoto by remember(personId) { mutableStateOf(person.photo) }
+    val photoChanged = draftConsent != person.photoConsent || draftPhoto != person.photo
+    val dirty = draftSpot != null || photoChanged
 
     Box(Modifier.fillMaxSize()) {
     Scaffold(
@@ -89,16 +97,45 @@ fun ProfileScreen(
             }
         }
         if (role == Role.VOLUNTEER) {
-            item { LastSeenSection(repo, role, person, zoneOf(repo, person)) { notify(lastSeenSaved) } }
+            item {
+                LastSeenSection(
+                    repo, role, person, zoneOf(repo, person),
+                    draftSpot = draftSpot, onDraftSpot = { lat, lng -> draftSpot = lat to lng },
+                    note = draftNote, onNote = { draftNote = it },
+                )
+            }
         }
         if (role == Role.VOLUNTEER) {
             item {
                 PhotoSection(
-                    consent = person.photoConsent,
-                    photo = person.photo,
-                    onConsentChange = { consent -> repo.setPhoto(person.id, if (consent) person.photo else null, consent) },
-                    onPhotoChange = { repo.setPhoto(person.id, it, consent = true) },
+                    consent = draftConsent,
+                    photo = draftPhoto,
+                    onConsentChange = { draftConsent = it; if (!it) draftPhoto = null },
+                    onPhotoChange = { draftPhoto = it; draftConsent = true },
                 )
+            }
+            item {
+                // nothing is stored until Save is pressed
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (dirty) {
+                        Text(
+                            stringResource(Res.string.changes_unsaved),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    AppButton(
+                        onClick = {
+                            draftSpot?.let { (lat, lng) -> repo.updateLastSeen(person.id, lat, lng, draftNote.trim().ifBlank { null }) }
+                            if (photoChanged) repo.setPhoto(person.id, draftPhoto.takeIf { draftConsent }, draftConsent)
+                            draftSpot = null
+                            draftNote = ""
+                            notify(lastSeenSaved)
+                        },
+                        enabled = dirty,
+                        modifier = BigButtonModifier,
+                    ) { Text(stringResource(Res.string.save)) }
+                }
             }
         }
         item { Text(stringResource(Res.string.needs_title), style = MaterialTheme.typography.titleLarge) }
@@ -232,10 +269,13 @@ private fun zoneOf(repo: HelpRepository, person: Person): Zone? = repo.zones.fir
  * server doesn't send the data to them either). Only shown while the sighting is recent.
  */
 @Composable
-private fun LastSeenSection(repo: HelpRepository, role: Role, person: Person, zone: Zone?, onSaved: () -> Unit) {
+private fun LastSeenSection(
+    repo: HelpRepository, role: Role, person: Person, zone: Zone?,
+    draftSpot: Pair<Double, Double>?, onDraftSpot: (Double, Double) -> Unit,
+    note: String, onNote: (String) -> Unit,
+) {
     val now = remember(person.lastSeenAtMillis) { nowMillis() }
     val visible = person.lastSeenVisible(now)
-    var note by remember { mutableStateOf("") }
     var picking by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
 
@@ -260,17 +300,11 @@ private fun LastSeenSection(repo: HelpRepository, role: Role, person: Person, zo
                 val me = rememberUserLocation()
                 val here = me.location
                 OutlinedTextField(
-                    note, { note = it }, Modifier.fillMaxWidth(),
+                    note, onNote, Modifier.fillMaxWidth(),
                     label = { Text(stringResource(Res.string.last_seen_note_field)) }, singleLine = true,
                 )
                 AppButton(
-                    onClick = {
-                        if (here != null) {
-                            repo.updateLastSeen(person.id, here.lat, here.lng, note.trim().ifBlank { null })
-                            note = ""
-                            onSaved()
-                        }
-                    },
+                    onClick = { if (here != null) onDraftSpot(here.lat, here.lng) },
                     enabled = here != null,
                     modifier = BigButtonModifier,
                 ) { Text(stringResource(Res.string.last_seen_here)) }
@@ -281,14 +315,12 @@ private fun LastSeenSection(repo: HelpRepository, role: Role, person: Person, zo
                     val city = zone?.let { Cities.byId(it.cityId) } ?: Cities.LAUSANNE
                     SpotPickerDialog(
                         repo, city, start = here,
-                        onPick = { lat, lng ->
-                            repo.updateLastSeen(person.id, lat, lng, note.trim().ifBlank { null })
-                            note = ""
-                            picking = false
-                            onSaved()
-                        },
+                        onPick = { lat, lng -> onDraftSpot(lat, lng); picking = false },
                         onDismiss = { picking = false },
                     )
+                }
+                if (draftSpot != null) {
+                    Text(stringResource(Res.string.spot_pending), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
                 }
                 Text(
                     when {
