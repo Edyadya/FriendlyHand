@@ -59,8 +59,6 @@
     <string name="charity_cultive_desc">Une association lausannoise, active depuis 2018, qui lutte contre le gaspillage alimentaire : elle récolte des fruits et légumes inutilisés, les transforme en conserves lors d'ateliers et les vend pour financer son action, en alliant écologie et inclusion sociale.</string>
     <string name="charities_radius">À moins de %1$d km de %2$s</string>
     <string name="charities_none">Aucune association listée à moins de %1$d km de %2$s pour le moment.</string>
-    <string name="charity_stmungos_name">St Mungo's</string>
-    <string name="charity_stmungos_desc">Une association qui offre logement, soutien et conseils aux personnes qui dorment dans la rue, et agit pour mettre fin au sans-abrisme de rue.</string>
     <string name="charity_centrepoint_name">Centrepoint</string>
     <string name="charity_centrepoint_desc">Une association pour les jeunes confrontés au sans-abrisme. Elle offre un lieu sûr, un soutien et une aide vers les études et le travail.</string>
     <string name="charity_londonyouth_name">London Youth</string>

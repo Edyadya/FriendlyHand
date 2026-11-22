@@ -41,7 +41,6 @@ private val Charities = listOf(
     Charity(Res.string.charity_cultive_name, Res.string.charity_cultive_desc, "https://cultive-toi.ch/", LAUSANNE_LAT, LAUSANNE_LNG),
     // London: registered, non-party-political non-profits (homelessness, youth, education, inclusion).
     // Left out on purpose: religious groups, businesses, alumni groups, anything for personal benefit.
-    Charity(Res.string.charity_stmungos_name, Res.string.charity_stmungos_desc, "https://www.mungos.org/donate/", LONDON_LAT, LONDON_LNG),
     Charity(Res.string.charity_centrepoint_name, Res.string.charity_centrepoint_desc, "https://www.centrepoint.org.uk/donate", LONDON_LAT, LONDON_LNG),
     Charity(Res.string.charity_londonyouth_name, Res.string.charity_londonyouth_desc, "https://www.londonyouth.org/donate/", LONDON_LAT, LONDON_LNG),
     Charity(Res.string.charity_kingstrust_name, Res.string.charity_kingstrust_desc, "https://www.princes-trust.org.uk/donate", LONDON_LAT, LONDON_LNG),
