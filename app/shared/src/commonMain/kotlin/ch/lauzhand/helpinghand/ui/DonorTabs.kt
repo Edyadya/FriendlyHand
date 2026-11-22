@@ -24,7 +24,6 @@ import org.jetbrains.compose.resources.stringResource
 enum class DonorTab(val label: StringResource) {
     CONTRIBUTIONS(Res.string.tab_contributions),
     MAP(Res.string.tab_map),
-    CHARITIES(Res.string.tab_charities),
     ACHIEVEMENTS(Res.string.tab_achievements),
 }
 
@@ -68,21 +67,31 @@ private fun TabIcon(tab: DonorTab) {
     Canvas(Modifier.size(24.dp)) {
         val w = 2.dp.toPx()
         when (tab) {
-            DonorTab.CONTRIBUTIONS -> drawList(color, w)
+            DonorTab.CONTRIBUTIONS -> drawPaper(color, w)
             DonorTab.MAP -> drawPin(color, w)
-            DonorTab.CHARITIES -> drawHeart(color, w)
             DonorTab.ACHIEVEMENTS -> drawMedal(color, w)
         }
     }
 }
 
-// a list: three bullets with lines
-private fun DrawScope.drawList(color: Color, w: Float) {
-    for (i in 0..2) {
-        val y = size.height * (0.25f + i * 0.25f)
-        drawCircle(color, w * 0.9f, Offset(size.width * 0.15f, y))
-        drawLine(color, Offset(size.width * 0.32f, y), Offset(size.width * 0.9f, y), w, StrokeCap.Round)
+// a paper page: a sheet with a folded corner and a few lines of text
+private fun DrawScope.drawPaper(color: Color, w: Float) {
+    fun p(x: Float, y: Float) = Offset(size.width * x, size.height * y)
+    val sheet = Path().apply {
+        moveTo(p(0.2f, 0.08f).x, p(0.2f, 0.08f).y)
+        lineTo(p(0.62f, 0.08f).x, p(0.62f, 0.08f).y)
+        lineTo(p(0.84f, 0.3f).x, p(0.84f, 0.3f).y)
+        lineTo(p(0.84f, 0.92f).x, p(0.84f, 0.92f).y)
+        lineTo(p(0.2f, 0.92f).x, p(0.2f, 0.92f).y)
+        close()
     }
+    drawPath(sheet, color, style = Stroke(w))
+    // the folded corner
+    drawLine(color, p(0.62f, 0.08f), p(0.62f, 0.3f), w, StrokeCap.Round)
+    drawLine(color, p(0.62f, 0.3f), p(0.84f, 0.3f), w, StrokeCap.Round)
+    // text lines
+    drawLine(color, p(0.33f, 0.52f), p(0.71f, 0.52f), w, StrokeCap.Round)
+    drawLine(color, p(0.33f, 0.68f), p(0.71f, 0.68f), w, StrokeCap.Round)
 }
 
 // a map pin: rounded top, point at the bottom, hole in the middle

@@ -39,6 +39,10 @@ private fun AchievementId.title(): StringResource = when (this) {
     AchievementId.HAND_TO_HAND -> Res.string.badge_hand_to_hand
     AchievementId.GOAL_REACHED -> Res.string.badge_goal_reached
     AchievementId.GAVE_100 -> Res.string.badge_gave_100
+    AchievementId.GAVE_50 -> Res.string.badge_gave_50
+    AchievementId.GAVE_250 -> Res.string.badge_gave_250
+    AchievementId.GAVE_500 -> Res.string.badge_gave_500
+    AchievementId.GAVE_1000 -> Res.string.badge_gave_1000
     AchievementId.THREE_AREAS -> Res.string.badge_three_areas
     AchievementId.THANKS_3 -> Res.string.badge_thanks_3
 }
@@ -50,6 +54,10 @@ private fun AchievementId.description(): StringResource = when (this) {
     AchievementId.HAND_TO_HAND -> Res.string.badge_hand_to_hand_desc
     AchievementId.GOAL_REACHED -> Res.string.badge_goal_reached_desc
     AchievementId.GAVE_100 -> Res.string.badge_gave_100_desc
+    AchievementId.GAVE_50 -> Res.string.badge_gave_50_desc
+    AchievementId.GAVE_250 -> Res.string.badge_gave_250_desc
+    AchievementId.GAVE_500 -> Res.string.badge_gave_500_desc
+    AchievementId.GAVE_1000 -> Res.string.badge_gave_1000_desc
     AchievementId.THREE_AREAS -> Res.string.badge_three_areas_desc
     AchievementId.THANKS_3 -> Res.string.badge_thanks_3_desc
 }
@@ -57,7 +65,8 @@ private fun AchievementId.description(): StringResource = when (this) {
 /** Donor tab: the goals panel, the partner voucher and the badges (rules in core: donorAchievements). */
 @Composable
 fun AchievementsScreen(repo: HelpRepository) {
-    val achievements = donorAchievements(repo.contributionsOf(ME_DONOR), repo.needs, repo.people)
+    val giveawayChf = repo.giveawayContributionsOf(ME_DONOR).sumOf { it.amountChf }
+    val achievements = donorAchievements(repo.contributionsOf(ME_DONOR), repo.needs, repo.people, giveawayChf)
         .sortedByDescending { it.unlocked } // unlocked first, otherwise in the rules' order
     // the badge whose reward is being shown, or null
     var opened by remember { mutableStateOf<Achievement?>(null) }

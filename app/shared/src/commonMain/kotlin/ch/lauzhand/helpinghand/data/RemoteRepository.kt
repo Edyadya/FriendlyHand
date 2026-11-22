@@ -39,7 +39,8 @@ import kotlin.concurrent.Volatile
 class RemoteRepository(
     private val baseUrl: String = DEFAULT_BASE_URL,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
-) : HelpRepository {
+    private val book: LocalBook = LocalBook(), // giveaways, orders and profile pictures: kept on the device for now
+) : HelpRepository, BookApi by book {
 
     companion object {
         /** Android emulator: use "http://10.0.2.2:8081" instead of localhost. */

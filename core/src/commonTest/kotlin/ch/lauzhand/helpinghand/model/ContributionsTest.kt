@@ -111,3 +111,47 @@ class ContributionsTest {
         assertEquals(NeedStatus.CONFIRMED, verifiedGoal.withDonation("d", 5).status)
     }
 }
+
+class MoneyAndOrdersTest {
+    @Test
+    fun dateStampsAreCorrect() {
+        assertEquals("01.01.1970", formatDate(0))
+        assertEquals("29.02.2024", formatDate(1_709_164_800_000L)) // a leap day
+        assertEquals("22.11.2026", formatDate(1_795_305_600_000L))
+        assertEquals("31.12.1969", formatDate(-1))
+    }
+
+    @Test
+    fun moneyBadgesFollowTheTotalIncludingGiveaways() {
+        val a = donorAchievements(emptyList(), Seed.needs, Seed.people, giveawayChf = 260)
+        fun id(i: AchievementId) = a.first { it.id == i }
+        assertTrue(id(AchievementId.GAVE_50).unlocked)
+        assertTrue(id(AchievementId.GAVE_100).unlocked)
+        assertTrue(id(AchievementId.GAVE_250).unlocked)
+        assertFalse(id(AchievementId.GAVE_500).unlocked)
+        assertEquals(260, id(AchievementId.GAVE_500).progress)
+        assertEquals(500, id(AchievementId.GAVE_500).target)
+    }
+
+    @Test
+    fun aGiveawayNeverTakesMoreThanItsGoal() {
+        val g = Giveaway("g", "Brand", "Coats", "x", logisticsGoalChf = 100, fundedChf = 90)
+        val (after, taken) = g.withContribution(50)
+        assertEquals(10, taken)
+        assertTrue(after.isFunded)
+        assertEquals(0, after.withContribution(5).second)
+    }
+
+    @Test
+    fun anOrderGoesThroughTheVolunteerStepsInOrder() {
+        val o = DeliveryOrder("o", "n-1", "p-jerry", "Coat", "flon", "donor-1", "Dan", 1)
+        assertEquals(OrderStatus.OPEN, o.pickedUp().status)      // cannot be picked up before a volunteer accepts
+        assertEquals(OrderStatus.OPEN, o.delivered().status)
+        val taken = o.acceptedBy("v1", "Mia")
+        assertEquals(OrderStatus.ACCEPTED, taken.status)
+        assertEquals("Mia", taken.volunteerName)
+        assertEquals("Mia", taken.acceptedBy("v2", "Other").volunteerName) // a second volunteer cannot take it
+        assertEquals(OrderStatus.PICKED_UP, taken.pickedUp().status)
+        assertEquals(OrderStatus.DELIVERED, taken.pickedUp().delivered().status)
+    }
+}

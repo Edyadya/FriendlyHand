@@ -13,9 +13,19 @@
     <string name="partner_imc_desc">Hackathon partner. A fuller description will follow.</string>
     <string name="partner_jetbrains_name">JetBrains</string>
     <string name="partner_jetbrains_desc">The makers of Kotlin, the language this app is built with.</string>
-    <string name="terms_body">These terms and conditions are placeholder text for the demo. They will be replaced before the app is used for real.\n\nHelping Hand lists people only with their consent, shows only their first name and the area they are usually in, and never shows an exact location to donors. Please use the app respectfully.</string>
-    <string name="about_body">Helping Hand connects people who want to help with people who need a hand, in their own neighbourhood. Volunteers meet people in the street, with their consent, and list what would help. Donors bring an item, pay for it or give towards a bigger goal, and the person confirms that they received it.</string>
+    <string name="terms_body">These terms and conditions are placeholder text for the demo. They will be replaced before the app is used for real.\n\nHelping Hand lists people only with their consent, shows only their first name and the area they are usually in, and never shows an exact location to patrons. Please use the app respectfully.</string>
+    <string name="about_body">Helping Hand connects people who want to help with people who need a hand, in their own neighbourhood. Volunteers meet people in the street, with their consent, and list what would help. Patrons bring an item, pay for it or give towards a bigger goal, and the person confirms that they received it.</string>
     <string name="about_credits">Made for IMC, built with Kotlin Multiplatform by JetBrains.</string>
     <string name="about_shared_note">Almost all of this app is written once, in Kotlin Multiplatform, and runs on Android, desktop and the web. Only a few small things are platform-specific: the live map, the device location, the saved settings and the language switch.</string>
     <string name="preview_clicked">clicked: %1$s</string>
+    <string name="menu_profile_picture">Profile picture</string>
+    <string name="menu_charities">Charities</string>
+    <string name="menu_giveaways">Giveaways</string>
+    <string name="menu_orders">Delivery orders</string>
+    <string name="profile_picture_title">Your profile picture</string>
+    <string name="profile_picture_hint">Only you choose it. It is shown next to your name in the menu.</string>
+    <string name="profile_picture_choose">Choose a picture</string>
+    <string name="profile_picture_change">Change the picture</string>
+    <string name="profile_picture_remove">Remove the picture</string>
+    <string name="profile_picture_unsupported">Choosing a picture is not available on this device.</string>
 </resources>

@@ -45,18 +45,39 @@ fun SettingsMenuContent(
     onOpenPage: (SettingsPage) -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
+    /** The account's name and profile picture (tap to change it). */
+    accountName: String = "",
+    accountPhoto: String? = null,
+    onProfilePicture: () -> Unit = {},
+    /** Screens opened from the menu (charities, giveaways, ...): a label and what to do. */
+    features: List<Pair<StringResource, () -> Unit>> = emptyList(),
 ) {
     val settings = LocalAppSettings.current
     Column(modifier) {
-        Text(
-            userLine,
-            Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-        )
+        Row(
+            Modifier.fillMaxWidth().clickable(onClick = onProfilePicture).padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            AccountAvatar(accountName, accountPhoto, 44.dp)
+            Column(Modifier.weight(1f)) {
+                Text(
+                    userLine,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
+                Text(
+                    stringResource(Res.string.menu_profile_picture),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        features.forEach { (label, onClick) -> MenuRow(label, onClick = onClick) }
+        if (features.isNotEmpty()) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         if (settings != null) {
             // Language: a segmented control, applied at once and remembered

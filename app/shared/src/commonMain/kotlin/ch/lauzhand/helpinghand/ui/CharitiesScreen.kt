@@ -1,6 +1,10 @@
 package ch.lauzhand.helpinghand.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -52,7 +56,7 @@ private val Charities = listOf(
  * description and a button to its own donation page.
  */
 @Composable
-fun CharitiesScreen(city: City, onCityChange: (City) -> Unit = {}) {
+fun CharitiesScreen(city: City, onCityChange: (City) -> Unit = {}, onBack: (() -> Unit)? = null) {
     val uri = LocalUriHandler.current
     val nearby = Charities
         .map { it to distanceKm(city.lat, city.lng, it.lat, it.lng) }
@@ -66,6 +70,7 @@ fun CharitiesScreen(city: City, onCityChange: (City) -> Unit = {}) {
     ) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (onBack != null) TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
                 Text(stringResource(Res.string.charities_title), style = MaterialTheme.typography.headlineSmall)
                 // pick the city here too, so London's charities are one tap away
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -81,6 +86,11 @@ fun CharitiesScreen(city: City, onCityChange: (City) -> Unit = {}) {
                 Text(
                     stringResource(Res.string.charities_intro),
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    stringResource(Res.string.charities_link_hint),
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
@@ -100,11 +110,15 @@ fun CharitiesScreen(city: City, onCityChange: (City) -> Unit = {}) {
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(stringResource(c.name), style = MaterialTheme.typography.titleLarge)
+                    // the name is the link to the charity's own page
+                    Text(
+                        stringResource(c.name),
+                        Modifier.heightIn(min = 48.dp).clickable(role = Role.Button) { uri.openUri(c.url) }.wrapContentHeight(Alignment.CenterVertically),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        textDecoration = TextDecoration.Underline,
+                    )
                     Text(stringResource(c.description), style = MaterialTheme.typography.bodyMedium)
-                    AppButton(onClick = { uri.openUri(c.url) }, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(Res.string.charity_donate), style = MaterialTheme.typography.titleMedium)
-                    }
                 }
             }
         }

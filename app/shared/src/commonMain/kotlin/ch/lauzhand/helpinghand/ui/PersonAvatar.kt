@@ -47,3 +47,20 @@ fun PersonAvatar(person: Person, size: Dp, modifier: Modifier = Modifier) {
         }
     }
 }
+
+
+/** A round avatar for the logged-in account: their own profile picture, or their initial. */
+@Composable
+fun AccountAvatar(name: String, photo: String?, size: Dp, modifier: Modifier = Modifier) {
+    val bitmap = rememberPhotoBitmap(photo)
+    Box(
+        modifier.size(size).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (bitmap != null) {
+            Image(bitmap, contentDescription = null, modifier = Modifier.size(size), contentScale = ContentScale.Crop)
+        } else {
+            Text(name.trim().take(1).uppercase(), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+        }
+    }
+}

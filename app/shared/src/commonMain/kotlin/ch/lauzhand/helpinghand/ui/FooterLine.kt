@@ -19,7 +19,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * "Made for [IMC logo] IMC · Built with [Kotlin logo] Kotlin Multiplatform", one small muted line.
+ * "Made for IMC · Built with [Kotlin logo] Kotlin Multiplatform", one small muted line.
  * It wraps onto two lines at the "·" when it is too wide. Used on the login screen and in About.
  * The logo files are placeholders (ic_imc_*, ic_kotlin_*) until the real ones are supplied.
  */
@@ -27,7 +27,6 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun FooterLine(modifier: Modifier = Modifier) {
     val dark = MaterialTheme.isDark
-    val imc: DrawableResource = if (dark) Res.drawable.ic_imc_dark else Res.drawable.ic_imc_light
     val kotlin: DrawableResource = if (dark) Res.drawable.ic_kotlin_dark else Res.drawable.ic_kotlin_light
     val style = MaterialTheme.typography.labelMedium
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
@@ -38,7 +37,6 @@ fun FooterLine(modifier: Modifier = Modifier) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(stringResource(Res.string.footer_made_for), style = style, color = muted)
-            Image(painterResource(imc), contentDescription = null, modifier = Modifier.height(18.dp))
             Text(stringResource(Res.string.footer_imc) + " ·", style = style, color = muted)
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {

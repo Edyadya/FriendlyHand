@@ -19,6 +19,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role as SemanticsRole
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -26,7 +28,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
-import ch.lauzhand.helpinghand.model.AccessCodes
 import ch.lauzhand.helpinghand.model.Role
 import helpinghand.app.shared.generated.resources.*
 import kotlinx.coroutines.launch
@@ -39,12 +40,6 @@ private val LoginRoles = listOf(Role.DONOR, Role.VOLUNTEER)
 private fun Role.info(): StringResource = when (this) {
     Role.DONOR -> Res.string.login_role_donor_info
     Role.VOLUNTEER -> Res.string.login_role_volunteer_info
-}
-
-/** Demo hackathon codes, shown as a hint under the code field. */
-private fun Role.demoCode(): String? = when (this) {
-    Role.DONOR -> null
-    Role.VOLUNTEER -> AccessCodes.VOLUNTEER
 }
 
 private enum class LoginError { WRONG_CODE, NO_CONNECTION }
@@ -65,12 +60,15 @@ fun LoginScreen(repo: HelpRepository) {
     val needsCode = role != Role.DONOR
     val canSubmit = !busy && name.isNotBlank() && (!needsCode || code.isNotBlank())
 
-    fun submit() {
-        if (!canSubmit) return
+    val guestName = stringResource(Res.string.login_guest_name)
+
+    fun submit(asGuest: Boolean = false) {
+        if (!asGuest && !canSubmit) return
+        if (busy) return
         busy = true
         error = null
         scope.launch {
-            repo.login(name.trim(), role, code.trim().takeIf { needsCode })
+            repo.login(if (asGuest) guestName else name.trim(), role, code.trim().takeIf { needsCode && !asGuest })
                 .onFailure {
                     // FakeRepository and RemoteRepository both report a wrong code as IllegalArgumentException
                     error = if (it is IllegalArgumentException) LoginError.WRONG_CODE else LoginError.NO_CONNECTION
@@ -95,9 +93,9 @@ fun LoginScreen(repo: HelpRepository) {
         val tight = short || needsCode
         val reserved = when {
             short && needsCode -> 520.dp
-            short -> 430.dp
+            short -> 500.dp
             needsCode -> 640.dp
-            else -> 560.dp
+            else -> 630.dp
         }
         val heroSize = minOf(maxWidth - 48.dp, maxHeight * 0.38f, maxHeight - reserved).coerceIn(96.dp, 320.dp)
         Column(
@@ -170,16 +168,31 @@ fun LoginScreen(repo: HelpRepository) {
                             label = { Text(stringResource(Res.string.login_code)) },
                             singleLine = true,
                             isError = error == LoginError.WRONG_CODE,
-                            supportingText = {
-                                role.demoCode()?.let { Text(stringResource(Res.string.login_code_hint, it)) }
-                            },
+                            visualTransformation = PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(
-                                capitalization = KeyboardCapitalization.Characters,
+                                keyboardType = KeyboardType.Password,
                                 imeAction = ImeAction.Done,
                             ),
                             keyboardActions = KeyboardActions(onDone = { submit() }),
                             modifier = Modifier.fillMaxWidth(),
                         )
+                    }
+
+                    // A patron can also come in without an account
+                    if (role == Role.DONOR) {
+                        AppOutlinedButton(
+                            onClick = { submit(asGuest = true) },
+                            enabled = !busy,
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                        ) { Text(stringResource(Res.string.login_guest)) }
+                        if (!short) {
+                            Text(
+                                stringResource(Res.string.login_guest_hint),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
                     }
 
                     error?.let {

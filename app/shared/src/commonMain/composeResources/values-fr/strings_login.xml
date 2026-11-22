@@ -3,10 +3,9 @@
     <string name="login_role_donor_info">Apporter un objet ou donner de l’argent</string>
     <string name="login_role_volunteer_info">Rencontrer les personnes, noter leurs besoins et livrer les objets payés</string>
     <string name="login_name">Votre prénom</string>
-    <string name="login_code">Code d’accès</string>
-    <string name="login_code_hint">Code de démo : %1$s</string>
+    <string name="login_code">Mot de passe</string>
     <string name="login_button">Se connecter</string>
-    <string name="login_wrong_code">Code d’accès incorrect. Vérifiez-le et réessayez.</string>
+    <string name="login_wrong_code">Mot de passe incorrect. Vérifiez-le et réessayez.</string>
     <string name="login_no_connection">Impossible de joindre le serveur. Vérifiez la connexion et réessayez.</string>
     <string name="logged_in_as">%1$s · %2$s</string>
     <string name="logout">Se déconnecter / changer d’utilisateur</string>
@@ -16,4 +15,7 @@
     <string name="footer_imc">IMC</string>
     <string name="footer_built_with">Développé avec</string>
     <string name="footer_kotlin">Kotlin Multiplatform</string>
+    <string name="login_guest">Continuer en invité</string>
+    <string name="login_guest_name">Invité</string>
+    <string name="login_guest_hint">Aucun compte nécessaire. Votre aide est enregistrée sur cet appareil pour cette visite.</string>
 </resources>

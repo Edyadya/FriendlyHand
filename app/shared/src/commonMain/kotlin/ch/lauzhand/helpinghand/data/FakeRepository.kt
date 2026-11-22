@@ -8,7 +8,7 @@ import androidx.compose.runtime.toMutableStateList
 import ch.lauzhand.helpinghand.model.*
 import kotlin.random.Random
 
-interface HelpRepository {
+interface HelpRepository : BookApi {
     val zones: List<Zone>
     val people: List<Person>
     val needs: List<Need>
@@ -41,6 +41,42 @@ interface HelpRepository {
      * [consent]: with consent = false (or photo = null) any photo is removed. Volunteers only.
      */
     fun setPhoto(personId: String, photoBase64: String?, consent: Boolean)
+
+    // --- hand-over order book (the order state itself lives in BookApi) ---
+
+    /**
+     * A patron who claimed an item hands it over to a volunteer: this puts an order in the order book (once per
+     * need). A volunteer accepts it, picks the item up and delivers it to the person.
+     */
+    fun requestHandover(needId: String, patronId: String, patronName: String) {
+        if (orders.any { it.needId == needId && it.status != OrderStatus.DELIVERED }) return
+        val need = needs.firstOrNull { it.id == needId } ?: return
+        val person = people.firstOrNull { it.id == need.personId } ?: return
+        saveOrder(
+            DeliveryOrder(
+                id = newId("o"), needId = needId, personId = person.id, itemTitle = need.title, zoneId = person.zoneId,
+                patronId = patronId, patronName = patronName, createdAtMillis = nowMillis(),
+            ),
+        )
+    }
+
+    /** A volunteer takes an open order. */
+    fun acceptOrder(orderId: String, volunteerId: String, volunteerName: String) {
+        orders.firstOrNull { it.id == orderId }?.let { saveOrder(it.acceptedBy(volunteerId, volunteerName)) }
+    }
+
+    /** The volunteer has the item: the need counts as handed over. */
+    fun markPickedUp(orderId: String) {
+        val o = orders.firstOrNull { it.id == orderId } ?: return
+        val picked = o.pickedUp()
+        if (picked.status == OrderStatus.PICKED_UP) { saveOrder(picked); markFulfilled(o.needId) }
+    }
+
+    /** The person confirmed they received it: the need is verified and its order is closed. */
+    fun confirmDelivered(needId: String) {
+        confirmReceived(needId)
+        orders.firstOrNull { it.needId == needId }?.let { saveOrder(it.delivered()) }
+    }
 }
 
 fun newId(prefix: String) = "$prefix-${Random.nextInt(1_000_000)}"
@@ -49,7 +85,7 @@ const val ME_DONOR = Seed.ME_DONOR
 const val ME_VOLUNTEER = Seed.ME_VOLUNTEER
 
 // Seed data and status rules live in :core (shared with the server).
-class FakeRepository : HelpRepository {
+class FakeRepository(private val book: LocalBook = LocalBook()) : HelpRepository, BookApi by book {
 
     override val zones = Seed.zones
 
@@ -59,6 +95,21 @@ class FakeRepository : HelpRepository {
 
     // who helped with what, used for "My contributions" and rewards
     private val contributions = mutableStateListOf<Contribution>()
+
+    init {
+        // A few hand-overs already waiting in the order book, so volunteers have something to take.
+        val demoPatrons = listOf("Lena", "Marc", "Sophie")
+        // Only needs of London people who still have another open need, so the map counts do not change.
+        fun stillOpen(n: Need) = n.status == NeedStatus.OPEN || n.status == NeedStatus.FUNDING
+        needs.withIndex()
+            .filter { (_, n) -> n.id.startsWith("n-ldn") && n.type == NeedType.SMALL && n.status == NeedStatus.OPEN && needs.any { o -> o.personId == n.personId && o.id != n.id && stillOpen(o) } }
+            .distinctBy { (_, n) -> n.personId } // one order per person, so each keeps another open need
+            .take(demoPatrons.size)
+            .forEachIndexed { k, (i, n) ->
+                needs[i] = n.claimedBy("donor-demo-$k")
+                requestHandover(n.id, "donor-demo-$k", demoPatrons[k])
+            }
+    }
 
     override fun addPerson(person: Person) { people += person }
     override fun addNeed(need: Need) { needs += need }

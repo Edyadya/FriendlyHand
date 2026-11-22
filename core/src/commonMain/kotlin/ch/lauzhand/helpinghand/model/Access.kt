@@ -2,9 +2,9 @@ package ch.lauzhand.helpinghand.model
 
 import kotlin.time.Clock
 
-/** Access codes for login: the one place to change them. DONOR needs no code. */
+/** Login passwords: the one place to change them. A patron needs none (account by name, or guest). */
 object AccessCodes {
-    const val VOLUNTEER = "LAUSANNE-2026"
+    const val VOLUNTEER = "1234"
 
     /** True if [code] is acceptable for [role]. */
     fun isValid(role: Role, code: String?): Boolean = when (role) {

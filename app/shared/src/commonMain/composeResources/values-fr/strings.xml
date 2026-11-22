@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Main tendue</string>
     <string name="role_volunteer">Bénévole</string>
-    <string name="role_donor">Donateur</string>
+    <string name="role_donor">Mécène</string>
     <string name="role_ngo">ONG</string>
     <string name="back">Retour</string>
     <string name="home_title">Personnes à proximité</string>
@@ -24,7 +24,7 @@
     <string name="action_bring">Je l'apporte</string>
     <string name="action_pay">Payer CHF 20</string>
     <string name="action_give">Donner CHF 50</string>
-    <string name="action_handed_over">Je l'ai remis</string>
+    <string name="action_handed_over">Le remettre à un bénévole</string>
     <string name="action_confirm">Confirmer avec %1$s</string>
     <string name="action_delivered">Marquer comme remis</string>
     <string name="new_person">Nouvelle personne</string>

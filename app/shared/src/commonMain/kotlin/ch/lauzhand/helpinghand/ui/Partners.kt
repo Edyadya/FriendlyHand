@@ -30,6 +30,10 @@ val AchievementId.reward: BadgeReward
         AchievementId.HAND_TO_HAND -> BadgeReward(Partner.VELOLAC, Res.string.reward_bike)
         AchievementId.GOAL_REACHED -> BadgeReward(Partner.IMS, Res.string.reward_ims)
         AchievementId.GAVE_100 -> BadgeReward(Partner.WAMAZON, Res.string.reward_gift_50)
+        AchievementId.GAVE_50 -> BadgeReward(Partner.KOLIBRI, Res.string.reward_coffee)
+        AchievementId.GAVE_250 -> BadgeReward(Partner.PAGINA, Res.string.reward_book)
+        AchievementId.GAVE_500 -> BadgeReward(Partner.WAMAZON, Res.string.reward_gift_50)
+        AchievementId.GAVE_1000 -> BadgeReward(Partner.IMS, Res.string.reward_ims)
         AchievementId.THREE_AREAS -> BadgeReward(Partner.PAGINA, Res.string.reward_book)
         AchievementId.THANKS_3 -> BadgeReward(Partner.KOLIBRI, Res.string.reward_breakfast)
     }

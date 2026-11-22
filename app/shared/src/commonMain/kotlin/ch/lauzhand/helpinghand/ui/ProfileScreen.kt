@@ -188,7 +188,7 @@ private fun NeedCard(repo: HelpRepository, role: Role, person: Person, need: Nee
 private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: Need, notify: (String) -> Unit) {
     val canGive = need.status == NeedStatus.OPEN || need.status == NeedStatus.FUNDING
     val msgClaimed = stringResource(Res.string.feedback_claimed, need.title)
-    val msgHanded = stringResource(Res.string.feedback_handed_over, person.firstName)
+    val msgHanded = stringResource(Res.string.feedback_order_sent)
     val msgConfirmed = stringResource(Res.string.feedback_confirmed, person.firstName)
     val msgDelivered = stringResource(Res.string.feedback_delivered)
 
@@ -241,7 +241,11 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
             } else if (need.type == NeedType.SMALL && need.status == NeedStatus.CLAIMED &&
                 need.claimedByDonorId == ME_DONOR && !need.paid
             ) {
-                AppButton(onClick = { repo.markFulfilled(need.id); notify(msgHanded) }, modifier = BigButtonModifier) {
+                AppButton(
+                    onClick = { repo.requestHandover(need.id, ME_DONOR, repo.currentAccount?.name ?: ""); notify(msgHanded) },
+                    enabled = repo.orders.none { it.needId == need.id },
+                    modifier = BigButtonModifier,
+                ) {
                     Text(stringResource(Res.string.action_handed_over), style = MaterialTheme.typography.titleMedium)
                 }
             }
@@ -254,7 +258,7 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
                 }
             }
             if (need.status == NeedStatus.FULFILLED) {
-                AppButton(onClick = { repo.confirmReceived(need.id); notify(msgConfirmed); showMoment = true }, modifier = BigButtonModifier) {
+                AppButton(onClick = { repo.confirmDelivered(need.id); notify(msgConfirmed); showMoment = true }, modifier = BigButtonModifier) {
                     Text(stringResource(Res.string.action_confirm, person.firstName), style = MaterialTheme.typography.titleMedium)
                 }
             }

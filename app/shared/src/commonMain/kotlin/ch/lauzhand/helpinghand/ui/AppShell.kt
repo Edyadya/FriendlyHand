@@ -1,6 +1,7 @@
 package ch.lauzhand.helpinghand.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,6 +27,7 @@ class ShellState {
     var city by mutableStateOf(Cities.LAUSANNE)
     var menuOpen by mutableStateOf(false)
     var settingsPage by mutableStateOf<SettingsPage?>(null)
+    var pictureOpen by mutableStateOf(false)
 }
 
 /** Simple state-based navigation, no library. */
@@ -34,6 +36,9 @@ sealed interface Screen {
     data class Profile(val personId: String) : Screen
     data object Onboarding : Screen
     data object Rewards : Screen
+    data object Charities : Screen
+    data object Giveaways : Screen
+    data object Orders : Screen
     data class AddNeed(val personId: String) : Screen
 }
 
@@ -69,10 +74,21 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                 userLine = stringResource(Res.string.logged_in_as, account.name, stringResource(role.label())),
                 onOpenPage = { menuOpen = false; settingsPage = it },
                 onLogout = { menuOpen = false; repo.logout() },
+                accountName = account.name,
+                accountPhoto = repo.accountPhotoOf(account.id),
+                onProfilePicture = { menuOpen = false; shell.pictureOpen = true },
+                features = buildList {
+                    add(Res.string.menu_charities to { menuOpen = false; screen = Screen.Charities })
+                    if (role == Role.DONOR) add(Res.string.menu_giveaways to { menuOpen = false; screen = Screen.Giveaways })
+                    if (role == Role.VOLUNTEER) add(Res.string.menu_orders to { menuOpen = false; screen = Screen.Orders })
+                },
             )
         }
         Column(Modifier.fillMaxSize()) {
-            AppTopBar(onMenuClick = { menuOpen = !menuOpen }) {
+            AppTopBar(
+                onMenuClick = { menuOpen = !menuOpen },
+                profile = { AccountAvatar(account.name, repo.accountPhotoOf(account.id), 32.dp, Modifier.clickable { shell.pictureOpen = true }) },
+            ) {
                 if (wide) {
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }, modifier = Modifier.width(300.dp)) {
                         menuContent()
@@ -83,8 +99,8 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
             Column(Modifier.weight(1f).fillMaxWidth()) {
                 Box(Modifier.weight(1f).fillMaxWidth()) {
                     // Never show a screen the role isn't allowed on (same rule the role chips used).
-                    val allowed = !((role != Role.VOLUNTEER && (screen is Screen.Onboarding || screen is Screen.AddNeed)) ||
-                        (role != Role.DONOR && screen is Screen.Rewards))
+                    val allowed = !((role != Role.VOLUNTEER && (screen is Screen.Onboarding || screen is Screen.AddNeed || screen is Screen.Orders)) ||
+                        (role != Role.DONOR && (screen is Screen.Rewards || screen is Screen.Giveaways)))
                     when (val s = if (allowed) screen else Screen.Home) {
                         Screen.Home -> when (if (showTabs) tab else DonorTab.MAP) {
                             DonorTab.MAP -> HomeScreen(
@@ -96,7 +112,6 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                                 onRewards = { selectTab(DonorTab.ACHIEVEMENTS) },
                             )
                             DonorTab.CONTRIBUTIONS -> ContributionsScreen(repo, onOpenPerson = { screen = Screen.Profile(it) })
-                            DonorTab.CHARITIES -> CharitiesScreen(shell.city) { shell.city = it }
                             DonorTab.ACHIEVEMENTS -> AchievementsScreen(repo)
                         }
                         is Screen.Profile -> ProfileScreen(
@@ -105,6 +120,13 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                             onAddNeed = { screen = Screen.AddNeed(s.personId) },
                         )
                         Screen.Rewards -> RewardScreen(repo, onBack = { screen = Screen.Home })
+                        Screen.Charities -> CharitiesScreen(shell.city, { shell.city = it }, onBack = { screen = Screen.Home })
+                        Screen.Giveaways -> GiveawaysScreen(repo, onBack = { screen = Screen.Home })
+                        Screen.Orders -> OrdersScreen(
+                            repo, account.id, account.name,
+                            onBack = { screen = Screen.Home },
+                            onOpenPerson = { screen = Screen.Profile(it) },
+                        )
                         Screen.Onboarding -> OnboardingScreen(
                             repo,
                             onBack = { screen = Screen.Home },
@@ -121,6 +143,7 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
         }
         if (!wide) SettingsDrawer(open = menuOpen, onDismiss = { menuOpen = false }) { menuContent() }
         settingsPage?.let { SettingsPageDialog(it) { settingsPage = null } }
+        if (shell.pictureOpen) ProfilePictureDialog(repo, account) { shell.pictureOpen = false }
         }
     }
 }

@@ -3,10 +3,9 @@
     <string name="login_role_donor_info">Bring items or give money</string>
     <string name="login_role_volunteer_info">Meet people, list what they need and deliver paid items</string>
     <string name="login_name">Your name</string>
-    <string name="login_code">Access code</string>
-    <string name="login_code_hint">Demo code: %1$s</string>
+    <string name="login_code">Password</string>
     <string name="login_button">Log in</string>
-    <string name="login_wrong_code">Wrong access code. Please check it and try again.</string>
+    <string name="login_wrong_code">Wrong password. Please check it and try again.</string>
     <string name="login_no_connection">Can’t reach the server. Check the connection and try again.</string>
     <string name="logged_in_as">%1$s · %2$s</string>
     <string name="logout">Log out / switch user</string>
@@ -16,4 +15,7 @@
     <string name="footer_imc">IMC</string>
     <string name="footer_built_with">Built with</string>
     <string name="footer_kotlin">Kotlin Multiplatform</string>
+    <string name="login_guest">Continue as guest</string>
+    <string name="login_guest_name">Guest</string>
+    <string name="login_guest_hint">No account needed. Your help is saved on this device for this visit.</string>
 </resources>

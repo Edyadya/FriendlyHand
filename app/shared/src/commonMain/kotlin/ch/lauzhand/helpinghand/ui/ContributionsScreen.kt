@@ -54,6 +54,10 @@ private fun StageDot(stage: Stage) {
 @Composable
 fun ContributionsScreen(repo: HelpRepository, onOpenPerson: (String) -> Unit) {
     val contributions = repo.contributionsOf(ME_DONOR).sortedByDescending { it.atMillis }
+    val giveawayPayments = repo.giveawayContributionsOf(ME_DONOR)
+    // everything the patron did, newest first: help for people, and payments towards giveaways
+    val timeline: List<Pair<Long, Any>> = (contributions.map { it.atMillis to (it as Any) } + giveawayPayments.map { it.atMillis to (it as Any) })
+        .sortedByDescending { it.first }
     val needById = repo.needs.associateBy { it.id }
     val personById = repo.people.associateBy { it.id }
     val helpedPeople = contributions.mapNotNull { needById[it.needId]?.personId }.toSet().size
@@ -66,7 +70,7 @@ fun ContributionsScreen(repo: HelpRepository, onOpenPerson: (String) -> Unit) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(stringResource(Res.string.contrib_title), style = MaterialTheme.typography.headlineSmall)
-                if (contributions.isNotEmpty()) {
+                if (timeline.isNotEmpty()) {
                     Text(
                         if (helpedPeople == 1) stringResource(Res.string.contrib_summary_one)
                         else stringResource(Res.string.contrib_summary_many, helpedPeople),
@@ -76,7 +80,7 @@ fun ContributionsScreen(repo: HelpRepository, onOpenPerson: (String) -> Unit) {
                 }
             }
         }
-        if (contributions.isEmpty()) {
+        if (timeline.isEmpty()) {
             item {
                 Text(
                     stringResource(Res.string.contrib_empty),
@@ -85,15 +89,21 @@ fun ContributionsScreen(repo: HelpRepository, onOpenPerson: (String) -> Unit) {
                 )
             }
         }
-        itemsIndexed(contributions, key = { i, c -> "${c.needId}-${c.atMillis}-$i" }) { _, c ->
-            val need = needById[c.needId] ?: return@itemsIndexed
-            ContributionCard(c, need, personById[need.personId]) { onOpenPerson(need.personId) }
+        itemsIndexed(timeline, key = { i, e -> "${e.first}-$i" }) { _, entry ->
+            when (val item = entry.second) {
+                is Contribution -> {
+                    val need = needById[item.needId] ?: return@itemsIndexed
+                    val order = repo.orders.firstOrNull { it.needId == need.id }
+                    ContributionCard(item, need, personById[need.personId], order) { onOpenPerson(need.personId) }
+                }
+                is GiveawayContribution -> GiveawayPaymentCard(item, repo.giveaways.firstOrNull { it.id == item.giveawayId })
+            }
         }
     }
 }
 
 @Composable
-private fun ContributionCard(c: Contribution, need: Need, person: Person?, onClick: () -> Unit) {
+private fun ContributionCard(c: Contribution, need: Need, person: Person?, order: DeliveryOrder?, onClick: () -> Unit) {
     Card(
         Modifier.fillMaxWidth().clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -104,6 +114,14 @@ private fun ContributionCard(c: Contribution, need: Need, person: Person?, onCli
                 stringResource(Res.string.contrib_person_need, person?.firstName.orEmpty(), need.title),
                 style = MaterialTheme.typography.titleLarge,
             )
+            // the date stamp
+            if (c.atMillis > 0) {
+                Text(
+                    stringResource(Res.string.contrib_on_date, formatDate(c.atMillis)),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Text(
                 when (c.kind) {
                     ContributionKind.BROUGHT -> stringResource(Res.string.contrib_brought)
@@ -128,6 +146,27 @@ private fun ContributionCard(c: Contribution, need: Need, person: Person?, onCli
                 )
             }
             StageDot(need.status.stage())
+            // the hand-over: which volunteer has the order
+            order?.let {
+                Text(it.status.line(it, person?.firstName.orEmpty()), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+            }
+        }
+    }
+}
+
+@Composable
+private fun GiveawayPaymentCard(c: GiveawayContribution, giveaway: Giveaway?) {
+    Card(
+        Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(giveaway?.brand.orEmpty(), style = MaterialTheme.typography.titleLarge)
+            if (c.atMillis > 0) {
+                Text(stringResource(Res.string.contrib_on_date, formatDate(c.atMillis)), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Text(stringResource(Res.string.giveaway_contribution_line, c.amountChf, giveaway?.title.orEmpty()), style = MaterialTheme.typography.bodyLarge)
         }
     }
 }

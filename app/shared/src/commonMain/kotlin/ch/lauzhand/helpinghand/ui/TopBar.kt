@@ -27,7 +27,7 @@ import org.jetbrains.compose.resources.stringResource
  * [menuAnchor] is drawn inside the same box as the icon, so a drop-down menu appears right under it.
  */
 @Composable
-fun AppTopBar(onMenuClick: () -> Unit, modifier: Modifier = Modifier, menuAnchor: @Composable () -> Unit = {}) {
+fun AppTopBar(onMenuClick: () -> Unit, modifier: Modifier = Modifier, profile: @Composable () -> Unit = {}, menuAnchor: @Composable () -> Unit = {}) {
     val label = stringResource(Res.string.settings_open_description)
     Row(
         modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp).heightIn(min = 48.dp),
@@ -35,6 +35,8 @@ fun AppTopBar(onMenuClick: () -> Unit, modifier: Modifier = Modifier, menuAnchor
     ) {
         Image(painterResource(Res.drawable.logo), contentDescription = null, modifier = Modifier.size(30.dp))
         Spacer(Modifier.weight(1f))
+        profile()
+        Spacer(Modifier.width(4.dp))
         Box {
             // 48 dp touch target around the 24 dp icon
             Box(
