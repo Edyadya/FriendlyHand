@@ -60,6 +60,8 @@ fun SettingsMenuContent(
     onProfilePicture: () -> Unit = {},
     /** Screens opened from the menu (charities, giveaways, ...): a label and what to do. */
     features: List<Pair<StringResource, () -> Unit>> = emptyList(),
+    /** Divider lines around the [features] (between Dark mode and them, and between them and the pages below). */
+    featureDividers: Boolean = true,
 ) {
     val settings = LocalAppSettings.current
     Column(modifier) {
@@ -113,11 +115,11 @@ fun SettingsMenuContent(
                 Text(stringResource(Res.string.settings_dark_mode), Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
                 Switch(checked = MaterialTheme.isDark, onCheckedChange = { settings.chooseDarkMode(it) })
             }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            if (featureDividers) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
 
         features.forEach { (label, onClick) -> MenuRow(label, onClick = onClick) }
-        if (features.isNotEmpty()) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        if (features.isNotEmpty() && featureDividers) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         MenuRow(Res.string.settings_partners) { onOpenPage(SettingsPage.PARTNERS) }
         MenuRow(Res.string.settings_terms) { onOpenPage(SettingsPage.TERMS) }

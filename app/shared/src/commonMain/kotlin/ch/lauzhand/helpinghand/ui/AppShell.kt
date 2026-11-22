@@ -79,6 +79,8 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                 accountName = account.name,
                 accountPhoto = repo.accountPhotoOf(account.id),
                 onProfilePicture = { menuOpen = false; shell.pictureOpen = true },
+                // volunteers have just one entry there (Charities), which reads better without divider lines around it
+                featureDividers = role != Role.VOLUNTEER,
                 features = buildList {
                     add(Res.string.menu_charities to { menuOpen = false; screen = Screen.Charities })
                     if (role == Role.DONOR) add(Res.string.menu_giveaways to { menuOpen = false; screen = Screen.Giveaways })
