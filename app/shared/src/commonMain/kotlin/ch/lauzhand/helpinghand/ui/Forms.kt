@@ -32,6 +32,8 @@ fun OnboardingScreen(
     var usualTime by remember { mutableStateOf("") }
     var ownWords by remember { mutableStateOf("") }
     var consent by remember { mutableStateOf(false) }
+    var photoConsent by remember { mutableStateOf(false) }
+    var photo by remember { mutableStateOf<String?>(null) }
 
     val canSave = consent && firstName.isNotBlank() && zoneId != null
 
@@ -71,6 +73,13 @@ fun OnboardingScreen(
             Checkbox(consent, { consent = it })
             Text(stringResource(Res.string.consent_text), style = MaterialTheme.typography.bodyLarge)
         }
+        // a photo has its own, separate consent
+        PhotoSection(
+            consent = photoConsent,
+            photo = photo,
+            onConsentChange = { photoConsent = it; if (!it) photo = null },
+            onPhotoChange = { photo = it },
+        )
         AppButton(
             onClick = {
                 val id = newId("p")
@@ -84,6 +93,8 @@ fun OnboardingScreen(
                         ownWords = ownWords.trim().ifBlank { null },
                         consentGiven = true,
                         createdByVolunteerId = ME_VOLUNTEER,
+                        photo = photo.takeIf { photoConsent },
+                        photoConsent = photoConsent,
                     )
                 )
                 onSaved(id)

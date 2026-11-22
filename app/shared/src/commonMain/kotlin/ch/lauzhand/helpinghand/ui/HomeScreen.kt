@@ -35,6 +35,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import ch.lauzhand.helpinghand.location.LocationStatus
 import ch.lauzhand.helpinghand.location.rememberUserLocation
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
 import ch.lauzhand.helpinghand.map.peopleInZone
@@ -223,12 +225,17 @@ private fun PersonBubble(repo: HelpRepository, person: Person, index: Int, onCli
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
+        val photo = rememberPersonPhoto(person)
         Box(
             Modifier.size(72.dp).clip(CircleShape).background(bg)
                 .border(3.dp, colors.surface, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            Text(person.firstName.take(1).uppercase(), style = MaterialTheme.typography.headlineMedium, color = fg)
+            if (photo != null) {
+                Image(photo, contentDescription = null, modifier = Modifier.size(72.dp), contentScale = ContentScale.Crop)
+            } else {
+                Text(person.firstName.take(1).uppercase(), style = MaterialTheme.typography.headlineMedium, color = fg)
+            }
         }
         Text(
             person.age?.let { stringResource(Res.string.person_age, person.firstName, it) } ?: person.firstName,

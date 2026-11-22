@@ -70,6 +70,8 @@ fun ProfileScreen(
         item { TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) } }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                // their photo, only if they consented to it
+                if (person.photoConsent && person.photo != null) PersonAvatar(person, 96.dp)
                 Text(person.firstName, style = MaterialTheme.typography.headlineMedium)
                 Text(
                     stringResource(Res.string.zone_time, zoneName, person.usualTime),
@@ -88,6 +90,16 @@ fun ProfileScreen(
         }
         if (role == Role.VOLUNTEER) {
             item { LastSeenSection(repo, role, person, zoneOf(repo, person)) { notify(lastSeenSaved) } }
+        }
+        if (role == Role.VOLUNTEER) {
+            item {
+                PhotoSection(
+                    consent = person.photoConsent,
+                    photo = person.photo,
+                    onConsentChange = { consent -> repo.setPhoto(person.id, if (consent) person.photo else null, consent) },
+                    onPhotoChange = { repo.setPhoto(person.id, it, consent = true) },
+                )
+            }
         }
         item { Text(stringResource(Res.string.needs_title), style = MaterialTheme.typography.titleLarge) }
         if (needs.isEmpty()) {

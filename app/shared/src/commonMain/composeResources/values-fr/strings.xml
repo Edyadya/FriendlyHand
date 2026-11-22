@@ -77,4 +77,11 @@
     <string name="last_seen_exact_hint">Enregistre votre position exacte comme lieu où vous l'avez vu, pour que le prochain bénévole puisse le retrouver. Seuls les bénévoles peuvent la voir.</string>
     <string name="last_seen_no_location">Activez la localisation pour enregistrer le lieu exact.</string>
     <string name="last_seen_demo_note">Cet appareil n'a pas de localisation : une position de démonstration est utilisée.</string>
+    <string name="photo_title">Photo</string>
+    <string name="photo_consent">Elle accepte que sa photo soit montrée dans l'application</string>
+    <string name="photo_consent_hint">Une photo ne peut être ajoutée, et n'est montrée, qu'avec son propre accord. Sans accord, toute photo est supprimée.</string>
+    <string name="photo_add">Ajouter une photo</string>
+    <string name="photo_replace">Remplacer la photo</string>
+    <string name="photo_remove">Supprimer la photo</string>
+    <string name="photo_unsupported">L'ajout de photos n'est pas encore disponible sur cet appareil.</string>
 </resources>

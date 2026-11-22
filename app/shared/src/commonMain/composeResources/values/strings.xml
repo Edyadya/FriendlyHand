@@ -77,4 +77,11 @@
     <string name="last_seen_exact_hint">Saves your exact position as the spot where you saw them, so the next volunteer can find them. Only volunteers can see it.</string>
     <string name="last_seen_no_location">Turn on location to save the exact spot.</string>
     <string name="last_seen_demo_note">This device has no location, so a demo position is used.</string>
+    <string name="photo_title">Photo</string>
+    <string name="photo_consent">They agree to have their photo shown in the app</string>
+    <string name="photo_consent_hint">A photo can only be added, and is only shown, with their own consent. Without it, any photo is removed.</string>
+    <string name="photo_add">Add a photo</string>
+    <string name="photo_replace">Replace the photo</string>
+    <string name="photo_remove">Remove the photo</string>
+    <string name="photo_unsupported">Adding photos is not available on this device yet.</string>
 </resources>
