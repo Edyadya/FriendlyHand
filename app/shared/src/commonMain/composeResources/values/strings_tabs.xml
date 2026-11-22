@@ -47,4 +47,16 @@
     <string name="hero_pending">%1$d waiting for a volunteer to verify</string>
     <string name="badge_pending">Pending verification</string>
     <string name="badge_pending_hint">Delivered. It unlocks when a volunteer verifies it.</string>
+    <string name="tab_charities">Charities</string>
+    <string name="charities_title">Reputable charities nearby</string>
+    <string name="charities_intro">Established organisations in the Lausanne area that help people in need. You give directly to them, on their own website.</string>
+    <string name="charity_donate">Donate or help</string>
+    <string name="charity_caritas_name">Caritas Vaud</string>
+    <string name="charity_caritas_desc">A non-profit working for and with people in social or economic hardship, to improve their living conditions and help them take part in society. In Lausanne it runs the Épiceries Caritas and the regional food centre.</string>
+    <string name="charity_solidere_name">Solid-ère</string>
+    <string name="charity_solidere_desc">A Lausanne association, active since 2020, that runs a free grocery shop at La Bourdonnette for more than 350 people a week. Food is given out without conditions, mostly by volunteers.</string>
+    <string name="charity_cartons_name">Cartons du Cœur Lausanne</string>
+    <string name="charity_cartons_desc">Free parcels of basic food for people in need. The organisation depends entirely on the solidarity and generosity of the public.</string>
+    <string name="charity_cultive_name">Cultive toi</string>
+    <string name="charity_cultive_desc">A Lausanne association, active since 2018, that fights food waste: it harvests unused fruit and vegetables, turns them into preserves in workshops and sells them to fund its work, combining ecology and social inclusion.</string>
 </resources>

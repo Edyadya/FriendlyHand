@@ -19,10 +19,11 @@ import helpinghand.app.shared.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** The donor's three main tabs. */
+/** The donor's main tabs. */
 enum class DonorTab(val label: StringResource) {
     CONTRIBUTIONS(Res.string.tab_contributions),
     MAP(Res.string.tab_map),
+    CHARITIES(Res.string.tab_charities),
     ACHIEVEMENTS(Res.string.tab_achievements),
 }
 
@@ -66,6 +67,7 @@ private fun TabIcon(tab: DonorTab) {
         when (tab) {
             DonorTab.CONTRIBUTIONS -> drawList(color, w)
             DonorTab.MAP -> drawPin(color, w)
+            DonorTab.CHARITIES -> drawHeart(color, w)
             DonorTab.ACHIEVEMENTS -> drawMedal(color, w)
         }
     }
@@ -102,4 +104,20 @@ private fun DrawScope.drawMedal(color: Color, w: Float) {
     drawLine(color, Offset(size.width * 0.7f, size.height * 0.08f), Offset(cx, size.height * 0.42f), w, StrokeCap.Round)
     drawCircle(color, size.width * 0.24f, Offset(cx, size.height * 0.66f), style = Stroke(w))
     drawCircle(color, size.width * 0.08f, Offset(cx, size.height * 0.66f))
+}
+
+// a heart: the charities tab
+private fun DrawScope.drawHeart(color: Color, w: Float) {
+    fun p(x: Float, y: Float) = Offset(size.width * x, size.height * y)
+    val heart = Path().apply {
+        moveTo(p(0.5f, 0.88f).x, p(0.5f, 0.88f).y)
+        cubicTo(p(0.12f, 0.6f).x, p(0.12f, 0.6f).y, p(0.05f, 0.38f).x, p(0.05f, 0.38f).y, p(0.05f, 0.3f).x, p(0.05f, 0.3f).y)
+        cubicTo(p(0.05f, 0.16f).x, p(0.05f, 0.16f).y, p(0.2f, 0.1f).x, p(0.2f, 0.1f).y, p(0.3f, 0.1f).x, p(0.3f, 0.1f).y)
+        cubicTo(p(0.4f, 0.1f).x, p(0.4f, 0.1f).y, p(0.47f, 0.17f).x, p(0.47f, 0.17f).y, p(0.5f, 0.25f).x, p(0.5f, 0.25f).y)
+        cubicTo(p(0.53f, 0.17f).x, p(0.53f, 0.17f).y, p(0.6f, 0.1f).x, p(0.6f, 0.1f).y, p(0.7f, 0.1f).x, p(0.7f, 0.1f).y)
+        cubicTo(p(0.8f, 0.1f).x, p(0.8f, 0.1f).y, p(0.95f, 0.16f).x, p(0.95f, 0.16f).y, p(0.95f, 0.3f).x, p(0.95f, 0.3f).y)
+        cubicTo(p(0.95f, 0.38f).x, p(0.95f, 0.38f).y, p(0.88f, 0.6f).x, p(0.88f, 0.6f).y, p(0.5f, 0.88f).x, p(0.5f, 0.88f).y)
+        close()
+    }
+    drawPath(heart, color, style = Stroke(w))
 }
