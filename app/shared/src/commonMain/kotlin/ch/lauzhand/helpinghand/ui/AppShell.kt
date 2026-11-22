@@ -1,15 +1,5 @@
 package ch.lauzhand.helpinghand.ui
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -43,9 +33,6 @@ class ShellState {
     var settingsPage by mutableStateOf<SettingsPage?>(null)
     var pictureOpen by mutableStateOf(false)
 }
-
-/** What is on screen: the screen, and for Home which bottom tab (null for other screens). Used for the transitions. */
-private data class ShellDest(val screen: Screen, val tab: DonorTab?)
 
 /** Simple state-based navigation, no library. */
 sealed interface Screen {
@@ -112,30 +99,8 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                     // Never show a screen the role isn't allowed on (same rule the role chips used).
                     val allowed = !((role != Role.VOLUNTEER && (screen is Screen.Onboarding || screen is Screen.AddNeed)) ||
                         (role != Role.DONOR && (screen is Screen.Rewards || screen is Screen.Giveaways)))
-                    val shown = if (allowed) screen else Screen.Home
-                    val reduceMotion = rememberReduceMotion()
-                    // Smooth changes: between the bottom tabs the page slides a little in the direction of the tab and
-                    // fades; opening or leaving a screen (a profile, a form) cross-fades. No motion if reduced.
-                    AnimatedContent(
-                        targetState = ShellDest(shown, if (shown == Screen.Home) tab else null),
-                        transitionSpec = {
-                            val from = initialState.tab
-                            val to = targetState.tab
-                            when {
-                                reduceMotion -> EnterTransition.None togetherWith ExitTransition.None
-                                from != null && to != null && from != to -> {
-                                    val dir = if (to.ordinal > from.ordinal) 1 else -1
-                                    (slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { it / 6 * dir } + fadeIn(tween(240, delayMillis = 60))) togetherWith
-                                        (slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -it / 6 * dir } + fadeOut(tween(140)))
-                                }
-                                else -> fadeIn(tween(240, delayMillis = 60)) togetherWith fadeOut(tween(140))
-                            }
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        label = "screen",
-                    ) { dest ->
-                    when (val s = dest.screen) {
-                        Screen.Home -> when (dest.tab ?: DonorTab.MAP) {
+                    when (val s = if (allowed) screen else Screen.Home) {
+                        Screen.Home -> when (tab) {
                             DonorTab.MAP -> HomeScreen(
                                 repo, role,
                                 city = shell.city,
@@ -168,7 +133,6 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                             repo, s.personId,
                             onDone = { screen = Screen.Profile(s.personId) },
                         )
-                    }
                     }
                 }
                 if (showTabs) DonorBottomBar(tab, selectTab)
