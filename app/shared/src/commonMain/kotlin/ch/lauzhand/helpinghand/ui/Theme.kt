@@ -44,6 +44,8 @@ class AppColors(
     /** The brand navy: stat panels, unlocked badge cards. Same in light and dark. */
     val navy: Color,
     val onNavy: Color,
+    /** Volunteer map bubbles (teal), white text on it. Same in light and dark. */
+    val volunteer: Color,
     /** Raised cards (dark theme uses a lighter blue). */
     val surfaceHigh: Color,
     val onSurfaceHigh: Color,
@@ -68,6 +70,7 @@ private val LightApp = AppColors(
     gold = Gold, onGold = Navy,
     success = Color(0xFF2E9E6B), onSuccess = Navy,
     navy = Navy, onNavy = Color(0xFFFFFFFF),
+    volunteer = Color(0xFF1F7A8C),
     surfaceHigh = Color(0xFFFFFFFF), onSurfaceHigh = Navy,
     locked = Color(0xFFC9D3E8), lockedContent = Color(0xFF7A88A8),
     navUnselected = Color(0xFF7A88A8),
@@ -80,6 +83,7 @@ private val DarkApp = AppColors(
     gold = Gold, onGold = Navy,
     success = Color(0xFF4CC38A), onSuccess = Navy,
     navy = Navy, onNavy = Color(0xFFFFFFFF),
+    volunteer = Color(0xFF1F7A8C),
     surfaceHigh = Color(0xFF103F9B), onSurfaceHigh = Color(0xFFF4F7FE),
     locked = Color(0xFF2A3F73), lockedContent = Color(0xFF8EA0C8),
     navUnselected = Color(0xFF8EA0C8),

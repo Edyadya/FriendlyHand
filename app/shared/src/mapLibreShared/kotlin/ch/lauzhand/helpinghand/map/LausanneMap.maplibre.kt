@@ -1,6 +1,5 @@
 package ch.lauzhand.helpinghand.map
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -17,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import ch.lauzhand.helpinghand.location.UserLocation
 import ch.lauzhand.helpinghand.model.*
 import ch.lauzhand.helpinghand.ui.app
+import ch.lauzhand.helpinghand.ui.isDark
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -77,6 +77,31 @@ actual fun LausanneMap(
     city: City,
     onMapClick: ((lat: Double, lng: Double) -> Unit)?,
 ) {
+    // The base map follows the APP's dark-mode switch (not only the system setting). A new style means a new map,
+    // so it is rebuilt when the theme flips, starting from where the camera was.
+    val dark = MaterialTheme.isDark
+    val camera = remember { arrayOfNulls<CameraPosition>(1) }
+    key(dark) {
+        LausanneMapStyled(zones, people, needs, role, onZoneClick, onPersonClick, modifier, userLocation, centreOnUser, city, onMapClick, dark, camera)
+    }
+}
+
+@Composable
+private fun LausanneMapStyled(
+    zones: List<Zone>,
+    people: List<Person>,
+    needs: List<Need>,
+    role: Role,
+    onZoneClick: (zoneId: String) -> Unit,
+    onPersonClick: (personId: String) -> Unit,
+    modifier: Modifier,
+    userLocation: UserLocation?,
+    centreOnUser: Int,
+    city: City,
+    onMapClick: ((lat: Double, lng: Double) -> Unit)?,
+    dark: Boolean,
+    camera: Array<CameraPosition?>,
+) {
     val onZone by rememberUpdatedState(onZoneClick)
     val zonesNow by rememberUpdatedState(zones)
     val cityNow by rememberUpdatedState(city)
@@ -117,15 +142,15 @@ actual fun LausanneMap(
     val pulse by remember { derivedStateOf { (pulseRaw * 16).toInt() / 16f } }
 
     val zoneColor = MaterialTheme.app.accent                     // the user's own position stays accent blue
-    // The area bubbles have a colour per role, both from the colour scheme: patrons accent blue, volunteers success green
-    val bubbleColor = if (role == Role.VOLUNTEER) MaterialTheme.app.success else MaterialTheme.app.accent
+    // The area bubbles have a colour per role, both from the colour scheme: patrons accent blue, volunteers teal
+    val bubbleColor = if (role == Role.VOLUNTEER) MaterialTheme.app.volunteer else MaterialTheme.app.accent
     val outline = MaterialTheme.app.onNavy                       // white ring
     val labelColor = MaterialTheme.app.onNavy                    // white number (large and bold, so 3.8:1 is enough)
-    val styleUrl = if (isSystemInDarkTheme()) STYLE_DARK else STYLE_LIGHT
+    val styleUrl = if (dark) STYLE_DARK else STYLE_LIGHT
 
     val state = rememberMapState(
         baseStyle = BaseStyle.Uri(styleUrl),
-        initialCameraPosition = CameraPosition(center = city.overview(), zoom = city.zoom),
+        initialCameraPosition = camera[0] ?: CameraPosition(center = city.overview(), zoom = city.zoom),
     ) {
         val mapState = LocalMapState.current
         val zoneSource = rememberGeoJsonSource(GeoJsonData.Features(zoneData))
@@ -190,6 +215,9 @@ actual fun LausanneMap(
             strokeWidth = const(3.dp),
         )
     }
+    // remember where the camera is, for when the map is rebuilt in the other theme
+    LaunchedEffect(Unit) { snapshotFlow { state.cameraPosition }.collect { camera[0] = it } }
+
     // Another city was chosen: fly there (not on the first frame, the map starts there already).
     var shownCity by remember { mutableStateOf(city.id) }
     LaunchedEffect(city.id) {
@@ -221,8 +249,8 @@ actual fun LausanneMap(
             Modifier.align(Alignment.BottomEnd).padding(4.dp),
             Alignment.BottomEnd,
             expandedStyle = expanded.copy(
-                containerColor = expanded.containerColor.copy(alpha = 0.4f),
-                contentColor = expanded.contentColor.copy(alpha = 0.7f),
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f),
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 textStyle = expanded.textStyle.copy(fontSize = 9.sp),
             ),
         )
