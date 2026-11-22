@@ -70,7 +70,7 @@ fun ContributionsScreen(repo: HelpRepository, onOpenPerson: (String) -> Unit) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(stringResource(Res.string.contrib_title), style = MaterialTheme.typography.headlineSmall)
-                if (timeline.isNotEmpty()) {
+                if (helpedPeople > 0) {
                     Text(
                         if (helpedPeople == 1) stringResource(Res.string.contrib_summary_one)
                         else stringResource(Res.string.contrib_summary_many, helpedPeople),
