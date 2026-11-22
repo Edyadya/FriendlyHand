@@ -10,7 +10,7 @@
     <string name="settings_about">À propos de nous</string>
     <string name="settings_close">Fermer</string>
     <string name="partner_imc_name">IMC</string>
-    <string name="partner_imc_desc">Partenaire du hackathon. IMC est une société de trading internationale qui utilise la technologie et les données pour améliorer le fonctionnement des marchés financiers.</string>
+    <string name="partner_imc_desc">IMC est une société de trading internationale qui utilise la technologie et les données pour améliorer le fonctionnement des marchés financiers.</string>
     <string name="partner_jetbrains_name">JetBrains</string>
     <string name="partner_jetbrains_desc">Les créateurs de Kotlin, le langage avec lequel cette application est développée.</string>
     <string name="terms_body">Ces conditions générales sont un texte provisoire pour la démonstration. Elles seront remplacées avant une utilisation réelle de l'application.\n\nMain tendue n'inscrit une personne qu'avec son accord, n'affiche que son prénom et le quartier où elle se trouve d'habitude, et ne montre jamais de position exacte aux mécènes. Merci d'utiliser l'application avec respect.</string>
