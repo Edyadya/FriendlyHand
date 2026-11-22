@@ -40,7 +40,7 @@ fun GoalsHero(completed: Int, modifier: Modifier = Modifier, pending: Int = 0, g
     val app = MaterialTheme.app
     val shown by animateIntAsState(completed.coerceAtMost(goal), tween(900))
     Column(
-        modifier.fillMaxWidth().background(app.navy, AppShape.card).padding(20.dp),
+        modifier.fillMaxWidth().darkOutline(AppShape.card).background(app.navy, AppShape.card).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(10.dp)) {

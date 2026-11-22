@@ -111,6 +111,7 @@ private fun BadgeCard(a: Achievement, onClick: () -> Unit) {
     val sub = if (a.unlocked) app.onNavy else colors.onSurface
     Column(
         Modifier.fillMaxWidth().heightIn(min = 170.dp)
+            .darkOutline(AppShape.card)
             .clip(AppShape.card)
             .background(container)
             .clickable(onClick = onClick)
@@ -142,8 +143,9 @@ private fun BadgeCard(a: Achievement, onClick: () -> Unit) {
                 LinearProgressIndicator(
                     progress = { a.progress.toFloat() / a.target },
                     modifier = Modifier.weight(1f).height(6.dp),
-                    color = app.accent,
-                    trackColor = colors.surface,
+                    // dark mode: a light track with a navy fill, both clearly apart from the locked card (4.5:1 and 7.6:1)
+                    color = if (MaterialTheme.isDark) app.navy else app.accent,
+                    trackColor = if (MaterialTheme.isDark) colors.outline else colors.surface,
                 )
                 Text(
                     stringResource(Res.string.badge_progress, a.progress, a.target),
@@ -224,7 +226,7 @@ private fun PartnerMonogram(p: Partner, modifier: Modifier) {
 private fun PlatformHelped(count: Int) {
     val colors = MaterialTheme.colorScheme
     Row(
-        Modifier.fillMaxWidth().background(colors.primaryContainer, AppShape.card).padding(horizontal = 16.dp, vertical = 14.dp),
+        Modifier.fillMaxWidth().darkOutline(AppShape.card).background(colors.primaryContainer, AppShape.card).padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {

@@ -144,7 +144,7 @@ private fun LausanneMapStyled(
 
     val zoneColor = MaterialTheme.app.accent                     // the user's own position stays accent blue
     // The area bubbles have a colour per role, both from the colour scheme: patrons accent blue, volunteers teal
-    val bubbleColor = if (role == Role.VOLUNTEER) MaterialTheme.app.volunteer else MaterialTheme.app.accent
+    val bubbleColor = if (role == Role.VOLUNTEER) MaterialTheme.app.volunteer else MaterialTheme.app.bubble
     val outline = MaterialTheme.app.onNavy                       // white ring
     val labelColor = MaterialTheme.app.onNavy                    // white number (large and bold, so 3.8:1 is enough)
     val styleUrl = MapStyles.forTheme(dark)

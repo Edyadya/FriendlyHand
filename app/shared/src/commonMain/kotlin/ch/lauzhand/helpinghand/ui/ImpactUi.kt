@@ -26,7 +26,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun ImpactStrip(impact: CommunityImpact, modifier: Modifier = Modifier, animate: Boolean = false, title: String? = stringResource(Res.string.impact_title)) {
     Column(
-        modifier.fillMaxWidth().background(MaterialTheme.app.navy, MaterialTheme.shapes.large).padding(horizontal = 12.dp, vertical = 16.dp),
+        modifier.fillMaxWidth().darkOutline(MaterialTheme.shapes.large).background(MaterialTheme.app.navy, MaterialTheme.shapes.large).padding(horizontal = 12.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         title?.let {
