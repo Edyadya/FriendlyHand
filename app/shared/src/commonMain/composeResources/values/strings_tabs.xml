@@ -76,8 +76,6 @@
     <string name="badge_gave_250_desc">Pay or give CHF 250 in total</string>
     <string name="badge_gave_500">CHF 500 given</string>
     <string name="badge_gave_500_desc">Pay or give CHF 500 in total</string>
-    <string name="badge_gave_1000">CHF 1000 given</string>
-    <string name="badge_gave_1000_desc">Pay or give CHF 1000 in total</string>
     <string name="giveaways_title">Giveaways</string>
     <string name="giveaways_intro">Brands offer their leftover goods for free. You pay for the logistics (collection, sorting and transport), and volunteers hand the goods out to people in need.</string>
     <string name="giveaway_demo">Example offer for the demo. The brand has not agreed to this.</string>
@@ -181,4 +179,6 @@
     <string name="group_delivering">Delivering</string>
     <string name="group_reaching">Reaching out</string>
     <string name="group_handing">Hand-overs and shopping</string>
+    <string name="badge_giveaway">Giveaway supporter</string>
+    <string name="badge_giveaway_desc">Pay towards the logistics of a brand giveaway</string>
 </resources>

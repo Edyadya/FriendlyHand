@@ -15,16 +15,16 @@ People are only ever shown by **area**, never at an exact spot. Only volunteers 
 
 It runs on **Android, the web (JS and Wasm) and desktop**, with an optional **Ktor server**, all from one Kotlin Multiplatform codebase.
 
-## Demo access codes
+## Demo login
 
 On the login screen you pick a role and enter your name:
 
-| Role      | Access code     |
-|-----------|-----------------|
-| Donor     | none            |
-| Volunteer | `LAUSANNE-2026` |
+| Role      | Password                                          |
+|-----------|---------------------------------------------------|
+| Patron    | none (enter a name, or press "Continue as guest") |
+| Volunteer | `1234`                                            |
 
-The codes are shown as a hint on the login screen, because this is a hackathon demo. They're defined in one place: `core/.../model/Access.kt` (`AccessCodes`).
+The password is not shown on the login screen, and what you type is hidden. It's defined in one place: `core/.../model/Access.kt` (`AccessCodes`). "Patron" is the name the app shows for the donor role, which is still called `DONOR` in the code.
 
 ## Fake or Remote data
 
@@ -79,7 +79,7 @@ server/        Ktor (JVM)
 **`core` (commonMain)** holds the logic the apps and the server must agree on:
 - `Models.kt`: the `@Serializable` data classes (`Person`, `Need`, `Zone`, `Account`…) and the request/response bodies of the API. These classes are both the app's model and the JSON format.
 - `NeedRules.kt`: the status changes (`claimedBy`, `withDonation`, `fulfilled`, `confirmed`). Both `FakeRepository` and the server use them, so the rules are the same everywhere.
-- `Access.kt`: the access codes and the last-seen privacy rules.
+- `Access.kt`: the volunteer password and the last-seen privacy rules.
 - `Seed.kt`: the demo data that both the Fake repository and the server start with.
 
 **`app/shared` commonMain** holds everything the user sees, written once for all platforms:

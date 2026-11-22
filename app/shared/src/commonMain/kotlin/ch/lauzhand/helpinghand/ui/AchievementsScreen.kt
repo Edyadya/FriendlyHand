@@ -42,7 +42,7 @@ internal fun AchievementId.title(): StringResource = when (this) {
     AchievementId.GAVE_50 -> Res.string.badge_gave_50
     AchievementId.GAVE_250 -> Res.string.badge_gave_250
     AchievementId.GAVE_500 -> Res.string.badge_gave_500
-    AchievementId.GAVE_1000 -> Res.string.badge_gave_1000
+    AchievementId.GIVEAWAY_SUPPORTER -> Res.string.badge_giveaway
     AchievementId.THREE_AREAS -> Res.string.badge_three_areas
     AchievementId.THANKS_3 -> Res.string.badge_thanks_3
 }
@@ -57,7 +57,7 @@ internal fun AchievementId.description(): StringResource = when (this) {
     AchievementId.GAVE_50 -> Res.string.badge_gave_50_desc
     AchievementId.GAVE_250 -> Res.string.badge_gave_250_desc
     AchievementId.GAVE_500 -> Res.string.badge_gave_500_desc
-    AchievementId.GAVE_1000 -> Res.string.badge_gave_1000_desc
+    AchievementId.GIVEAWAY_SUPPORTER -> Res.string.badge_giveaway_desc
     AchievementId.THREE_AREAS -> Res.string.badge_three_areas_desc
     AchievementId.THANKS_3 -> Res.string.badge_thanks_3_desc
 }
@@ -72,7 +72,7 @@ internal fun AchievementId.glyph(): BadgeGlyph = when (this) {
     AchievementId.GAVE_100 -> BadgeGlyph.COINS_2
     AchievementId.GAVE_250 -> BadgeGlyph.COINS_3
     AchievementId.GAVE_500 -> BadgeGlyph.COINS_4
-    AchievementId.GAVE_1000 -> BadgeGlyph.COINS_5
+    AchievementId.GIVEAWAY_SUPPORTER -> BadgeGlyph.PARCEL
     AchievementId.THREE_AREAS -> BadgeGlyph.PIN
     AchievementId.THANKS_3 -> BadgeGlyph.SPEECH_HEART
 }
@@ -89,8 +89,8 @@ fun AchievementsScreen(repo: HelpRepository) {
     // three groups, each under a small heading
     val groups = listOf(
         RewardGroup(Res.string.group_helping, listOf(AchievementId.FIRST_HELP, AchievementId.HELPED_3, AchievementId.HELPED_10, AchievementId.HAND_TO_HAND).map(::tile)),
-        RewardGroup(Res.string.group_giving, listOf(AchievementId.GAVE_50, AchievementId.GAVE_100, AchievementId.GAVE_250, AchievementId.GAVE_500, AchievementId.GAVE_1000).map(::tile)),
-        RewardGroup(Res.string.group_community, listOf(AchievementId.GOAL_REACHED, AchievementId.THREE_AREAS, AchievementId.THANKS_3).map(::tile)),
+        RewardGroup(Res.string.group_giving, listOf(AchievementId.GAVE_50, AchievementId.GAVE_100, AchievementId.GAVE_250, AchievementId.GAVE_500).map(::tile)),
+        RewardGroup(Res.string.group_community, listOf(AchievementId.GOAL_REACHED, AchievementId.THREE_AREAS, AchievementId.THANKS_3, AchievementId.GIVEAWAY_SUPPORTER).map(::tile)),
     )
     // the badge whose reward is being shown, or null
     var opened by remember { mutableStateOf<Achievement?>(null) }

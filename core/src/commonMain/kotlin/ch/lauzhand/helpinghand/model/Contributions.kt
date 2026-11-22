@@ -40,13 +40,15 @@ fun pendingGoals(contributions: List<Contribution>, needs: List<Need>): Int {
 enum class AchievementId {
     FIRST_HELP, HELPED_3, HELPED_10, HAND_TO_HAND, GOAL_REACHED, GAVE_100, THREE_AREAS, THANKS_3,
     // money donated, in total (what was given to needs plus what was paid towards giveaway logistics)
-    GAVE_50, GAVE_250, GAVE_500, GAVE_1000,
+    GAVE_50, GAVE_250, GAVE_500,
+    // community: paid towards a brand giveaway's logistics
+    GIVEAWAY_SUPPORTER,
 }
 
 /** Money badges: the total in CHF each one needs. */
 val MoneyBadgeTargets: Map<AchievementId, Int> = mapOf(
     AchievementId.GAVE_50 to 50, AchievementId.GAVE_100 to 100, AchievementId.GAVE_250 to 250,
-    AchievementId.GAVE_500 to 500, AchievementId.GAVE_1000 to 1000,
+    AchievementId.GAVE_500 to 500,
 )
 
 /**
@@ -98,9 +100,10 @@ fun donorAchievements(
         a(AchievementId.GAVE_100, verified.given + giveawayChf, delivered.given + giveawayChf, 100),
         a(AchievementId.GAVE_250, verified.given + giveawayChf, delivered.given + giveawayChf, 250),
         a(AchievementId.GAVE_500, verified.given + giveawayChf, delivered.given + giveawayChf, 500),
-        a(AchievementId.GAVE_1000, verified.given + giveawayChf, delivered.given + giveawayChf, 1000),
         a(AchievementId.THREE_AREAS, verified.areas.size, delivered.areas.size, 3),
         // "confirmed as received" is verification itself (only for items), so there is nothing pending for this one
+        // paying towards a giveaway counts at once (money is never verified): any payment unlocks it
+        a(AchievementId.GIVEAWAY_SUPPORTER, if (giveawayChf > 0) 1 else 0, if (giveawayChf > 0) 1 else 0, 1),
         a(AchievementId.THANKS_3, verified.helpedNeeds.count { it.isVerified }, verified.helpedNeeds.count { it.isVerified }, 3),
     )
 }

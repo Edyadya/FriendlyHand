@@ -355,3 +355,22 @@ class VolunteerRewardsTest {
         assertNotEquals(badgeSeed("Mia", 3), badgeSeed("Mia", 4))   // the pattern changes with every delivery
     }
 }
+
+class PatronBadgeSetTest {
+    private fun badges(giveawayChf: Int) = donorAchievements(emptyList(), Seed.needs, Seed.people, giveawayChf)
+
+    @Test
+    fun thereAreStillTwelveBadgesAndNoThousandFrancBadge() {
+        assertEquals(12, AchievementId.entries.size)
+        assertTrue(AchievementId.entries.none { it.name == "GAVE_1000" })
+        assertEquals(setOf(50, 100, 250, 500), MoneyBadgeTargets.values.toSet())
+    }
+
+    @Test
+    fun payingTowardsAGiveawayUnlocksTheCommunityBadgeAtOnce() {
+        assertFalse(badges(0).first { it.id == AchievementId.GIVEAWAY_SUPPORTER }.unlocked)
+        val b = badges(20).first { it.id == AchievementId.GIVEAWAY_SUPPORTER }
+        assertTrue(b.unlocked)           // money is never verified
+        assertFalse(b.pending)
+    }
+}

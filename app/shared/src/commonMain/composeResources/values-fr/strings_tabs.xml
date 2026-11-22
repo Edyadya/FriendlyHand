@@ -76,8 +76,6 @@
     <string name="badge_gave_250_desc">Payer ou donner CHF 250 au total</string>
     <string name="badge_gave_500">CHF 500 donnés</string>
     <string name="badge_gave_500_desc">Payer ou donner CHF 500 au total</string>
-    <string name="badge_gave_1000">CHF 1000 donnés</string>
-    <string name="badge_gave_1000_desc">Payer ou donner CHF 1000 au total</string>
     <string name="giveaways_title">Dons de marques</string>
     <string name="giveaways_intro">Des marques offrent leurs invendus gratuitement. Vous payez la logistique (collecte, tri et transport), et des bénévoles distribuent les articles aux personnes dans le besoin.</string>
     <string name="giveaway_demo">Offre d'exemple pour la démo. La marque n'a rien accepté.</string>
@@ -181,4 +179,6 @@
     <string name="group_delivering">Livrer</string>
     <string name="group_reaching">Aller vers les autres</string>
     <string name="group_handing">Remises et courses</string>
+    <string name="badge_giveaway">Soutien aux dons de marques</string>
+    <string name="badge_giveaway_desc">Payez une part de la logistique d'un don de marque</string>
 </resources>
