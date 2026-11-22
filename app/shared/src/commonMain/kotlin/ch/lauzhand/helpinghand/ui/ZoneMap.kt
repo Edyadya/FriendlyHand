@@ -109,8 +109,8 @@ fun ZoneMap(
             fontWeight = FontWeight.Medium,
         )
 
-        // bubbles: one colour per role, both from the colour scheme (patrons accent blue, volunteers brand navy)
-        val bubbleColor = if (role == Role.VOLUNTEER) MaterialTheme.app.navy else MaterialTheme.app.accent
+        // bubbles: one colour per role, both from the colour scheme (patrons accent blue, volunteers success green)
+        val bubbleColor = if (role == Role.VOLUNTEER) MaterialTheme.app.success else MaterialTheme.app.accent
         val bubble = 40.dp
         val slot = 76.dp
         repo.zones.filter { showBubbles && it.cityId == city.id }.forEach { z ->
