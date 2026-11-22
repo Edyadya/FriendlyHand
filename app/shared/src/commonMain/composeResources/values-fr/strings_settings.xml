@@ -10,7 +10,7 @@
     <string name="settings_about">À propos de nous</string>
     <string name="settings_close">Fermer</string>
     <string name="partner_imc_name">IMC</string>
-    <string name="partner_imc_desc">Partenaire du hackathon. Une description plus complète suivra.</string>
+    <string name="partner_imc_desc">Partenaire du hackathon. IMC est une société de trading internationale qui utilise la technologie et les données pour améliorer le fonctionnement des marchés financiers.</string>
     <string name="partner_jetbrains_name">JetBrains</string>
     <string name="partner_jetbrains_desc">Les créateurs de Kotlin, le langage avec lequel cette application est développée.</string>
     <string name="terms_body">Ces conditions générales sont un texte provisoire pour la démonstration. Elles seront remplacées avant une utilisation réelle de l'application.\n\nMain tendue n'inscrit une personne qu'avec son accord, n'affiche que son prénom et le quartier où elle se trouve d'habitude, et ne montre jamais de position exacte aux mécènes. Merci d'utiliser l'application avec respect.</string>
@@ -37,4 +37,11 @@
     <string name="gender_prefer_not">Je préfère ne pas le dire</string>
     <string name="profile_city">Ville</string>
     <string name="profile_country">Pays</string>
+    <string name="partner_imc_giving_title">Engagement solidaire</string>
+    <string name="partner_imc_giving_1">IMC soutient des associations dans le monde entier, avec un accent fort sur l'éducation et sur de meilleures perspectives pour les jeunes.</string>
+    <string name="partner_imc_giving_2">À Amsterdam, la fondation d'IMC soutient l'IMC Weekend School depuis 1998. IMC soutient aussi Room to Read, qui aide les enfants à apprendre à lire, en Afrique et en Inde.</string>
+    <string name="partner_imc_giving_3">IMC indique que ses dons ont atteint près de 30 millions d'euros en 2025, répartis entre plus de 200 organisations.</string>
+    <string name="partner_jetbrains_about_1">JetBrains a été fondée en 2000 à Prague. Elle crée les outils que les développeurs utilisent chaque jour, comme l'éditeur de code IntelliJ IDEA.</string>
+    <string name="partner_jetbrains_about_2">JetBrains a créé Kotlin et l'a publié en open source en 2012. Kotlin est très utilisé pour les applications Android.</string>
+    <string name="partner_jetbrains_about_3">Cette application utilise Kotlin Multiplatform, qui permet de faire tourner un seul code sur Android, ordinateur et web.</string>
 </resources>

@@ -10,7 +10,7 @@
     <string name="settings_about">About us</string>
     <string name="settings_close">Close</string>
     <string name="partner_imc_name">IMC</string>
-    <string name="partner_imc_desc">Hackathon partner. A fuller description will follow.</string>
+    <string name="partner_imc_desc">Hackathon partner. IMC is a global trading firm that uses technology and data to help financial markets work better.</string>
     <string name="partner_jetbrains_name">JetBrains</string>
     <string name="partner_jetbrains_desc">The makers of Kotlin, the language this app is built with.</string>
     <string name="terms_body">These terms and conditions are placeholder text for the demo. They will be replaced before the app is used for real.\n\nHelping Hand lists people only with their consent, shows only their first name and the area they are usually in, and never shows an exact location to patrons. Please use the app respectfully.</string>
@@ -37,4 +37,11 @@
     <string name="gender_prefer_not">Prefer not to say</string>
     <string name="profile_city">City</string>
     <string name="profile_country">Country</string>
+    <string name="partner_imc_giving_title">Giving back</string>
+    <string name="partner_imc_giving_1">IMC supports charities around the world, with a strong focus on education and on giving young people better opportunities.</string>
+    <string name="partner_imc_giving_2">In Amsterdam, IMC's foundation has supported the IMC Weekend School since 1998. IMC also backs Room to Read, which helps children learn to read, in Africa and India.</string>
+    <string name="partner_imc_giving_3">IMC reports that its charitable giving reached almost EUR 30 million in 2025, shared among more than 200 organisations.</string>
+    <string name="partner_jetbrains_about_1">JetBrains was founded in 2000 in Prague. It builds the tools developers use every day, such as the IntelliJ IDEA code editor.</string>
+    <string name="partner_jetbrains_about_2">JetBrains created Kotlin and made it open source in 2012. Kotlin is widely used for Android apps.</string>
+    <string name="partner_jetbrains_about_3">This app uses Kotlin Multiplatform, which lets one codebase run on Android, desktop and the web.</string>
 </resources>

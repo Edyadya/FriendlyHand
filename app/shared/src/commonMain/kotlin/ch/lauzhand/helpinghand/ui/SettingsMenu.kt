@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -26,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.settings.AppLanguage
 import ch.lauzhand.helpinghand.settings.LocalAppSettings
 import helpinghand.app.shared.generated.resources.*
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -209,7 +212,10 @@ fun SettingsPageDialog(page: SettingsPage, onClose: () -> Unit) {
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 when (page) {
-                    SettingsPage.PARTNERS -> ProjectPartners.forEach { PartnerRow(it) }
+                    SettingsPage.PARTNERS -> ProjectPartners.forEachIndexed { i, p ->
+                        if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        PartnerRow(p)
+                    }
                     SettingsPage.TERMS -> Text(stringResource(Res.string.terms_body), style = MaterialTheme.typography.bodyMedium)
                     SettingsPage.ABOUT -> {
                         Text(stringResource(Res.string.about_body), style = MaterialTheme.typography.bodyMedium)
@@ -230,26 +236,39 @@ fun SettingsPageDialog(page: SettingsPage, onClose: () -> Unit) {
 
 // ---- partners: data-driven, so adding one is a single line ----
 
-private class ProjectPartner(val name: StringResource, val description: StringResource, val monogram: String)
+private class ProjectPartner(
+    val name: StringResource,
+    val description: StringResource,
+    val logo: DrawableResource,
+    /** A small heading above [details], or null. */
+    val detailsTitle: StringResource? = null,
+    /** More paragraphs about the partner. */
+    val details: List<StringResource> = emptyList(),
+)
 
 private val ProjectPartners = listOf(
-    ProjectPartner(Res.string.partner_imc_name, Res.string.partner_imc_desc, "IMC"),
-    ProjectPartner(Res.string.partner_jetbrains_name, Res.string.partner_jetbrains_desc, "JB"),
+    ProjectPartner(
+        Res.string.partner_imc_name, Res.string.partner_imc_desc, Res.drawable.imc_logo,
+        detailsTitle = Res.string.partner_imc_giving_title,
+        details = listOf(Res.string.partner_imc_giving_1, Res.string.partner_imc_giving_2, Res.string.partner_imc_giving_3),
+    ),
+    ProjectPartner(
+        Res.string.partner_jetbrains_name, Res.string.partner_jetbrains_desc, Res.drawable.jetbrains_logo,
+        details = listOf(Res.string.partner_jetbrains_about_1, Res.string.partner_jetbrains_about_2, Res.string.partner_jetbrains_about_3),
+    ),
 )
 
 @Composable
 private fun PartnerRow(p: ProjectPartner) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-        // placeholder logo: a monogram, until the real logo files arrive
-        Box(
-            Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(p.monogram, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            Image(painterResource(p.logo), contentDescription = null, modifier = Modifier.size(48.dp))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(p.name), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(p.description), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
-        Column(Modifier.weight(1f)) {
-            Text(stringResource(p.name), style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(p.description), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
+        p.detailsTitle?.let { Text(stringResource(it), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) }
+        p.details.forEach { Text(stringResource(it), style = MaterialTheme.typography.bodyMedium) }
     }
 }
