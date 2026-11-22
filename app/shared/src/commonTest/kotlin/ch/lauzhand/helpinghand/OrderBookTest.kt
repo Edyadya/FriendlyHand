@@ -153,3 +153,31 @@ class ImpactAppTest {
     }
 }
 
+class PurchaseOrderTest {
+    @Test
+    fun payingForAnItemPutsAPurchaseOrderInTheOrderBook() {
+        val repo = FakeRepository()
+        repo.donate("n-1", ME_DONOR, 20)
+        repo.requestPurchase("n-1", ME_DONOR, "Dan")
+        repo.requestPurchase("n-1", ME_DONOR, "Dan") // once per item
+        val order = repo.orders.single { it.needId == "n-1" }
+        assertEquals(OrderKind.PURCHASE, order.kind)
+        assertEquals(OrderStatus.OPEN, order.status)
+
+        repo.acceptOrder(order.id, ME_VOLUNTEER, "Mia")
+        repo.markPickedUp(order.id)                 // "I bought it"
+        repo.confirmDelivered("n-1")                // the person received it
+        assertEquals(OrderStatus.DELIVERED, repo.orders.single { it.id == order.id }.status)
+        assertEquals(NeedStatus.CONFIRMED, repo.needs.first { it.id == "n-1" }.status)
+        assertEquals(1, deliveriesDone(repo.orders, ME_VOLUNTEER))
+    }
+
+    @Test
+    fun aHandoverOrderIsStillTheDefaultKind() {
+        val repo = FakeRepository()
+        repo.claimNeed("n-3", ME_DONOR)
+        repo.requestHandover("n-3", ME_DONOR, "Dan")
+        assertEquals(OrderKind.HANDOVER, repo.orders.single { it.needId == "n-3" }.kind)
+    }
+}
+

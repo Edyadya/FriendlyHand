@@ -89,7 +89,7 @@
     <string name="giveaway_give">Payer la logistique</string>
     <string name="giveaway_funded">Objectif atteint. Des bénévoles collectent les articles et les distribuent.</string>
     <string name="giveaway_contribution_line">CHF %1$d payés pour la logistique de : %2$s</string>
-    <string name="orders_title">Commandes de remise</string>
+    <string name="orders_title">Livraisons</string>
     <string name="orders_intro">Les mécènes remettent des objets à des bénévoles. Prenez une commande, récupérez l'objet et remettez-le à la personne.</string>
     <string name="orders_open">En attente d'un bénévole</string>
     <string name="orders_mine">Mes commandes</string>
@@ -128,4 +128,9 @@
     <string name="vr_badge_first_desc">Livrez votre première commande à une personne dans le besoin</string>
     <string name="vr_badge_five_desc">Livrez 5 commandes aux personnes qui en ont besoin</string>
     <string name="vr_badge_ten_desc">Livrez 10 commandes aux personnes qui en ont besoin</string>
+    <string name="order_buy_for">Acheter %1$s pour %2$s à %3$s</string>
+    <string name="order_paid_by">Payé par %1$s · %2$s</string>
+    <string name="order_bought">Je l'ai acheté</string>
+    <string name="order_status_accepted_buy">%1$s va l'acheter et l'apporter</string>
+    <string name="order_status_picked_buy">%1$s l'a acheté et l'apporte à %2$s</string>
 </resources>

@@ -89,7 +89,7 @@
     <string name="giveaway_give">Pay for the logistics</string>
     <string name="giveaway_funded">Goal reached. Volunteers collect the goods and hand them out.</string>
     <string name="giveaway_contribution_line">Paid CHF %1$d for the logistics of: %2$s</string>
-    <string name="orders_title">Delivery orders</string>
+    <string name="orders_title">Deliveries</string>
     <string name="orders_intro">Patrons hand items over to volunteers. Take an order, pick the item up and deliver it to the person.</string>
     <string name="orders_open">Waiting for a volunteer</string>
     <string name="orders_mine">My orders</string>
@@ -128,4 +128,9 @@
     <string name="vr_badge_first_desc">Deliver your first order to someone in need</string>
     <string name="vr_badge_five_desc">Deliver 5 orders to the people who need them</string>
     <string name="vr_badge_ten_desc">Deliver 10 orders to the people who need them</string>
+    <string name="order_buy_for">Buy %1$s for %2$s in %3$s</string>
+    <string name="order_paid_by">Paid by patron %1$s · %2$s</string>
+    <string name="order_bought">I bought it</string>
+    <string name="order_status_accepted_buy">%1$s will buy it and bring it</string>
+    <string name="order_status_picked_buy">%1$s bought it and is bringing it to %2$s</string>
 </resources>

@@ -60,6 +60,19 @@ interface HelpRepository : BookApi {
         )
     }
 
+    /** A patron paid for a small item: a volunteer has to buy it and bring it. Puts a PURCHASE order in the order book. */
+    fun requestPurchase(needId: String, patronId: String, patronName: String) {
+        if (orders.any { it.needId == needId && it.status != OrderStatus.DELIVERED }) return
+        val need = needs.firstOrNull { it.id == needId } ?: return
+        val person = people.firstOrNull { it.id == need.personId } ?: return
+        saveOrder(
+            DeliveryOrder(
+                id = newId("o"), needId = needId, personId = person.id, itemTitle = need.title, zoneId = person.zoneId,
+                patronId = patronId, patronName = patronName, createdAtMillis = nowMillis(), kind = OrderKind.PURCHASE,
+            ),
+        )
+    }
+
     /** A volunteer takes an open order. */
     fun acceptOrder(orderId: String, volunteerId: String, volunteerName: String) {
         orders.firstOrNull { it.id == orderId }?.let { saveOrder(it.acceptedBy(volunteerId, volunteerName)) }

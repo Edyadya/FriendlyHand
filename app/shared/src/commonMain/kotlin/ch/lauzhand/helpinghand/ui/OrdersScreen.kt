@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
 import ch.lauzhand.helpinghand.model.DeliveryOrder
+import ch.lauzhand.helpinghand.model.OrderKind
 import ch.lauzhand.helpinghand.model.OrderStatus
 import ch.lauzhand.helpinghand.model.formatDate
 import helpinghand.app.shared.generated.resources.*
@@ -85,9 +86,15 @@ private fun OrderCard(repo: HelpRepository, o: DeliveryOrder, volunteerId: Strin
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(Res.string.order_item_for, o.itemTitle, person?.firstName.orEmpty(), zone), style = MaterialTheme.typography.titleLarge)
+            val buying = o.kind == OrderKind.PURCHASE
             Text(
-                stringResource(Res.string.order_from, o.patronName, formatDate(o.createdAtMillis)),
+                if (buying) stringResource(Res.string.order_buy_for, o.itemTitle, person?.firstName.orEmpty(), zone)
+                else stringResource(Res.string.order_item_for, o.itemTitle, person?.firstName.orEmpty(), zone),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                if (buying) stringResource(Res.string.order_paid_by, o.patronName, formatDate(o.createdAtMillis))
+                else stringResource(Res.string.order_from, o.patronName, formatDate(o.createdAtMillis)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -100,7 +107,7 @@ private fun OrderCard(repo: HelpRepository, o: DeliveryOrder, volunteerId: Strin
                 OrderStatus.ACCEPTED -> AppButton(
                     onClick = { repo.markPickedUp(o.id) },
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-                ) { Text(stringResource(Res.string.order_picked_up), style = MaterialTheme.typography.titleMedium) }
+                ) { Text(stringResource(if (buying) Res.string.order_bought else Res.string.order_picked_up), style = MaterialTheme.typography.titleMedium) }
                 OrderStatus.PICKED_UP -> AppButton(
                     onClick = { repo.confirmDelivered(o.needId); onDelivered(o) },
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
@@ -118,7 +125,7 @@ private fun OrderCard(repo: HelpRepository, o: DeliveryOrder, volunteerId: Strin
 @Composable
 fun OrderStatus.line(o: DeliveryOrder, personName: String): String = when (this) {
     OrderStatus.OPEN -> stringResource(Res.string.order_status_open)
-    OrderStatus.ACCEPTED -> stringResource(Res.string.order_status_accepted, o.volunteerName.orEmpty())
-    OrderStatus.PICKED_UP -> stringResource(Res.string.order_status_picked, o.volunteerName.orEmpty(), personName)
+    OrderStatus.ACCEPTED -> stringResource(if (o.kind == OrderKind.PURCHASE) Res.string.order_status_accepted_buy else Res.string.order_status_accepted, o.volunteerName.orEmpty())
+    OrderStatus.PICKED_UP -> stringResource(if (o.kind == OrderKind.PURCHASE) Res.string.order_status_picked_buy else Res.string.order_status_picked, o.volunteerName.orEmpty(), personName)
     OrderStatus.DELIVERED -> stringResource(Res.string.order_status_delivered, o.volunteerName.orEmpty())
 }

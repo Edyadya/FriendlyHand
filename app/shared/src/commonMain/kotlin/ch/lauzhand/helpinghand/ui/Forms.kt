@@ -15,6 +15,7 @@ import ch.lauzhand.helpinghand.model.Need
 import ch.lauzhand.helpinghand.location.UserLocation
 import ch.lauzhand.helpinghand.location.rememberUserLocation
 import ch.lauzhand.helpinghand.model.Cities
+import ch.lauzhand.helpinghand.model.City
 import ch.lauzhand.helpinghand.model.nowMillis
 import androidx.compose.material3.TextButton
 import ch.lauzhand.helpinghand.model.NeedType
@@ -30,7 +31,10 @@ fun OnboardingScreen(
     repo: HelpRepository,
     onBack: () -> Unit,
     onSaved: (String) -> Unit,
+    /** The city shown on the map: the area list starts with its areas. */
+    initialCity: City = Cities.LAUSANNE,
 ) {
+    var cityId by remember { mutableStateOf(initialCity.id) }
     var firstName by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var zoneId by remember { mutableStateOf<String?>(null) }
@@ -61,8 +65,21 @@ fun OnboardingScreen(
             label = { Text(stringResource(Res.string.field_age)) }, singleLine = true,
         )
         Text(stringResource(Res.string.field_zone), style = MaterialTheme.typography.titleMedium)
+        // the areas of one city at a time (switch city here)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Cities.all.forEach { c ->
+                FilterChip(
+                    selected = cityId == c.id,
+                    onClick = {
+                        cityId = c.id
+                        if (repo.zones.firstOrNull { it.id == zoneId }?.cityId != c.id) zoneId = null
+                    },
+                    label = { Text(c.name) },
+                )
+            }
+        }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            repo.zones.forEach { z ->
+            repo.zones.filter { it.cityId == cityId }.forEach { z ->
                 FilterChip(
                     selected = zoneId == z.id,
                     onClick = { zoneId = z.id },

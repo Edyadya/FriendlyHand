@@ -125,6 +125,7 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                         Screen.Giveaways -> GiveawaysScreen(repo, onBack = { screen = Screen.Home })
                         Screen.Onboarding -> OnboardingScreen(
                             repo,
+                            initialCity = shell.city,
                             onBack = { screen = Screen.Home },
                             onSaved = { screen = Screen.Profile(it) },
                         )

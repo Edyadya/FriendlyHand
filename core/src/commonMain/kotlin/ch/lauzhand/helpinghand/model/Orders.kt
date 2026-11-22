@@ -10,6 +10,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class OrderStatus { OPEN, ACCEPTED, PICKED_UP, DELIVERED }
 
+/** HANDOVER: a patron brings the item and hands it to a volunteer. PURCHASE: a patron paid, the volunteer buys the item. */
+@Serializable
+enum class OrderKind { HANDOVER, PURCHASE }
+
 @Serializable
 data class DeliveryOrder(
     val id: String,
@@ -25,6 +29,7 @@ data class DeliveryOrder(
     val volunteerName: String? = null,
     val acceptedAtMillis: Long? = null,
     val deliveredAtMillis: Long? = null,
+    val kind: OrderKind = OrderKind.HANDOVER,
 )
 
 fun DeliveryOrder.acceptedBy(volunteerId: String, volunteerName: String, atMillis: Long = nowMillis()): DeliveryOrder =

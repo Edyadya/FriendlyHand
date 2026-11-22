@@ -51,7 +51,7 @@ fun SpotPickerDialog(
                         LausanneMap(
                             zones = emptyList(), people = emptyList(), needs = emptyList(), role = Role.VOLUNTEER,
                             onZoneClick = {}, onPersonClick = {}, modifier = Modifier.fillMaxSize(),
-                            userLocation = picked, centreOnUser = 0, city = city,
+                            userLocation = picked, centreOnUser = if (start != null) 1 else 0, city = city, // zoom in on where it starts
                             onMapClick = { lat, lng -> picked = UserLocation(lat, lng, 0f, isDemo = false) },
                         )
                     } else {

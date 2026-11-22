@@ -199,6 +199,8 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
 
     fun give(amount: Int, type: NeedType) {
         repo.donate(need.id, ME_DONOR, amount)
+        // paid for an item: a volunteer now has to buy it and bring it, so it goes into the order book
+        if (type == NeedType.SMALL) repo.requestPurchase(need.id, ME_DONOR, repo.currentAccount?.name ?: "")
         scope.launch {
             notify(
                 if (type == NeedType.SMALL) getString(Res.string.feedback_paid, amount, need.title)
