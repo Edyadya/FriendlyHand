@@ -62,12 +62,36 @@ internal fun AchievementId.description(): StringResource = when (this) {
     AchievementId.THANKS_3 -> Res.string.badge_thanks_3_desc
 }
 
+internal fun AchievementId.glyph(): BadgeGlyph = when (this) {
+    AchievementId.FIRST_HELP -> BadgeGlyph.HAND
+    AchievementId.HELPED_3 -> BadgeGlyph.PEOPLE
+    AchievementId.HELPED_10 -> BadgeGlyph.CROWD
+    AchievementId.HAND_TO_HAND -> BadgeGlyph.HAND_ITEM
+    AchievementId.GOAL_REACHED -> BadgeGlyph.FLAG
+    AchievementId.GAVE_50 -> BadgeGlyph.COINS_1
+    AchievementId.GAVE_100 -> BadgeGlyph.COINS_2
+    AchievementId.GAVE_250 -> BadgeGlyph.COINS_3
+    AchievementId.GAVE_500 -> BadgeGlyph.COINS_4
+    AchievementId.GAVE_1000 -> BadgeGlyph.COINS_5
+    AchievementId.THREE_AREAS -> BadgeGlyph.PIN
+    AchievementId.THANKS_3 -> BadgeGlyph.SPEECH_HEART
+}
+
 /** Donor tab: the goals panel, the partner voucher and the badges (rules in core: donorAchievements). */
 @Composable
 fun AchievementsScreen(repo: HelpRepository) {
     val giveawayChf = repo.giveawayContributionsOf(ME_DONOR).sumOf { it.amountChf }
     val achievements = donorAchievements(repo.contributionsOf(ME_DONOR), repo.needs, repo.people, giveawayChf)
-        .sortedByDescending { it.unlocked } // unlocked first, otherwise in the rules' order
+    fun tile(id: AchievementId): RewardTile {
+        val a = achievements.first { it.id == id }
+        return RewardTile(id.name, id.title(), id.glyph(), a.unlocked, a.pending, a.progress, a.target)
+    }
+    // three groups, each under a small heading
+    val groups = listOf(
+        RewardGroup(Res.string.group_helping, listOf(AchievementId.FIRST_HELP, AchievementId.HELPED_3, AchievementId.HELPED_10, AchievementId.HAND_TO_HAND).map(::tile)),
+        RewardGroup(Res.string.group_giving, listOf(AchievementId.GAVE_50, AchievementId.GAVE_100, AchievementId.GAVE_250, AchievementId.GAVE_500, AchievementId.GAVE_1000).map(::tile)),
+        RewardGroup(Res.string.group_community, listOf(AchievementId.GOAL_REACHED, AchievementId.THREE_AREAS, AchievementId.THANKS_3).map(::tile)),
+    )
     // the badge whose reward is being shown, or null
     var opened by remember { mutableStateOf<Achievement?>(null) }
     val completed = repo.completedGoalsFor(ME_DONOR)
@@ -75,12 +99,14 @@ fun AchievementsScreen(repo: HelpRepository) {
     val pending = pendingGoals(repo.contributionsOf(ME_DONOR), repo.needs)
     val peopleHelped = peopleHelpedOverall(repo.needs)
 
+    // centred, and no wider than 960 dp on big screens
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(4), // four reward blocks in a line
-        modifier = Modifier.fillMaxSize(),
+        columns = GridCells.Adaptive(104.dp), // about three columns on a phone, more on a wide screen
+        modifier = Modifier.widthIn(max = 960.dp).fillMaxSize(),
         contentPadding = PaddingValues(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(stringResource(Res.string.achievements_title), style = MaterialTheme.typography.headlineSmall)
@@ -98,20 +124,15 @@ fun AchievementsScreen(repo: HelpRepository) {
         item(span = { GridItemSpan(maxLineSpan) }) { PlatformHelped(peopleHelped) }
         item(span = { GridItemSpan(maxLineSpan) }) { GoalsHero(completed, pending = pending) }
         item(span = { GridItemSpan(maxLineSpan) }) { VoucherCard(completed, pending = pending) }
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            Text(stringResource(Res.string.badges_title), style = MaterialTheme.typography.headlineSmall)
-        }
-        items(achievements, key = { it.id.name }) { a ->
-            RewardTileCard(RewardTile(a.id.name, a.id.title(), a.unlocked, a.pending, a.progress, a.target), { opened = a })
-        }
+        rewardGroups(groups) { t -> opened = achievements.first { it.id.name == t.key } }
+    }
     }
 
     opened?.let { a ->
         RewardInfoDialog(
-            repo = repo, title = a.id.title(), description = a.id.description(), reward = a.id.reward,
+            repo = repo, title = a.id.title(), description = a.id.description(), reward = a.id.reward, glyph = a.id.glyph(),
             unlocked = a.unlocked, pending = a.pending, progress = a.progress, target = a.target,
             qrKey = "p:${a.id.name}",
-            icon = { BadgeIcon(a.unlocked, Modifier.size(48.dp), pending = a.pending) },
         ) { opened = null }
     }
 }

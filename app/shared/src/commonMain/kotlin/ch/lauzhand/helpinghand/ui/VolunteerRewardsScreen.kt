@@ -4,10 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
@@ -52,48 +52,72 @@ internal fun VolunteerBadge.description(): StringResource = when (this) {
     VolunteerBadge.FIVE_HANDOVERS -> Res.string.vr_badge_handover5_desc
 }
 
+internal fun VolunteerBadge.glyph(): BadgeGlyph = when (this) {
+    VolunteerBadge.FIRST_DELIVERY -> BadgeGlyph.PARCEL
+    VolunteerBadge.FIVE_DELIVERIES -> BadgeGlyph.PARCELS
+    VolunteerBadge.TEN_DELIVERIES -> BadgeGlyph.TRUCK
+    VolunteerBadge.TWENTY_FIVE_DELIVERIES -> BadgeGlyph.TRUCK_STAR
+    VolunteerBadge.THREE_AREAS -> BadgeGlyph.PIN
+    VolunteerBadge.FIVE_AREAS -> BadgeGlyph.ROUTE
+    VolunteerBadge.FIVE_PEOPLE -> BadgeGlyph.PEOPLE
+    VolunteerBadge.TEN_PEOPLE -> BadgeGlyph.CROWD
+    VolunteerBadge.FIRST_PURCHASE -> BadgeGlyph.BAG
+    VolunteerBadge.FIVE_PURCHASES -> BadgeGlyph.CART
+    VolunteerBadge.FIRST_HANDOVER -> BadgeGlyph.HAND
+    VolunteerBadge.FIVE_HANDOVERS -> BadgeGlyph.HANDS
+}
+
 /**
  * Volunteers' Rewards tab: the same design as the patrons'. A personal badge, the community banner, the goals panel
- * (each delivered order is a goal), the partner voucher, and all twelve badges in blocks, four to a row. Tap a block to
- * see its reward and, once it is unlocked, its QR code.
+ * (each delivered order is a goal), the partner voucher, a "Next up" card and all twelve badges in three groups. Tap a
+ * badge to see how to unlock it, its reward and, once it is unlocked, its QR code.
  */
 @Composable
 fun VolunteerRewardsScreen(repo: HelpRepository, account: Account) {
     val done = deliveriesDone(repo.orders, account.id)
     val onTheWay = deliveriesInProgress(repo.orders, account.id)
-    val badges = volunteerBadges(repo.orders, account.id).sortedByDescending { it.unlocked } // unlocked first
+    val badges = volunteerBadges(repo.orders, account.id)
     var opened by remember { mutableStateOf<VolunteerProgress?>(null) }
+
+    fun tile(b: VolunteerBadge): RewardTile {
+        val p = badges.first { it.badge == b }
+        return RewardTile(b.name, b.title(), b.glyph(), p.unlocked, false, p.progress, b.target)
+    }
+    val groups = listOf(
+        RewardGroup(Res.string.group_delivering, listOf(VolunteerBadge.FIRST_DELIVERY, VolunteerBadge.FIVE_DELIVERIES, VolunteerBadge.TEN_DELIVERIES, VolunteerBadge.TWENTY_FIVE_DELIVERIES).map(::tile)),
+        RewardGroup(Res.string.group_reaching, listOf(VolunteerBadge.THREE_AREAS, VolunteerBadge.FIVE_AREAS, VolunteerBadge.FIVE_PEOPLE, VolunteerBadge.TEN_PEOPLE).map(::tile)),
+        RewardGroup(Res.string.group_handing, listOf(VolunteerBadge.FIRST_HANDOVER, VolunteerBadge.FIVE_HANDOVERS, VolunteerBadge.FIRST_PURCHASE, VolunteerBadge.FIVE_PURCHASES).map(::tile)),
+    )
 
     opened?.let { b ->
         RewardInfoDialog(
-            repo = repo, title = b.badge.title(), description = b.badge.description(), reward = b.badge.reward,
+            repo = repo, title = b.badge.title(), description = b.badge.description(), reward = b.badge.reward, glyph = b.badge.glyph(),
             unlocked = b.unlocked, pending = false, progress = b.progress, target = b.badge.target,
             qrKey = "v:${b.badge.name}",
-            icon = { BadgeIcon(b.unlocked, Modifier.size(48.dp)) },
         ) { opened = null }
     }
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(4), // four reward blocks in a line
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        item(span = { GridItemSpan(maxLineSpan) }) { Text(stringResource(Res.string.achievements_title), style = MaterialTheme.typography.headlineSmall) }
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            PersonalBadgeCard(
-                name = account.name, count = done,
-                countLabel = if (done == 1) stringResource(Res.string.art_count_deliveries_one) else stringResource(Res.string.art_count_deliveries, done),
-                goldDone = badges.count { it.unlocked }, caption = Res.string.art_caption_volunteer,
-            )
-        }
-        item(span = { GridItemSpan(maxLineSpan) }) { PlatformHelped(peopleHelpedOverall(repo.needs)) }
-        item(span = { GridItemSpan(maxLineSpan) }) { GoalsHero(done, pending = onTheWay) }
-        item(span = { GridItemSpan(maxLineSpan) }) { VoucherCard(done, pending = onTheWay) }
-        item(span = { GridItemSpan(maxLineSpan) }) { Text(stringResource(Res.string.badges_title), style = MaterialTheme.typography.headlineSmall) }
-        items(badges, key = { it.badge.name }) { b ->
-            RewardTileCard(RewardTile(b.badge.name, b.badge.title(), b.unlocked, false, b.progress, b.badge.target), { opened = b })
+    // centred, and no wider than 960 dp on big screens
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(104.dp), // about three columns on a phone, more on a wide screen
+            modifier = Modifier.widthIn(max = 960.dp).fillMaxSize(),
+            contentPadding = PaddingValues(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item(span = { GridItemSpan(maxLineSpan) }) { Text(stringResource(Res.string.achievements_title), style = MaterialTheme.typography.headlineSmall) }
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                PersonalBadgeCard(
+                    name = account.name, count = done,
+                    countLabel = if (done == 1) stringResource(Res.string.art_count_deliveries_one) else stringResource(Res.string.art_count_deliveries, done),
+                    goldDone = badges.count { it.unlocked }, caption = Res.string.art_caption_volunteer,
+                )
+            }
+            item(span = { GridItemSpan(maxLineSpan) }) { PlatformHelped(peopleHelpedOverall(repo.needs)) }
+            item(span = { GridItemSpan(maxLineSpan) }) { GoalsHero(done, pending = onTheWay) }
+            item(span = { GridItemSpan(maxLineSpan) }) { VoucherCard(done, pending = onTheWay) }
+            rewardGroups(groups) { t -> opened = badges.first { it.badge.name == t.key } }
         }
     }
 }

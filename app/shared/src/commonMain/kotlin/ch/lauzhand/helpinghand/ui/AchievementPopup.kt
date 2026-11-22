@@ -35,7 +35,7 @@ import org.jetbrains.compose.resources.stringResource
 val LocalMomentGate = compositionLocalOf<MutableIntState?> { null }
 
 /** A badge the person has just unlocked and has not been told about yet. */
-private class UnlockedBadge(val key: String, val title: StringResource, val description: StringResource, val reward: BadgeReward)
+private class UnlockedBadge(val key: String, val title: StringResource, val description: StringResource, val reward: BadgeReward, val glyph: BadgeGlyph, val target: Int)
 
 /**
  * The pop-up for a newly unlocked badge, then the confetti. Shown once per badge, after any delivery moment.
@@ -50,11 +50,11 @@ fun AchievementHost(repo: HelpRepository, account: Account) {
         val giveawayChf = repo.giveawayContributionsOf(ME_DONOR).sumOf { it.amountChf }
         donorAchievements(repo.contributionsOf(ME_DONOR), repo.needs, repo.people, giveawayChf)
             .filter { it.unlocked }
-            .map { UnlockedBadge("p:${it.id.name}", it.id.title(), it.id.description(), it.id.reward) }
+            .map { UnlockedBadge("p:${it.id.name}", it.id.title(), it.id.description(), it.id.reward, it.id.glyph(), it.target) }
     } else {
         volunteerBadges(repo.orders, account.id)
             .filter { it.unlocked }
-            .map { UnlockedBadge("v:${it.badge.name}", it.badge.title(), it.badge.description(), it.badge.reward) }
+            .map { UnlockedBadge("v:${it.badge.name}", it.badge.title(), it.badge.description(), it.badge.reward, it.badge.glyph(), it.badge.target) }
     }.filter { !repo.isBadgeCelebrated(it.key) }
 
     // wait a moment, so a delivery moment that opens in the same instant goes first
@@ -73,9 +73,8 @@ fun AchievementHost(repo: HelpRepository, account: Account) {
     }
     rewardFor?.let { b ->
         RewardInfoDialog(
-            repo = repo, title = b.title, description = b.description, reward = b.reward,
-            unlocked = true, pending = false, progress = 1, target = 1, qrKey = b.key,
-            icon = { BadgeIcon(true, Modifier.size(48.dp)) },
+            repo = repo, title = b.title, description = b.description, reward = b.reward, glyph = b.glyph,
+            unlocked = true, pending = false, progress = b.target, target = b.target, qrKey = b.key,
         ) { rewardFor = null }
     }
 }
@@ -85,8 +84,9 @@ private fun AchievementDialog(b: UnlockedBadge, onSeeReward: () -> Unit, onLater
     // the pop-up comes first, the confetti follows a moment later
     var confetti by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) { delay(450); confetti = 1 }
-    val pop = remember { Animatable(0f) }
-    LaunchedEffect(Unit) { pop.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = 260f)) }
+    // the medallion starts locked, then the ring fills and it turns gold with a little pop (see BadgeMedallion)
+    var unlocked by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { delay(250); unlocked = true }
 
     Dialog(onDismissRequest = onLater, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         // full screen, so the confetti covers everything; a tap outside the card closes it
@@ -103,7 +103,7 @@ private fun AchievementDialog(b: UnlockedBadge, onSeeReward: () -> Unit, onLater
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                BadgeIcon(true, Modifier.size(84.dp).scale(pop.value))
+                BadgeMedallion(b.glyph, unlocked, if (unlocked) b.target else b.target - 1, b.target, size = 132.dp, animate = true)
                 Text(stringResource(Res.string.achievement_unlocked), style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
                 Text(stringResource(b.title), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
                 Text(stringResource(b.description), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)

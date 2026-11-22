@@ -67,13 +67,17 @@ class AppColors(
     val progressTrack: Color,
     val progressFill: Color,
     val rewardFill: Color,
+    /** Badge medallions: the end of the gold gradient, the ring of an unlocked badge (3:1 on its tile) and the pale locked medallion. */
+    val goldLight: Color,
+    val goldRing: Color,
+    val medalLocked: Color,
 )
 
 private val Navy = Color(0xFF02215E)
 private val Gold = Color(0xFFF1B604)
 private val Accent = Color(0xFF3B7BFF)
 
-private val LightApp = AppColors(
+internal val LightApp = AppColors(
     accent = Accent, onAccent = Navy,
     gold = Gold, onGold = Navy,
     success = Color(0xFF2E9E6B), onSuccess = Navy,
@@ -85,6 +89,7 @@ private val LightApp = AppColors(
     gradientStart = Color(0xFFDCE6FF), gradientEnd = Color(0xFFF4F7FE),
     pale = Color(0xFF8EAEFF),
     progressTrack = Color(0xFFD5DEF0), progressFill = Accent, rewardFill = Accent,
+    goldLight = Color(0xFFFFD966), goldRing = Color(0xFFB38600), medalLocked = Color(0xFFE8EEFB),
 )
 
 // ---- Dark mode: high contrast. Page #010B22, cards #0B1F55, raised #142B6B, borders #4A67B8 (1.5 dp).
@@ -100,6 +105,7 @@ internal val DarkApp = AppColors(
     gradientStart = Color(0xFF0B1F55), gradientEnd = Color(0xFF010B22),
     pale = Color(0xFF8EAEFF),
     progressTrack = Color(0xFF24396F), progressFill = Color(0xFF5C8DFF), rewardFill = Gold,
+    goldLight = Color(0xFFFFD966), goldRing = Gold, medalLocked = Color(0xFF142B6B),
 )
 
 private val LocalAppColors = staticCompositionLocalOf { LightApp }
@@ -113,7 +119,7 @@ val MaterialTheme.isDark: Boolean
 val MaterialTheme.app: AppColors
     @Composable @ReadOnlyComposable get() = LocalAppColors.current
 
-private val LightColors: ColorScheme = lightColorScheme(
+internal val LightColors: ColorScheme = lightColorScheme(
     primary = Color(0xFF103F9B), onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFFE3EBFF), onPrimaryContainer = Navy,
     secondary = Accent, onSecondary = Navy,

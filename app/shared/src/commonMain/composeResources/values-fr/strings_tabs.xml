@@ -131,7 +131,7 @@
     <string name="order_status_picked_buy">%1$s l'a acheté et l'apporte à %2$s</string>
     <string name="order_view_person">Voir %1$s</string>
     <string name="tab_deliveries">Livraisons</string>
-    <string name="vr_badge_areas">Trois quartiers</string>
+    <string name="vr_badge_areas">3 quartiers</string>
     <string name="vr_badge_areas_desc">Livrez dans 3 quartiers différents</string>
     <string name="vr_badge_people">Cinq personnes</string>
     <string name="vr_badge_people_desc">Livrez à 5 personnes différentes</string>
@@ -156,7 +156,7 @@
     <string name="chat_demo_note">Dans cette démo, les messages restent sur cet appareil : l'autre personne ne les voit que sur ce même appareil.</string>
     <string name="vr_badge_25">25 livraisons</string>
     <string name="vr_badge_25_desc">Livrez 25 commandes aux personnes qui en ont besoin</string>
-    <string name="vr_badge_areas5">Cinq quartiers</string>
+    <string name="vr_badge_areas5">5 quartiers</string>
     <string name="vr_badge_areas5_desc">Livrez dans 5 quartiers différents</string>
     <string name="vr_badge_people10">Dix personnes</string>
     <string name="vr_badge_people10_desc">Livrez à 10 personnes différentes</string>
@@ -170,4 +170,15 @@
     <string name="art_count_contributions_one">1 contribution</string>
     <string name="badge_progress_short">%1$d / %2$d</string>
     <string name="badge_pending_short">En attente</string>
+    <string name="next_up">Prochain badge</string>
+    <string name="reward_how_to">Comment le débloquer</string>
+    <string name="badge_a11y_unlocked">%1$s, débloqué</string>
+    <string name="badge_a11y_locked">%1$s, verrouillé, %2$d sur %3$d</string>
+    <string name="badge_a11y_pending">%1$s, remis et en attente de vérification par un bénévole, %2$d sur %3$d</string>
+    <string name="group_helping">Aider</string>
+    <string name="group_giving">Donner</string>
+    <string name="group_community">Communauté</string>
+    <string name="group_delivering">Livrer</string>
+    <string name="group_reaching">Aller vers les autres</string>
+    <string name="group_handing">Remises et courses</string>
 </resources>
