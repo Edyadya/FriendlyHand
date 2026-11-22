@@ -18,14 +18,23 @@
     <string name="about_credits">Conçu pour IMC, développé avec Kotlin Multiplatform de JetBrains.</string>
     <string name="about_shared_note">Presque toute cette application est écrite une seule fois, en Kotlin Multiplatform, et fonctionne sur Android, ordinateur et web. Seules quelques petites parties dépendent de la plateforme : la carte en direct, la position de l'appareil, les réglages enregistrés et le changement de langue.</string>
     <string name="preview_clicked">touché : %1$s</string>
-    <string name="menu_profile_picture">Photo de profil</string>
+    <string name="menu_profile_picture">Votre profil</string>
     <string name="menu_charities">Associations</string>
     <string name="menu_giveaways">Dons de marques</string>
     <string name="menu_orders">Commandes de remise</string>
-    <string name="profile_picture_title">Votre photo de profil</string>
-    <string name="profile_picture_hint">Vous seul la choisissez. Elle s'affiche à côté de votre nom dans le menu.</string>
+    <string name="profile_picture_title">Votre profil</string>
+    <string name="profile_picture_hint">Tout est facultatif. Vous seul choisissez ce que vous partagez.</string>
     <string name="profile_picture_choose">Choisir une photo</string>
     <string name="profile_picture_change">Changer la photo</string>
     <string name="profile_picture_remove">Supprimer la photo</string>
     <string name="profile_picture_unsupported">Le choix d'une photo n'est pas disponible sur cet appareil.</string>
+    <string name="profile_gender">Genre (facultatif)</string>
+    <string name="profile_gender_none">Non précisé</string>
+    <string name="gender_female">Femme</string>
+    <string name="gender_male">Homme</string>
+    <string name="gender_non_binary">Non binaire</string>
+    <string name="gender_other">Autre</string>
+    <string name="gender_prefer_not">Je préfère ne pas le dire</string>
+    <string name="profile_city">Ville</string>
+    <string name="profile_country">Pays</string>
 </resources>

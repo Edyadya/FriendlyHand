@@ -25,6 +25,10 @@ interface BookApi {
     /** A patron's or volunteer's own profile picture (a small base64 JPEG), or null. */
     fun accountPhotoOf(accountId: String): String?
     fun setAccountPhoto(accountId: String, photoBase64: String?)
+
+    /** Optional gender, city and country of the account (only for themselves). */
+    fun accountProfileOf(accountId: String): AccountProfile
+    fun setAccountProfile(accountId: String, profile: AccountProfile)
 }
 
 class LocalBook : BookApi {
@@ -32,6 +36,7 @@ class LocalBook : BookApi {
     private val givenToGiveaways = mutableStateListOf<GiveawayContribution>()
     override val orders = mutableStateListOf<DeliveryOrder>()
     private val photos = mutableStateMapOf<String, String>()
+    private val profiles = mutableStateMapOf<String, AccountProfile>()
 
     override fun giveawayContributionsOf(donorId: String) = givenToGiveaways.filter { it.donorId == donorId }
 
@@ -53,5 +58,11 @@ class LocalBook : BookApi {
 
     override fun setAccountPhoto(accountId: String, photoBase64: String?) {
         if (photoBase64 == null) photos.remove(accountId) else photos[accountId] = photoBase64
+    }
+
+    override fun accountProfileOf(accountId: String): AccountProfile = profiles[accountId] ?: AccountProfile()
+
+    override fun setAccountProfile(accountId: String, profile: AccountProfile) {
+        profiles[accountId] = profile.copy(city = profile.city.trim(), country = profile.country.trim())
     }
 }

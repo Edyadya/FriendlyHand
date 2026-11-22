@@ -49,6 +49,8 @@ fun SettingsMenuContent(
     accountName: String = "",
     accountPhoto: String? = null,
     onProfilePicture: () -> Unit = {},
+    /** Shown under the name instead of "Your profile" when the account has told its city and country. */
+    accountLocation: String? = null,
     /** Screens opened from the menu (charities, giveaways, ...): a label and what to do. */
     features: List<Pair<StringResource, () -> Unit>> = emptyList(),
 ) {
@@ -69,9 +71,11 @@ fun SettingsMenuContent(
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 )
                 Text(
-                    stringResource(Res.string.menu_profile_picture),
+                    accountLocation ?: stringResource(Res.string.menu_profile_picture),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 )
             }
         }

@@ -197,3 +197,19 @@ class MoneyIsNeverVerifiedTest {
         assertEquals(0, donorAchievements(c, needs, people).of(AchievementId.THANKS_3).progress)
     }
 }
+
+class AccountProfileTest {
+    @Test
+    fun theLocationShowsOnlyWhatIsFilledIn() {
+        assertNull(AccountProfile().location)
+        assertEquals("Lausanne", AccountProfile(city = " Lausanne ").location)
+        assertEquals("Switzerland", AccountProfile(country = "Switzerland").location)
+        assertEquals("Lausanne, Switzerland", AccountProfile(city = "Lausanne", country = "Switzerland").location)
+    }
+
+    @Test
+    fun theGenderChoiceIsOptionalAndHasAPreferNotToSay() {
+        assertNull(AccountProfile().gender)
+        assertTrue(Gender.entries.contains(Gender.PREFER_NOT_TO_SAY))
+    }
+}

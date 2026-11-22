@@ -106,4 +106,15 @@ class OrderBookTest {
         repo.confirmReceived("n-3")
         assertEquals(2, repo.completedGoalsFor(ME_DONOR))
     }
+
+    @Test
+    fun aProfileKeepsAnOptionalGenderAndLocation() {
+        val repo = FakeRepository()
+        assertEquals(AccountProfile(), repo.accountProfileOf("acc"))
+        repo.setAccountProfile("acc", AccountProfile(Gender.FEMALE, " Lausanne ", "Switzerland"))
+        val saved = repo.accountProfileOf("acc")
+        assertEquals(Gender.FEMALE, saved.gender)
+        assertEquals("Lausanne, Switzerland", saved.location)
+        assertEquals(AccountProfile(), repo.accountProfileOf("someone-else")) // each account has its own
+    }
 }
