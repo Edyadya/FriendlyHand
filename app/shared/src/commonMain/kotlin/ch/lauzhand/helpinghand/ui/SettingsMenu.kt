@@ -28,6 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.Role as SemanticsRole
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.settings.AppLanguage
 import ch.lauzhand.helpinghand.settings.LocalAppSettings
@@ -191,12 +195,28 @@ fun SettingsDrawer(open: Boolean, onDismiss: () -> Unit, content: @Composable Co
                 Column(Modifier.verticalScroll(rememberScrollState()).padding(vertical = 8.dp)) {
                     Row(Modifier.fillMaxWidth().padding(start = 16.dp, top = 8.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(stringResource(Res.string.settings_title), Modifier.weight(1f), style = MaterialTheme.typography.headlineSmall)
-                        TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(Res.string.settings_close)) }
+                        // an X instead of the word; screen readers still read it as "Close"
+                        val closeLabel = stringResource(Res.string.settings_close)
+                        Box(
+                            Modifier.size(48.dp).clip(CircleShape).clickable(onClick = onDismiss)
+                                .semantics { contentDescription = closeLabel; role = SemanticsRole.Button },
+                            contentAlignment = Alignment.Center,
+                        ) { CloseIcon(MaterialTheme.colorScheme.primary) }
                     }
                     content()
                 }
             }
         }
+    }
+}
+
+/** An X, drawn (no icon library needed). */
+@Composable
+private fun CloseIcon(color: Color) {
+    androidx.compose.foundation.Canvas(Modifier.size(20.dp)) {
+        val w = 2.5.dp.toPx()
+        drawLine(color, androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.1f), androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.9f), w, androidx.compose.ui.graphics.StrokeCap.Round)
+        drawLine(color, androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.1f), androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.9f), w, androidx.compose.ui.graphics.StrokeCap.Round)
     }
 }
 

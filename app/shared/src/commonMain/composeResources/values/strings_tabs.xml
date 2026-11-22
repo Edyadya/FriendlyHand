@@ -1,10 +1,10 @@
 <resources>
-    <string name="tab_contributions">My contributions</string>
+    <string name="tab_contributions">Contributions</string>
     <string name="tab_map">Map</string>
-    <string name="tab_achievements">Achievements</string>
+    <string name="tab_achievements">Rewards</string>
     <string name="map_tap_bubble">Tap a bubble on the map to see who is there.</string>
     <string name="map_close_area">Close</string>
-    <string name="contrib_title">My contributions</string>
+    <string name="contrib_title">Contributions</string>
     <string name="contrib_summary_one">You helped 1 person</string>
     <string name="contrib_summary_many">You helped %1$d people</string>
     <string name="contrib_empty">Nothing yet. Open the map and tap a bubble to find someone to help.</string>
@@ -12,7 +12,7 @@
     <string name="contrib_brought">You’re bringing it</string>
     <string name="contrib_paid">You paid CHF %1$d</string>
     <string name="contrib_gave">You gave CHF %1$d</string>
-    <string name="achievements_title">Achievements</string>
+    <string name="achievements_title">Rewards</string>
     <string name="badges_title">Badges</string>
     <string name="badge_progress">%1$d / %2$d</string>
     <string name="badge_unlocked">Unlocked</string>
@@ -104,7 +104,7 @@
     <string name="order_status_accepted">%1$s will pick it up</string>
     <string name="order_status_picked">%1$s has it and is bringing it to %2$s</string>
     <string name="order_status_delivered">Delivered by %1$s</string>
-    <string name="feedback_order_sent">Order sent. A volunteer will take it. You will see their name in My contributions.</string>
+    <string name="feedback_order_sent">Order sent. A volunteer will take it. You will see their name in Contributions.</string>
     <string name="contrib_on_date">On %1$s</string>
     <string name="charities_link_hint">Tap a name to open the charity's website.</string>
 </resources>
