@@ -32,7 +32,7 @@ import helpinghand.app.shared.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-private fun AchievementId.title(): StringResource = when (this) {
+internal fun AchievementId.title(): StringResource = when (this) {
     AchievementId.FIRST_HELP -> Res.string.badge_first_help
     AchievementId.HELPED_3 -> Res.string.badge_helped_3
     AchievementId.HELPED_10 -> Res.string.badge_helped_10
@@ -47,7 +47,7 @@ private fun AchievementId.title(): StringResource = when (this) {
     AchievementId.THANKS_3 -> Res.string.badge_thanks_3
 }
 
-private fun AchievementId.description(): StringResource = when (this) {
+internal fun AchievementId.description(): StringResource = when (this) {
     AchievementId.FIRST_HELP -> Res.string.badge_first_help_desc
     AchievementId.HELPED_3 -> Res.string.badge_helped_3_desc
     AchievementId.HELPED_10 -> Res.string.badge_helped_10_desc
@@ -85,6 +85,15 @@ fun AchievementsScreen(repo: HelpRepository) {
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(stringResource(Res.string.achievements_title), style = MaterialTheme.typography.headlineSmall)
         }
+        // your personal badge: a pattern that is only yours, gold for the goals you completed
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            val contributions = repo.contributionsOf(ME_DONOR)
+            PersonalBadgeCard(
+                name = repo.currentAccount?.name.orEmpty(), count = contributions.size,
+                countLabel = stringResource(Res.string.art_count_contributions, contributions.size),
+                goldDone = completed, caption = Res.string.art_caption_patron,
+            )
+        }
         // how many people the whole platform has helped (everyone's verified help, not just mine)
         item(span = { GridItemSpan(maxLineSpan) }) { PlatformHelped(peopleHelped) }
         item(span = { GridItemSpan(maxLineSpan) }) { GoalsHero(completed, pending = pending) }
@@ -95,7 +104,14 @@ fun AchievementsScreen(repo: HelpRepository) {
         items(achievements, key = { it.id.name }) { a -> BadgeCard(a) { opened = a } }
     }
 
-    opened?.let { RewardDialog(it) { opened = null } }
+    opened?.let { a ->
+        RewardInfoDialog(
+            repo = repo, title = a.id.title(), description = a.id.description(), reward = a.id.reward,
+            unlocked = a.unlocked, pending = a.pending, progress = a.progress, target = a.target,
+            qrKey = "p:${a.id.name}",
+            icon = { BadgeIcon(a.unlocked, Modifier.size(48.dp), pending = a.pending) },
+        ) { opened = null }
+    }
 }
 
 /**
@@ -159,65 +175,6 @@ private fun BadgeCard(a: Achievement, onClick: () -> Unit) {
                 color = text,
             )
         }
-    }
-}
-
-/** What tapping a badge shows: its reward and the partner who gives it. */
-@Composable
-private fun RewardDialog(a: Achievement, onDismiss: () -> Unit) {
-    val r = a.id.reward
-    val colors = MaterialTheme.colorScheme
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = MaterialTheme.shapes.large,
-        containerColor = colors.surface,
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.reward_close)) } },
-        icon = { BadgeIcon(a.unlocked, Modifier.size(48.dp), pending = a.pending) },
-        title = { Text(stringResource(a.id.title())) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(stringResource(a.id.description()), style = MaterialTheme.typography.bodyLarge)
-                // the reward itself: surface card with the gold edge (gold = reward)
-                Row(
-                    Modifier.fillMaxWidth().height(IntrinsicSize.Min)
-                        .clip(AppShape.card)
-                        .background(colors.surface)
-                        .border(MaterialTheme.borderWidth, colors.outlineVariant, AppShape.card),
-                ) {
-                    Box(Modifier.width(2.dp).fillMaxHeight().background(MaterialTheme.app.gold))
-                    Row(
-                        Modifier.fillMaxWidth().padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        PartnerMonogram(r.partner, Modifier.size(44.dp))
-                        Column {
-                            Text(stringResource(Res.string.reward_label), style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant)
-                            Text(stringResource(r.reward), style = MaterialTheme.typography.titleLarge, color = colors.onSurface)
-                            Text(stringResource(Res.string.reward_from, r.partner.displayName), style = MaterialTheme.typography.bodyMedium, color = colors.onSurface)
-                        }
-                    }
-                }
-                Text(
-                    when {
-                        a.unlocked -> stringResource(Res.string.reward_unlocked, r.partner.displayName)
-                        a.pending -> stringResource(Res.string.badge_pending_hint)
-                        else -> stringResource(Res.string.reward_locked, a.progress, a.target)
-                    },
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = if (a.unlocked) colors.primary else colors.onSurfaceVariant,
-                )
-            }
-        },
-    )
-}
-
-/** A round badge with the partner's initials (no logos are used). */
-@Composable
-private fun PartnerMonogram(p: Partner, modifier: Modifier) {
-    val colors = MaterialTheme.colorScheme
-    Box(modifier.clip(CircleShape).background(colors.primaryContainer), contentAlignment = Alignment.Center) {
-        Text(p.monogram, color = colors.onPrimaryContainer, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
     }
 }
 

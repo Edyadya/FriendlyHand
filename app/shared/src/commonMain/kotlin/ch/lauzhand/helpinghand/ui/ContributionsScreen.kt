@@ -12,6 +12,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
@@ -53,6 +57,10 @@ private fun StageDot(stage: Stage) {
 /** Donor tab: everything I brought, paid or gave, newest first. Tapping one opens the person. */
 @Composable
 fun ContributionsScreen(repo: HelpRepository, onOpenPerson: (String) -> Unit) {
+    var chatOrderId by remember { mutableStateOf<String?>(null) }
+    repo.orders.firstOrNull { it.id == chatOrderId }?.takeIf { it.chatOpen }?.let { o ->
+        ChatDialog(repo, o, asVolunteer = false, myName = repo.currentAccount?.name.orEmpty()) { chatOrderId = null }
+    }
     val contributions = repo.contributionsOf(ME_DONOR).sortedByDescending { it.atMillis }
     val giveawayPayments = repo.giveawayContributionsOf(ME_DONOR)
     // everything the patron did, newest first: help for people, and payments towards giveaways
@@ -97,7 +105,7 @@ fun ContributionsScreen(repo: HelpRepository, onOpenPerson: (String) -> Unit) {
                 is Contribution -> {
                     val need = needById[item.needId] ?: return@itemsIndexed
                     val order = repo.orders.firstOrNull { it.needId == need.id }
-                    ContributionCard(item, need, personById[need.personId], order) { onOpenPerson(need.personId) }
+                    ContributionCard(item, need, personById[need.personId], order, onChat = { chatOrderId = it }) { onOpenPerson(need.personId) }
                 }
                 is GiveawayContribution -> GiveawayPaymentCard(item, repo.giveaways.firstOrNull { it.id == item.giveawayId })
             }
@@ -106,7 +114,7 @@ fun ContributionsScreen(repo: HelpRepository, onOpenPerson: (String) -> Unit) {
 }
 
 @Composable
-private fun ContributionCard(c: Contribution, need: Need, person: Person?, order: DeliveryOrder?, onClick: () -> Unit) {
+private fun ContributionCard(c: Contribution, need: Need, person: Person?, order: DeliveryOrder?, onChat: (String) -> Unit, onClick: () -> Unit) {
     Card(
         Modifier.fillMaxWidth().clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -152,6 +160,12 @@ private fun ContributionCard(c: Contribution, need: Need, person: Person?, order
             // the hand-over: which volunteer has the order
             order?.let {
                 Text(it.status.line(it, person?.firstName.orEmpty()), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+                // once a volunteer took the order, patron and volunteer can talk until it is delivered
+                if (it.chatOpen) {
+                    AppOutlinedButton(onClick = { onChat(it.id) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                        Text(stringResource(Res.string.chat_title, it.volunteerName.orEmpty()))
+                    }
+                }
             }
         }
     }

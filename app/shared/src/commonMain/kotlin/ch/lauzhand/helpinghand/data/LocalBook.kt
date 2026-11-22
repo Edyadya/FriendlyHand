@@ -26,6 +26,18 @@ interface BookApi {
     fun accountPhotoOf(accountId: String): String?
     fun setAccountPhoto(accountId: String, photoBase64: String?)
 
+    /** The temporary chat of an order (oldest first). It exists while the order is on its way and is deleted on delivery. */
+    fun chatOf(orderId: String): List<ChatMessage>
+    fun sendChat(orderId: String, fromVolunteer: Boolean, senderName: String, text: String)
+    fun closeChat(orderId: String)
+
+    /** The random redemption code of an unlocked reward ([key] names the badge). Made once, then always the same. */
+    fun rewardCodeFor(key: String): String
+
+    /** Badges whose "you unlocked it" pop-up was already shown. */
+    fun isBadgeCelebrated(key: String): Boolean
+    fun markBadgesCelebrated(keys: Collection<String>)
+
     /** Deliveries whose "it reached them" moment was already shown to the patron. */
     fun isCelebrated(needId: String): Boolean
     fun markCelebrated(needIds: Collection<String>)
@@ -42,6 +54,9 @@ class LocalBook : BookApi {
     private val photos = mutableStateMapOf<String, String>()
     private val profiles = mutableStateMapOf<String, AccountProfile>()
     private val celebrated = mutableStateListOf<String>()
+    private val chat = mutableStateListOf<ChatMessage>()
+    private val rewardCodes = mutableMapOf<String, String>()
+    private val celebratedBadges = mutableStateListOf<String>()
 
     override fun giveawayContributionsOf(donorId: String) = givenToGiveaways.filter { it.donorId == donorId }
 
@@ -64,6 +79,27 @@ class LocalBook : BookApi {
     override fun setAccountPhoto(accountId: String, photoBase64: String?) {
         if (photoBase64 == null) photos.remove(accountId) else photos[accountId] = photoBase64
     }
+
+    override fun chatOf(orderId: String): List<ChatMessage> = chat.filter { it.orderId == orderId }
+
+    override fun sendChat(orderId: String, fromVolunteer: Boolean, senderName: String, text: String) {
+        val clean = text.trim().take(MAX_CHAT_CHARS)
+        if (clean.isEmpty()) return
+        // only while the order is on its way
+        if (orders.firstOrNull { it.id == orderId }?.chatOpen != true) return
+        chat += ChatMessage(newId("m"), orderId, fromVolunteer, senderName, clean, nowMillis())
+    }
+
+    override fun closeChat(orderId: String) { chat.removeAll { it.orderId == orderId } }
+
+    override fun rewardCodeFor(key: String): String = rewardCodes.getOrPut(key) {
+        val letters = "ABCDEFGHJKMNPQRSTUVWXYZ23456789" // no look-alike characters
+        "HH-" + (1..8).map { letters.random() }.joinToString("")
+    }
+
+    override fun isBadgeCelebrated(key: String): Boolean = key in celebratedBadges
+
+    override fun markBadgesCelebrated(keys: Collection<String>) { keys.forEach { if (it !in celebratedBadges) celebratedBadges += it } }
 
     override fun isCelebrated(needId: String): Boolean = needId in celebrated
 

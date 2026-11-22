@@ -275,8 +275,10 @@ class CelebrationTest {
 }
 
 class VolunteerRewardsTest {
-    private fun order(id: String, volunteer: String?, status: OrderStatus) =
-        DeliveryOrder(id, "n", "p", "Coat", "z", "d", "Dan", 1, status, volunteer, volunteer)
+    private fun order(id: String, volunteer: String?, status: OrderStatus, zone: String = "z", person: String = "p", kind: OrderKind = OrderKind.HANDOVER) =
+        DeliveryOrder(id, "n-$id", person, "Coat", zone, "d", "Dan", 1, status, volunteer, volunteer, kind = kind)
+
+    private fun progress(orders: List<DeliveryOrder>, b: VolunteerBadge) = volunteerBadges(orders, "me").first { it.badge == b }
 
     @Test
     fun onlyMyDeliveredOrdersCount() {
@@ -289,14 +291,45 @@ class VolunteerRewardsTest {
     }
 
     @Test
-    fun badgesUnlockAtTheirTargetAndProgressIsCapped() {
-        val none = volunteerBadges(0)
-        assertTrue(none.none { it.unlocked })
-        val some = volunteerBadges(6).associateBy { it.badge }
-        assertTrue(some.getValue(VolunteerBadge.FIRST_DELIVERY).unlocked)
-        assertTrue(some.getValue(VolunteerBadge.FIVE_DELIVERIES).unlocked)
-        assertFalse(some.getValue(VolunteerBadge.TEN_DELIVERIES).unlocked)
-        assertEquals(6, some.getValue(VolunteerBadge.TEN_DELIVERIES).progress)
-        assertEquals(5, some.getValue(VolunteerBadge.FIVE_DELIVERIES).progress)
+    fun deliveryBadgesUnlockAtTheirTargetAndProgressIsCapped() {
+        assertTrue(volunteerBadges(emptyList(), "me").none { it.unlocked })
+        val orders = (1..6).map { order("o$it", "me", OrderStatus.DELIVERED, zone = "z$it", person = "p$it") }
+        assertTrue(progress(orders, VolunteerBadge.FIRST_DELIVERY).unlocked)
+        assertTrue(progress(orders, VolunteerBadge.FIVE_DELIVERIES).unlocked)
+        assertFalse(progress(orders, VolunteerBadge.TEN_DELIVERIES).unlocked)
+        assertEquals(6, progress(orders, VolunteerBadge.TEN_DELIVERIES).progress)
+        assertEquals(5, progress(orders, VolunteerBadge.FIVE_DELIVERIES).progress)
+    }
+
+    @Test
+    fun areasPeopleAndPurchasesHaveTheirOwnBadges() {
+        val same = (1..4).map { order("s$it", "me", OrderStatus.DELIVERED, zone = "flon", person = "luc") } // four orders, one place, one person
+        assertEquals(1, progress(same, VolunteerBadge.THREE_AREAS).progress)
+        assertEquals(1, progress(same, VolunteerBadge.FIVE_PEOPLE).progress)
+        assertEquals(0, progress(same, VolunteerBadge.FIRST_PURCHASE).progress)
+        val spread = listOf(
+            order("a", "me", OrderStatus.DELIVERED, zone = "z1", person = "p1"),
+            order("b", "me", OrderStatus.DELIVERED, zone = "z2", person = "p2", kind = OrderKind.PURCHASE),
+            order("c", "me", OrderStatus.DELIVERED, zone = "z3", person = "p3"),
+        )
+        assertTrue(progress(spread, VolunteerBadge.THREE_AREAS).unlocked)
+        assertTrue(progress(spread, VolunteerBadge.FIRST_PURCHASE).unlocked)
+        assertEquals(3, progress(spread, VolunteerBadge.FIVE_PEOPLE).progress)
+    }
+
+    @Test
+    fun theChatIsOpenOnlyBetweenAcceptingAndDelivering() {
+        val base = order("a", "me", OrderStatus.OPEN)
+        assertFalse(base.chatOpen)
+        assertTrue(base.copy(status = OrderStatus.ACCEPTED).chatOpen)
+        assertTrue(base.copy(status = OrderStatus.PICKED_UP).chatOpen)
+        assertFalse(base.copy(status = OrderStatus.DELIVERED).chatOpen)
+    }
+
+    @Test
+    fun theBadgeSeedIsPersonalAndGrowsWithTheCount() {
+        assertEquals(badgeSeed("Mia", 3), badgeSeed("  mia ", 3))   // same person, same count
+        assertNotEquals(badgeSeed("Mia", 3), badgeSeed("Dan", 3))   // another person
+        assertNotEquals(badgeSeed("Mia", 3), badgeSeed("Mia", 4))   // the pattern changes with every delivery
     }
 }

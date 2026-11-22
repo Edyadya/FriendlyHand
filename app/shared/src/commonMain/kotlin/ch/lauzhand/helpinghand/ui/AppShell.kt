@@ -68,6 +68,8 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
     var menuOpen by shell::menuOpen
     var settingsPage by shell::settingsPage
 
+    val momentGate = remember { mutableIntStateOf(0) }
+    CompositionLocalProvider(LocalMomentGate provides momentGate) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         BoxWithConstraints(Modifier.safeContentPadding().fillMaxSize()) {
         // The menu is a side bar that slides in from the right, on every screen size.
@@ -113,7 +115,7 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                             DonorTab.CONTRIBUTIONS ->
                                 if (role == Role.DONOR) ContributionsScreen(repo, onOpenPerson = { screen = Screen.Profile(it) })
                                 else OrdersScreen(repo, account.id, account.name, onOpenPerson = { screen = Screen.Profile(it) })
-                            DonorTab.ACHIEVEMENTS -> if (role == Role.DONOR) AchievementsScreen(repo) else VolunteerRewardsScreen(repo, account.id)
+                            DonorTab.ACHIEVEMENTS -> if (role == Role.DONOR) AchievementsScreen(repo) else VolunteerRewardsScreen(repo, account)
                         }
                         is Screen.Profile -> ProfileScreen(
                             repo, role, s.personId,
@@ -135,7 +137,7 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                         )
                     }
                 }
-                if (showTabs) DonorBottomBar(tab, selectTab)
+                if (showTabs) DonorBottomBar(tab, selectTab, volunteer = role == Role.VOLUNTEER)
             }
         }
         SettingsDrawer(open = menuOpen, onDismiss = { menuOpen = false }) { menuContent() }
@@ -152,6 +154,9 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                 ) { repo.markCelebrated(fresh.map { it.id }) }
             }
         }
+        // a newly unlocked badge: pop-up, then confetti
+        AchievementHost(repo, account)
         }
+    }
     }
 }

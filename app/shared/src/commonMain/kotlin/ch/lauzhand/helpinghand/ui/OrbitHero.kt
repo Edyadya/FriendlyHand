@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import helpinghand.app.shared.generated.resources.Res
+import helpinghand.app.shared.generated.resources.ic_kotlin_light
 import helpinghand.app.shared.generated.resources.imc_logo
 import helpinghand.app.shared.generated.resources.jetbrains_logo
 import helpinghand.app.shared.generated.resources.logo
@@ -40,7 +42,7 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-private enum class OrbitKind { HEART, PIN, COAT, SOCKS, COIN, BOOK, LOGO_IMC, LOGO_JETBRAINS }
+private enum class OrbitKind { HEART, PIN, COAT, SOCKS, COIN, BOOK, LOGO_IMC, LOGO_JETBRAINS, LOGO_KOTLIN }
 
 /** One small icon on a ring: which ring, where it starts (degrees) and what it is. */
 private class Orbiter(val ring: Int, val startDeg: Float, val kind: OrbitKind)
@@ -49,7 +51,7 @@ private class Orbiter(val ring: Int, val startDeg: Float, val kind: OrbitKind)
 private val Orbiters = listOf(
     Orbiter(0, 30f, OrbitKind.HEART), Orbiter(0, 210f, OrbitKind.LOGO_IMC),
     Orbiter(1, 0f, OrbitKind.COAT), Orbiter(1, 180f, OrbitKind.BOOK),
-    Orbiter(2, 80f, OrbitKind.LOGO_JETBRAINS), Orbiter(2, 260f, OrbitKind.LOGO_IMC),
+    Orbiter(2, 80f, OrbitKind.LOGO_JETBRAINS), Orbiter(2, 260f, OrbitKind.LOGO_KOTLIN),
 )
 private val RingRadius = floatArrayOf(0.40f, 0.68f, 0.96f) // fractions of the half-diameter
 private val RingAlpha = floatArrayOf(0.40f, 0.32f, 0.25f)
@@ -69,6 +71,8 @@ fun OrbitHero(diameter: Dp, modifier: Modifier = Modifier, reduceMotion: Boolean
     val label = MaterialTheme.typography.labelSmall
     val imc: ImageBitmap = imageResource(Res.drawable.imc_logo)
     val jetbrains: ImageBitmap = imageResource(Res.drawable.jetbrains_logo)
+    // the Kotlin logo is a vector drawable, so it is drawn through a painter
+    val kotlinLogo = painterResource(Res.drawable.ic_kotlin_light)
 
     val transition = rememberInfiniteTransition(label = "orbit")
     val inner by transition.animateFloat(0f, 360f, infiniteRepeatable(tween(26_000, easing = LinearEasing)), label = "inner")
@@ -89,8 +93,9 @@ fun OrbitHero(diameter: Dp, modifier: Modifier = Modifier, reduceMotion: Boolean
                 val rad = (o.startDeg + moved) * (PI.toFloat() / 180f)
                 val at = Offset(c.x + RingRadius[o.ring] * half * cos(rad), c.y + RingRadius[o.ring] * half * sin(rad))
                 val logo = when (o.kind) { OrbitKind.LOGO_IMC -> imc; OrbitKind.LOGO_JETBRAINS -> jetbrains; else -> null }
+                val isLogo = logo != null || o.kind == OrbitKind.LOGO_KOTLIN
                 // logos sit on a white disc so they stay readable in dark mode too
-                drawCircle(if (logo != null) Color.White else disc, discRadius, at)
+                drawCircle(if (isLogo) Color.White else disc, discRadius, at)
                 drawCircle(accent.copy(alpha = 0.55f), discRadius, at, style = Stroke(1.dp.toPx()))
                 if (logo != null) {
                     val side = (discRadius * (if (o.kind == OrbitKind.LOGO_IMC) 1.55f else 1.25f)).toInt()
@@ -100,6 +105,9 @@ fun OrbitHero(diameter: Dp, modifier: Modifier = Modifier, reduceMotion: Boolean
                         dstSize = IntSize(side, side),
                         dstOffset = IntOffset((at.x - side / 2f).toInt(), (at.y - side / 2f).toInt()),
                     )
+                } else if (o.kind == OrbitKind.LOGO_KOTLIN) {
+                    val side = discRadius * 1.25f
+                    translate(at.x - side / 2f, at.y - side / 2f) { with(kotlinLogo) { draw(androidx.compose.ui.geometry.Size(side, side)) } }
                 } else {
                     glyph(o.kind, at, discRadius * 0.62f, if (o.ring == 1) accent else primary, disc, textMeasurer, label)
                 }
@@ -154,7 +162,7 @@ private fun DrawScope.glyph(
             drawLine(cutout, p(-0.7f, -0.1f), p(-0.3f, 0.0f), 1.2.dp.toPx())
             drawLine(cutout, p(0.7f, -0.1f), p(0.3f, 0.0f), 1.2.dp.toPx())
         }
-        OrbitKind.LOGO_IMC, OrbitKind.LOGO_JETBRAINS -> Unit // drawn as images by the caller
+        OrbitKind.LOGO_IMC, OrbitKind.LOGO_JETBRAINS, OrbitKind.LOGO_KOTLIN -> Unit // drawn as images by the caller
     }
 }
 

@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
 import ch.lauzhand.helpinghand.model.DeliveryOrder
 import ch.lauzhand.helpinghand.model.OrderKind
+import ch.lauzhand.helpinghand.model.chatOpen
 import ch.lauzhand.helpinghand.model.OrderStatus
 import ch.lauzhand.helpinghand.model.formatDate
 import helpinghand.app.shared.generated.resources.*
@@ -28,6 +29,11 @@ import org.jetbrains.compose.resources.stringResource
  */
 @Composable
 fun OrdersScreen(repo: HelpRepository, volunteerId: String, volunteerName: String, onOpenPerson: (String) -> Unit, onBack: (() -> Unit)? = null) {
+    // the order whose chat is open (looked up again each time, so the chat closes by itself on delivery)
+    var chatOrderId by remember { mutableStateOf<String?>(null) }
+    repo.orders.firstOrNull { it.id == chatOrderId }?.takeIf { it.chatOpen }?.let { o ->
+        ChatDialog(repo, o, asVolunteer = true, myName = volunteerName) { chatOrderId = null }
+    }
     val orders = repo.orders.sortedByDescending { it.createdAtMillis }
     val open = orders.filter { it.status == OrderStatus.OPEN }
     val mine = orders.filter { it.volunteerId == volunteerId && (it.status == OrderStatus.ACCEPTED || it.status == OrderStatus.PICKED_UP) }
@@ -60,8 +66,8 @@ fun OrdersScreen(repo: HelpRepository, volunteerId: String, volunteerName: Strin
                 Text(stringResource(Res.string.orders_intro), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        section(Res.string.orders_open, open) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered) }
-        section(Res.string.orders_mine, mine) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered) }
+        section(Res.string.orders_open, open) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered, onChat = { id -> chatOrderId = id }) }
+        section(Res.string.orders_mine, mine) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered, onChat = { id -> chatOrderId = id }) }
         section(Res.string.orders_done, done) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered) }
     }
 }
@@ -77,7 +83,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.section(
 }
 
 @Composable
-private fun OrderCard(repo: HelpRepository, o: DeliveryOrder, volunteerId: String, volunteerName: String, onOpenPerson: (String) -> Unit, onDelivered: (DeliveryOrder) -> Unit) {
+private fun OrderCard(repo: HelpRepository, o: DeliveryOrder, volunteerId: String, volunteerName: String, onOpenPerson: (String) -> Unit, onDelivered: (DeliveryOrder) -> Unit, onChat: (String) -> Unit = {}) {
     val person = repo.people.firstOrNull { it.id == o.personId }
     val zone = repo.zones.firstOrNull { it.id == o.zoneId }?.name.orEmpty()
     Card(
@@ -113,6 +119,12 @@ private fun OrderCard(repo: HelpRepository, o: DeliveryOrder, volunteerId: Strin
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                 ) { Text(stringResource(Res.string.order_delivered_button, person?.firstName.orEmpty()), style = MaterialTheme.typography.titleMedium) }
                 OrderStatus.DELIVERED -> Unit
+            }
+            // a taken order has a chat with the patron, until the item is delivered
+            if (o.chatOpen && o.volunteerId == volunteerId) {
+                AppOutlinedButton(onClick = { onChat(o.id) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                    Text(stringResource(Res.string.chat_title, o.patronName))
+                }
             }
             AppOutlinedButton(onClick = { onOpenPerson(o.personId) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                 Text(stringResource(Res.string.order_view_person, person?.firstName.orEmpty()))

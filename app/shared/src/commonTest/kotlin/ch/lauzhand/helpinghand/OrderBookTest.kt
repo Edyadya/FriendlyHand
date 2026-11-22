@@ -181,3 +181,82 @@ class PurchaseOrderTest {
     }
 }
 
+
+class ChatAndRewardsTest {
+    private fun takenOrder(repo: FakeRepository): DeliveryOrder {
+        repo.claimNeed("n-1", ME_DONOR)
+        repo.requestHandover("n-1", ME_DONOR, "Dan")
+        val o = repo.orders.single { it.needId == "n-1" }
+        repo.acceptOrder(o.id, ME_VOLUNTEER, "Mia")
+        return repo.orders.single { it.id == o.id }
+    }
+
+    @Test
+    fun theChatOpensWhenAVolunteerTakesTheOrderAndNotBefore() {
+        val repo = FakeRepository()
+        repo.claimNeed("n-1", ME_DONOR)
+        repo.requestHandover("n-1", ME_DONOR, "Dan")
+        val open = repo.orders.single { it.needId == "n-1" }
+        repo.sendChat(open.id, false, "Dan", "hello?")                       // nobody has taken it yet
+        assertTrue(repo.chatOf(open.id).isEmpty())
+        val taken = takenOrder(repo).also { assertTrue(it.chatOpen) }
+        repo.sendChat(taken.id, false, "Dan", "  I can meet at 5  ")
+        repo.sendChat(taken.id, true, "Mia", "Fine, see you there")
+        repo.sendChat(taken.id, true, "Mia", "   ")                           // blank messages are ignored
+        val messages = repo.chatOf(taken.id)
+        assertEquals(listOf("I can meet at 5", "Fine, see you there"), messages.map { it.text })
+        assertEquals(listOf(false, true), messages.map { it.fromVolunteer })
+    }
+
+    @Test
+    fun theChatIsTemporaryAndIsDeletedWhenTheItemIsDelivered() {
+        val repo = FakeRepository()
+        val taken = takenOrder(repo)
+        repo.sendChat(taken.id, true, "Mia", "on my way")
+        repo.markPickedUp(taken.id)
+        repo.sendChat(taken.id, false, "Dan", "thanks")                     // still open while it is on its way
+        assertEquals(2, repo.chatOf(taken.id).size)
+        repo.confirmDelivered("n-1")
+        assertTrue(repo.chatOf(taken.id).isEmpty())
+        repo.sendChat(taken.id, true, "Mia", "too late")                    // closed
+        assertTrue(repo.chatOf(taken.id).isEmpty())
+    }
+
+    @Test
+    fun aMessageIsCutAtTheLimit() {
+        val repo = FakeRepository()
+        val taken = takenOrder(repo)
+        repo.sendChat(taken.id, true, "Mia", "x".repeat(MAX_CHAT_CHARS + 100))
+        assertEquals(MAX_CHAT_CHARS, repo.chatOf(taken.id).single().text.length)
+    }
+
+    @Test
+    fun aRewardCodeIsRandomButStaysTheSameForTheSameBadge() {
+        val repo = FakeRepository()
+        val a = repo.rewardCodeFor("p:FIRST_HELP")
+        assertEquals(a, repo.rewardCodeFor("p:FIRST_HELP"))
+        assertNotEquals(a, repo.rewardCodeFor("p:HELPED_3"))
+        assertTrue(Regex("HH-[A-Z2-9]{8}").matches(a), a)
+        assertNotEquals(a, FakeRepository().rewardCodeFor("p:FIRST_HELP")) // random: another session, another code
+    }
+
+    @Test
+    fun aBadgePopUpIsShownOnce() {
+        val repo = FakeRepository()
+        assertFalse(repo.isBadgeCelebrated("p:FIRST_HELP"))
+        repo.markBadgesCelebrated(listOf("p:FIRST_HELP"))
+        assertTrue(repo.isBadgeCelebrated("p:FIRST_HELP"))
+        assertFalse(repo.isBadgeCelebrated("v:FIRST_DELIVERY"))
+    }
+
+    @Test
+    fun deliveringUnlocksTheVolunteerBadges() {
+        val repo = FakeRepository()
+        takenOrder(repo)
+        assertTrue(volunteerBadges(repo.orders, ME_VOLUNTEER).none { it.unlocked })
+        val o = repo.orders.single { it.needId == "n-1" }
+        repo.markPickedUp(o.id); repo.confirmDelivered("n-1")
+        val unlocked = volunteerBadges(repo.orders, ME_VOLUNTEER).filter { it.unlocked }.map { it.badge }
+        assertEquals(listOf(VolunteerBadge.FIRST_DELIVERY), unlocked)
+    }
+}

@@ -1,10 +1,10 @@
 <resources>
-    <string name="tab_contributions">Deliveries</string>
+    <string name="tab_contributions">Contributions</string>
     <string name="tab_map">Map</string>
     <string name="tab_achievements">Rewards</string>
     <string name="map_tap_bubble">Tap a bubble on the map to see who is there.</string>
     <string name="map_close_area">Close</string>
-    <string name="contrib_title">Deliveries</string>
+    <string name="contrib_title">Contributions</string>
     <string name="contrib_summary_one">You helped 1 person</string>
     <string name="contrib_summary_many">You helped %1$d people</string>
     <string name="contrib_empty">Nothing yet. Open the map and tap a bubble to find someone to help.</string>
@@ -100,7 +100,7 @@
     <string name="order_status_accepted">%1$s will pick it up</string>
     <string name="order_status_picked">%1$s has it and is bringing it to %2$s</string>
     <string name="order_status_delivered">Delivered by %1$s</string>
-    <string name="feedback_order_sent">Order sent. A volunteer will take it. You will see their name in Deliveries.</string>
+    <string name="feedback_order_sent">Order sent. A volunteer will take it. You will see their name in Contributions.</string>
     <string name="contrib_on_date">On %1$s</string>
     <string name="charities_link_hint">Tap a name to open the charity's website.</string>
     <string name="impact_title">Community impact</string>
@@ -130,4 +130,28 @@
     <string name="order_status_accepted_buy">%1$s will buy it and bring it</string>
     <string name="order_status_picked_buy">%1$s bought it and is bringing it to %2$s</string>
     <string name="order_view_person">View %1$s</string>
+    <string name="tab_deliveries">Deliveries</string>
+    <string name="vr_badge_areas">Three neighbourhoods</string>
+    <string name="vr_badge_areas_desc">Deliver in 3 different areas</string>
+    <string name="vr_badge_people">Five people</string>
+    <string name="vr_badge_people_desc">Deliver to 5 different people</string>
+    <string name="vr_badge_purchase">Shopper</string>
+    <string name="vr_badge_purchase_desc">Buy and deliver an item a patron paid for</string>
+    <string name="reward_qr_hint">Show this QR code at %1$s</string>
+    <string name="reward_code">Code: %1$s</string>
+    <string name="achievement_unlocked">Badge unlocked!</string>
+    <string name="achievement_see_reward">See my reward</string>
+    <string name="achievement_later">Later</string>
+    <string name="art_title">Your badge</string>
+    <string name="art_caption_patron">A pattern that is only yours. It grows with every contribution, and gold marks the goals you completed.</string>
+    <string name="art_caption_volunteer">A pattern that is only yours. It grows with every delivery, and gold marks the badges you earned.</string>
+    <string name="art_count_contributions">%1$d contributions</string>
+    <string name="art_count_deliveries">%1$d deliveries</string>
+    <string name="chat_title">Chat with %1$s</string>
+    <string name="chat_hint">Only for this delivery. The chat closes when the item is delivered.</string>
+    <string name="chat_privacy">Please do not share the person's exact location or medical details here.</string>
+    <string name="chat_empty">No messages yet. Say hello and agree on a time and place.</string>
+    <string name="chat_input">Write a message</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_demo_note">In this demo the messages stay on this device, so the other person sees them only on this same device.</string>
 </resources>

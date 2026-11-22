@@ -1,6 +1,7 @@
 package ch.lauzhand.helpinghand.ui
 
 import ch.lauzhand.helpinghand.model.AchievementId
+import ch.lauzhand.helpinghand.model.VolunteerBadge
 import helpinghand.app.shared.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
 
@@ -45,3 +46,14 @@ val Partner.monogram: String
         else if (words.size >= 2) "${words[0][0]}${words[1][0]}"
         else displayName.filter { it.isUpperCase() }.take(2).ifEmpty { displayName.take(2) }
     }.uppercase()
+
+/** What a volunteer badge earns, and from which partner: the same kind of rewards patrons get. */
+val VolunteerBadge.reward: BadgeReward
+    get() = when (this) {
+        VolunteerBadge.FIRST_DELIVERY -> BadgeReward(Partner.KOLIBRI, Res.string.reward_coffee)
+        VolunteerBadge.FIVE_DELIVERIES -> BadgeReward(Partner.WAMAZON, Res.string.reward_gift_20)
+        VolunteerBadge.TEN_DELIVERIES -> BadgeReward(Partner.JETBRAINS, Res.string.reward_jetbrains)
+        VolunteerBadge.THREE_AREAS -> BadgeReward(Partner.PAGINA, Res.string.reward_book)
+        VolunteerBadge.FIVE_PEOPLE -> BadgeReward(Partner.KOLIBRI, Res.string.reward_breakfast)
+        VolunteerBadge.FIRST_PURCHASE -> BadgeReward(Partner.VELOLAC, Res.string.reward_bike)
+    }

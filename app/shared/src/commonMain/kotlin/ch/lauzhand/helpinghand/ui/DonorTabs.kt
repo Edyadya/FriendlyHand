@@ -30,7 +30,7 @@ enum class DonorTab(val label: StringResource) {
 
 /** The donor tabs, at the bottom of the screen. */
 @Composable
-fun DonorBottomBar(selected: DonorTab, onSelect: (DonorTab) -> Unit) {
+fun DonorBottomBar(selected: DonorTab, onSelect: (DonorTab) -> Unit, volunteer: Boolean = false) {
     // AppShell already pads for system bars, so no extra insets here
     val line = MaterialTheme.colorScheme.outline
     val dark = MaterialTheme.isDark
@@ -47,7 +47,8 @@ fun DonorBottomBar(selected: DonorTab, onSelect: (DonorTab) -> Unit) {
                 icon = { TabIcon(tab) },
                 label = {
                     Text(
-                        stringResource(tab.label),
+                        // the first tab is Contributions for patrons and Deliveries for volunteers
+                        stringResource(if (volunteer && tab == DonorTab.CONTRIBUTIONS) Res.string.tab_deliveries else tab.label),
                         style = MaterialTheme.typography.labelSmall,
                         // four tabs are narrow: let a long name (also in French) wrap onto a second line
                         textAlign = TextAlign.Center,

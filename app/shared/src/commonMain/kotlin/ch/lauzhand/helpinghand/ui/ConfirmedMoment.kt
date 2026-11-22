@@ -34,6 +34,9 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun ConfirmedMoment(impactLine: String, impact: CommunityImpact, onDismiss: () -> Unit) {
     LaunchedEffect(Unit) { delay(4500); onDismiss() }
+    // while this is on screen, the badge pop-up waits
+    val gate = LocalMomentGate.current
+    DisposableEffect(Unit) { gate?.let { it.intValue++ }; onDispose { gate?.let { it.intValue-- } } }
 
     val stamp = remember { Animatable(0f) }
     LaunchedEffect(Unit) { stamp.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = 220f)) }

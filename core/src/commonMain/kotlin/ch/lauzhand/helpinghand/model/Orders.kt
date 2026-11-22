@@ -42,3 +42,20 @@ fun DeliveryOrder.pickedUp(): DeliveryOrder =
 fun DeliveryOrder.delivered(atMillis: Long = nowMillis()): DeliveryOrder =
     if (status == OrderStatus.DELIVERED || status == OrderStatus.OPEN) this
     else copy(status = OrderStatus.DELIVERED, deliveredAtMillis = atMillis)
+
+/** The chat is open while a volunteer has taken the order and it is not delivered yet. */
+val DeliveryOrder.chatOpen: Boolean get() = status == OrderStatus.ACCEPTED || status == OrderStatus.PICKED_UP
+
+/** One message in the temporary chat between a patron and the volunteer who took their order. */
+@Serializable
+data class ChatMessage(
+    val id: String,
+    val orderId: String,
+    val fromVolunteer: Boolean,
+    val senderName: String,
+    val text: String,
+    val atMillis: Long,
+)
+
+/** Longest message, in characters. */
+const val MAX_CHAT_CHARS = 500

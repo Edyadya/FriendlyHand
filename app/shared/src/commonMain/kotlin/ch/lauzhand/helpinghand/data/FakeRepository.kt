@@ -88,7 +88,7 @@ interface HelpRepository : BookApi {
     /** The person confirmed they received it: the need is verified and its order is closed. */
     fun confirmDelivered(needId: String) {
         confirmReceived(needId)
-        orders.firstOrNull { it.needId == needId }?.let { saveOrder(it.delivered()) }
+        orders.firstOrNull { it.needId == needId }?.let { saveOrder(it.delivered()); closeChat(it.id) } // the chat is temporary
     }
 }
 

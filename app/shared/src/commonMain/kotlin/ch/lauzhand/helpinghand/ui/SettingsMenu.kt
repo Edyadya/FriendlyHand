@@ -210,7 +210,7 @@ fun SettingsDrawer(open: Boolean, onDismiss: () -> Unit, content: @Composable Co
 
 /** An X, drawn (no icon library needed). */
 @Composable
-private fun CloseIcon(color: Color) {
+internal fun CloseIcon(color: Color) {
     androidx.compose.foundation.Canvas(Modifier.size(20.dp)) {
         val w = 2.5.dp.toPx()
         drawLine(color, androidx.compose.ui.geometry.Offset(size.width * 0.1f, size.height * 0.1f), androidx.compose.ui.geometry.Offset(size.width * 0.9f, size.height * 0.9f), w, androidx.compose.ui.graphics.StrokeCap.Round)
