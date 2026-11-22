@@ -273,3 +273,30 @@ class CelebrationTest {
         assertTrue(deliveriesToCelebrate(contributions, needs) { true }.isEmpty())
     }
 }
+
+class VolunteerRewardsTest {
+    private fun order(id: String, volunteer: String?, status: OrderStatus) =
+        DeliveryOrder(id, "n", "p", "Coat", "z", "d", "Dan", 1, status, volunteer, volunteer)
+
+    @Test
+    fun onlyMyDeliveredOrdersCount() {
+        val orders = listOf(
+            order("a", "me", OrderStatus.DELIVERED), order("b", "me", OrderStatus.DELIVERED),
+            order("c", "me", OrderStatus.PICKED_UP), order("d", "other", OrderStatus.DELIVERED), order("e", null, OrderStatus.OPEN),
+        )
+        assertEquals(2, deliveriesDone(orders, "me"))
+        assertEquals(1, deliveriesInProgress(orders, "me"))
+    }
+
+    @Test
+    fun badgesUnlockAtTheirTargetAndProgressIsCapped() {
+        val none = volunteerBadges(0)
+        assertTrue(none.none { it.unlocked })
+        val some = volunteerBadges(6).associateBy { it.badge }
+        assertTrue(some.getValue(VolunteerBadge.FIRST_DELIVERY).unlocked)
+        assertTrue(some.getValue(VolunteerBadge.FIVE_DELIVERIES).unlocked)
+        assertFalse(some.getValue(VolunteerBadge.TEN_DELIVERIES).unlocked)
+        assertEquals(6, some.getValue(VolunteerBadge.TEN_DELIVERIES).progress)
+        assertEquals(5, some.getValue(VolunteerBadge.FIVE_DELIVERIES).progress)
+    }
+}

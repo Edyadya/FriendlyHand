@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import ch.lauzhand.helpinghand.model.communityImpact
+import ch.lauzhand.helpinghand.model.needCoverage
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
@@ -25,7 +26,7 @@ import org.jetbrains.compose.resources.stringResource
  * order, picks the item up and delivers it to the person, who then confirms it.
  */
 @Composable
-fun OrdersScreen(repo: HelpRepository, volunteerId: String, volunteerName: String, onBack: () -> Unit, onOpenPerson: (String) -> Unit) {
+fun OrdersScreen(repo: HelpRepository, volunteerId: String, volunteerName: String, onOpenPerson: (String) -> Unit, onBack: (() -> Unit)? = null) {
     val orders = repo.orders.sortedByDescending { it.createdAtMillis }
     val open = orders.filter { it.status == OrderStatus.OPEN }
     val mine = orders.filter { it.volunteerId == volunteerId && (it.status == OrderStatus.ACCEPTED || it.status == OrderStatus.PICKED_UP) }
@@ -48,9 +49,12 @@ fun OrdersScreen(repo: HelpRepository, volunteerId: String, volunteerName: Strin
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        // the community's impact and coverage, as at the top of a patron's Deliveries
+        item { ImpactStrip(communityImpact(repo.needs, repo.giveaways)) }
+        item { CoverageCard(needCoverage(repo.needs)) }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
+                if (onBack != null) TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
                 Text(stringResource(Res.string.orders_title), style = MaterialTheme.typography.headlineSmall)
                 Text(stringResource(Res.string.orders_intro), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }

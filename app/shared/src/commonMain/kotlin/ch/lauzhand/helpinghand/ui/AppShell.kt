@@ -42,7 +42,6 @@ sealed interface Screen {
     data object Rewards : Screen
     data object Charities : Screen
     data object Giveaways : Screen
-    data object Orders : Screen
     data class AddNeed(val personId: String) : Screen
 }
 
@@ -83,7 +82,6 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                 features = buildList {
                     add(Res.string.menu_charities to { menuOpen = false; screen = Screen.Charities })
                     if (role == Role.DONOR) add(Res.string.menu_giveaways to { menuOpen = false; screen = Screen.Giveaways })
-                    if (role == Role.VOLUNTEER) add(Res.string.menu_orders to { menuOpen = false; screen = Screen.Orders })
                 },
             )
         }
@@ -92,14 +90,15 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                 onMenuClick = { menuOpen = !menuOpen },
                 profile = { AccountAvatar(account.name, repo.accountPhotoOf(account.id), 32.dp, Modifier.clickable { shell.pictureOpen = true }) },
             )
-            val showTabs = role == Role.DONOR
+            // Everyone gets the same three tabs at the bottom: Deliveries, Map, Rewards
+            val showTabs = true
             Column(Modifier.weight(1f).fillMaxWidth()) {
                 Box(Modifier.weight(1f).fillMaxWidth()) {
                     // Never show a screen the role isn't allowed on (same rule the role chips used).
-                    val allowed = !((role != Role.VOLUNTEER && (screen is Screen.Onboarding || screen is Screen.AddNeed || screen is Screen.Orders)) ||
+                    val allowed = !((role != Role.VOLUNTEER && (screen is Screen.Onboarding || screen is Screen.AddNeed)) ||
                         (role != Role.DONOR && (screen is Screen.Rewards || screen is Screen.Giveaways)))
                     when (val s = if (allowed) screen else Screen.Home) {
-                        Screen.Home -> when (if (showTabs) tab else DonorTab.MAP) {
+                        Screen.Home -> when (tab) {
                             DonorTab.MAP -> HomeScreen(
                                 repo, role,
                                 city = shell.city,
@@ -108,8 +107,11 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                                 onNewPerson = { screen = Screen.Onboarding },
                                 onRewards = { selectTab(DonorTab.ACHIEVEMENTS) },
                             )
-                            DonorTab.CONTRIBUTIONS -> ContributionsScreen(repo, onOpenPerson = { screen = Screen.Profile(it) })
-                            DonorTab.ACHIEVEMENTS -> AchievementsScreen(repo)
+                            // Deliveries: a patron's own gifts, or the volunteers' order book
+                            DonorTab.CONTRIBUTIONS ->
+                                if (role == Role.DONOR) ContributionsScreen(repo, onOpenPerson = { screen = Screen.Profile(it) })
+                                else OrdersScreen(repo, account.id, account.name, onOpenPerson = { screen = Screen.Profile(it) })
+                            DonorTab.ACHIEVEMENTS -> if (role == Role.DONOR) AchievementsScreen(repo) else VolunteerRewardsScreen(repo, account.id)
                         }
                         is Screen.Profile -> ProfileScreen(
                             repo, role, s.personId,
@@ -119,11 +121,6 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                         Screen.Rewards -> RewardScreen(repo, onBack = { screen = Screen.Home })
                         Screen.Charities -> CharitiesScreen(shell.city, { shell.city = it }, onBack = { screen = Screen.Home })
                         Screen.Giveaways -> GiveawaysScreen(repo, onBack = { screen = Screen.Home })
-                        Screen.Orders -> OrdersScreen(
-                            repo, account.id, account.name,
-                            onBack = { screen = Screen.Home },
-                            onOpenPerson = { screen = Screen.Profile(it) },
-                        )
                         Screen.Onboarding -> OnboardingScreen(
                             repo,
                             onBack = { screen = Screen.Home },

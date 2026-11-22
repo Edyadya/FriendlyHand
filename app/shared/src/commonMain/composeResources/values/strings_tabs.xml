@@ -1,10 +1,10 @@
 <resources>
-    <string name="tab_contributions">Contributions</string>
+    <string name="tab_contributions">Deliveries</string>
     <string name="tab_map">Map</string>
     <string name="tab_achievements">Rewards</string>
     <string name="map_tap_bubble">Tap a bubble on the map to see who is there.</string>
     <string name="map_close_area">Close</string>
-    <string name="contrib_title">Contributions</string>
+    <string name="contrib_title">Deliveries</string>
     <string name="contrib_summary_one">You helped 1 person</string>
     <string name="contrib_summary_many">You helped %1$d people</string>
     <string name="contrib_empty">Nothing yet. Open the map and tap a bubble to find someone to help.</string>
@@ -104,7 +104,7 @@
     <string name="order_status_accepted">%1$s will pick it up</string>
     <string name="order_status_picked">%1$s has it and is bringing it to %2$s</string>
     <string name="order_status_delivered">Delivered by %1$s</string>
-    <string name="feedback_order_sent">Order sent. A volunteer will take it. You will see their name in Contributions.</string>
+    <string name="feedback_order_sent">Order sent. A volunteer will take it. You will see their name in Deliveries.</string>
     <string name="contrib_on_date">On %1$s</string>
     <string name="charities_link_hint">Tap a name to open the charity's website.</string>
     <string name="impact_title">Community impact</string>
@@ -117,4 +117,15 @@
     <string name="moment_reached_gift">Your gift for %1$s reached %2$s near %3$s</string>
     <string name="moment_reached">The %1$s reached %2$s near %3$s</string>
     <string name="moment_totals">The community so far</string>
+    <string name="vr_your_deliveries">Your deliveries</string>
+    <string name="vr_delivered_count">%1$d delivered</string>
+    <string name="vr_in_progress">%1$d on the way</string>
+    <string name="vr_badge_first">First delivery</string>
+    <string name="vr_badge_five">5 deliveries</string>
+    <string name="vr_badge_ten">10 deliveries</string>
+    <string name="vr_unlocked">Unlocked</string>
+    <string name="vr_progress">%1$d of %2$d</string>
+    <string name="vr_badge_first_desc">Deliver your first order to someone in need</string>
+    <string name="vr_badge_five_desc">Deliver 5 orders to the people who need them</string>
+    <string name="vr_badge_ten_desc">Deliver 10 orders to the people who need them</string>
 </resources>

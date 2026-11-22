@@ -37,3 +37,21 @@ fun deliveriesToCelebrate(contributions: List<Contribution>, needs: List<Need>, 
     return contributions.sortedBy { it.atMillis }.mapNotNull { byId[it.needId] }.distinctBy { it.id }
         .filter { it.isVerified && !isCelebrated(it.id) }
 }
+
+/** Volunteer badges, by how many deliveries they have completed (an order delivered and confirmed by the person). */
+enum class VolunteerBadge(val target: Int) { FIRST_DELIVERY(1), FIVE_DELIVERIES(5), TEN_DELIVERIES(10) }
+
+data class VolunteerProgress(val badge: VolunteerBadge, val progress: Int) {
+    val unlocked: Boolean get() = progress >= badge.target
+}
+
+/** Orders this volunteer delivered. */
+fun deliveriesDone(orders: List<DeliveryOrder>, volunteerId: String): Int =
+    orders.count { it.volunteerId == volunteerId && it.status == OrderStatus.DELIVERED }
+
+/** Orders this volunteer has taken and not delivered yet. */
+fun deliveriesInProgress(orders: List<DeliveryOrder>, volunteerId: String): Int =
+    orders.count { it.volunteerId == volunteerId && (it.status == OrderStatus.ACCEPTED || it.status == OrderStatus.PICKED_UP) }
+
+fun volunteerBadges(deliveries: Int): List<VolunteerProgress> =
+    VolunteerBadge.entries.map { VolunteerProgress(it, deliveries.coerceAtMost(it.target)) }

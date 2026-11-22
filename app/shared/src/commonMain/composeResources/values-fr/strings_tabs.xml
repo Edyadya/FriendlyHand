@@ -1,10 +1,10 @@
 <resources>
-    <string name="tab_contributions">Contributions</string>
+    <string name="tab_contributions">Livraisons</string>
     <string name="tab_map">Carte</string>
     <string name="tab_achievements">Récompenses</string>
     <string name="map_tap_bubble">Touchez une bulle sur la carte pour voir qui s’y trouve.</string>
     <string name="map_close_area">Fermer</string>
-    <string name="contrib_title">Contributions</string>
+    <string name="contrib_title">Livraisons</string>
     <string name="contrib_summary_one">Vous avez aidé 1 personne</string>
     <string name="contrib_summary_many">Vous avez aidé %1$d personnes</string>
     <string name="contrib_empty">Rien pour l’instant. Ouvrez la carte et touchez une bulle pour trouver quelqu’un à aider.</string>
@@ -104,7 +104,7 @@
     <string name="order_status_accepted">%1$s va le récupérer</string>
     <string name="order_status_picked">%1$s l'a et l'apporte à %2$s</string>
     <string name="order_status_delivered">Remis par %1$s</string>
-    <string name="feedback_order_sent">Commande envoyée. Un bénévole va la prendre. Vous verrez son nom dans Contributions.</string>
+    <string name="feedback_order_sent">Commande envoyée. Un bénévole va la prendre. Vous verrez son nom dans Livraisons.</string>
     <string name="contrib_on_date">Le %1$s</string>
     <string name="charities_link_hint">Touchez un nom pour ouvrir le site de l'association.</string>
     <string name="impact_title">Impact collectif</string>
@@ -117,4 +117,15 @@
     <string name="moment_reached_gift">Votre don pour %1$s est arrivé chez %2$s près de %3$s</string>
     <string name="moment_reached">L'objet « %1$s » est arrivé chez %2$s près de %3$s</string>
     <string name="moment_totals">La communauté jusqu'ici</string>
+    <string name="vr_your_deliveries">Vos livraisons</string>
+    <string name="vr_delivered_count">%1$d livrées</string>
+    <string name="vr_in_progress">%1$d en route</string>
+    <string name="vr_badge_first">Première livraison</string>
+    <string name="vr_badge_five">5 livraisons</string>
+    <string name="vr_badge_ten">10 livraisons</string>
+    <string name="vr_unlocked">Débloqué</string>
+    <string name="vr_progress">%1$d sur %2$d</string>
+    <string name="vr_badge_first_desc">Livrez votre première commande à une personne dans le besoin</string>
+    <string name="vr_badge_five_desc">Livrez 5 commandes aux personnes qui en ont besoin</string>
+    <string name="vr_badge_ten_desc">Livrez 10 commandes aux personnes qui en ont besoin</string>
 </resources>
