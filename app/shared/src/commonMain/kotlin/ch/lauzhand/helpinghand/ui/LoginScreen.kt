@@ -232,14 +232,17 @@ private fun RoleTile(role: Role, selected: Boolean, compact: Boolean, modifier: 
     val colors = MaterialTheme.colorScheme
     val shape = AppShape.card
     // unselected: surface with an outline; selected: primary fill with onPrimary text and icon
-    val container by animateColorAsState(if (selected) colors.primary else colors.surface)
-    val content by animateColorAsState(if (selected) colors.onPrimary else colors.onSurface)
+    // selected: the primary fill; in dark mode the chosen role is white with navy text and icon
+    val selectedFill = if (MaterialTheme.isDark) colors.onSurface else colors.primary
+    val selectedContent = if (MaterialTheme.isDark) MaterialTheme.app.onAccent else colors.onPrimary
+    val container by animateColorAsState(if (selected) selectedFill else colors.surface)
+    val content by animateColorAsState(if (selected) selectedContent else colors.onSurface)
     Column(
         modifier
             .heightIn(min = if (compact) 84.dp else 120.dp)
             .clip(shape)
             .background(container)
-            .border(MaterialTheme.borderWidth, if (selected) colors.primary else colors.outlineVariant, shape)
+            .border(MaterialTheme.borderWidth, if (selected) selectedFill else colors.outlineVariant, shape)
             .selectable(selected = selected, onClick = onSelect, role = SemanticsRole.RadioButton)
             .padding(if (compact) 10.dp else 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
