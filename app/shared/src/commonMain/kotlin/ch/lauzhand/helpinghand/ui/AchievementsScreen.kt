@@ -76,11 +76,11 @@ fun AchievementsScreen(repo: HelpRepository) {
     val peopleHelped = peopleHelpedOverall(repo.needs)
 
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 170.dp),
+        columns = GridCells.Fixed(4), // four reward blocks in a line
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(stringResource(Res.string.achievements_title), style = MaterialTheme.typography.headlineSmall)
@@ -90,7 +90,7 @@ fun AchievementsScreen(repo: HelpRepository) {
             val contributions = repo.contributionsOf(ME_DONOR)
             PersonalBadgeCard(
                 name = repo.currentAccount?.name.orEmpty(), count = contributions.size,
-                countLabel = stringResource(Res.string.art_count_contributions, contributions.size),
+                countLabel = if (contributions.size == 1) stringResource(Res.string.art_count_contributions_one) else stringResource(Res.string.art_count_contributions, contributions.size),
                 goldDone = completed, caption = Res.string.art_caption_patron,
             )
         }
@@ -101,7 +101,9 @@ fun AchievementsScreen(repo: HelpRepository) {
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(stringResource(Res.string.badges_title), style = MaterialTheme.typography.headlineSmall)
         }
-        items(achievements, key = { it.id.name }) { a -> BadgeCard(a) { opened = a } }
+        items(achievements, key = { it.id.name }) { a ->
+            RewardTileCard(RewardTile(a.id.name, a.id.title(), a.unlocked, a.pending, a.progress, a.target), { opened = a })
+        }
     }
 
     opened?.let { a ->
@@ -114,80 +116,16 @@ fun AchievementsScreen(repo: HelpRepository) {
     }
 }
 
-/**
- * Unlocked: navy card, gold medal, white label. Locked: grey "locked" fill, padlock, and an
- * "unlock by ..." hint with progress. Locked and unlocked also differ by icon and label, not only colour.
- */
-@Composable
-private fun BadgeCard(a: Achievement, onClick: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    val app = MaterialTheme.app
-    // locked: the grey fill in light mode; in dark mode a plain card with a border, so the empty bar stays visible
-    val container = if (a.unlocked) app.navy else if (MaterialTheme.isDark) colors.surface else app.locked // pending uses the locked look, with a gold dashed icon
-    val text = if (a.unlocked) app.onNavy else colors.onSurface
-    val sub = if (a.unlocked) app.onNavy else colors.onSurface
-    Column(
-        Modifier.fillMaxWidth().heightIn(min = 170.dp)
-            .darkOutline(AppShape.card)
-            .clip(AppShape.card)
-            .background(container)
-            .clickable(onClick = onClick)
-            .padding(14.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        BadgeIcon(a.unlocked, Modifier.size(40.dp), pending = a.pending)
-        Text(stringResource(a.id.title()), style = MaterialTheme.typography.titleMedium, color = text)
-        Text(
-            when {
-                a.unlocked -> stringResource(a.id.description())
-                a.pending -> stringResource(Res.string.badge_pending_hint)
-                else -> stringResource(Res.string.badge_unlock_by, stringResource(a.id.description()))
-            },
-            style = MaterialTheme.typography.bodySmall,
-            color = sub,
-        )
-        Text(
-            stringResource(Res.string.reward_on_badge, a.id.reward.partner.displayName),
-            style = MaterialTheme.typography.labelMedium,
-            // gold text is allowed here: it names a reward, and it sits on navy
-            color = if (a.unlocked) app.gold else colors.onSurfaceVariant,
-        )
-        Spacer(Modifier.weight(1f, fill = false))
-        if (a.unlocked) {
-            Text(stringResource(Res.string.badge_unlocked), style = MaterialTheme.typography.labelLarge, color = text)
-        } else {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                AppProgressBar(
-                    progress = { a.progress.toFloat() / a.target },
-                    modifier = Modifier.weight(1f).height(6.dp),
-                    color = app.rewardFill,                                   // gold in dark mode
-                    trackColor = if (MaterialTheme.isDark) app.progressTrack else colors.surface,
-                )
-                Text(
-                    stringResource(Res.string.badge_progress, a.progress, a.target),
-                    style = MaterialTheme.typography.labelMedium.merge(NumeralStyle),
-                    color = text,
-                )
-            }
-            Text(
-                stringResource(if (a.pending) Res.string.badge_pending else Res.string.badge_locked),
-                style = MaterialTheme.typography.labelMedium,
-                color = text,
-            )
-        }
-    }
-}
-
 /** The whole platform's number: how many different people have had help verified by a volunteer. */
 @Composable
-private fun PlatformHelped(count: Int) {
+internal fun PlatformHelped(count: Int) {
     val colors = MaterialTheme.colorScheme
     Row(
-        Modifier.fillMaxWidth().darkOutline(AppShape.card).background(colors.primaryContainer, AppShape.card).padding(horizontal = 16.dp, vertical = 14.dp),
+        Modifier.fillMaxWidth().darkOutline(AppShape.card).background(colors.primaryContainer, AppShape.card).padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Text(count.toString(), style = MaterialTheme.typography.displaySmall, color = colors.onPrimaryContainer)
+        Text(count.toString(), style = MaterialTheme.typography.headlineLarge, color = colors.onPrimaryContainer)
         Column(Modifier.weight(1f)) {
             Text(
                 if (count == 1) stringResource(Res.string.platform_helped_one) else stringResource(Res.string.platform_helped_many, count),

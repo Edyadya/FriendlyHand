@@ -257,6 +257,6 @@ class ChatAndRewardsTest {
         val o = repo.orders.single { it.needId == "n-1" }
         repo.markPickedUp(o.id); repo.confirmDelivered("n-1")
         val unlocked = volunteerBadges(repo.orders, ME_VOLUNTEER).filter { it.unlocked }.map { it.badge }
-        assertEquals(listOf(VolunteerBadge.FIRST_DELIVERY), unlocked)
+        assertEquals(listOf(VolunteerBadge.FIRST_DELIVERY, VolunteerBadge.FIRST_HANDOVER), unlocked) // a hand-over delivered
     }
 }

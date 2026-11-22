@@ -318,6 +318,28 @@ class VolunteerRewardsTest {
     }
 
     @Test
+    fun thereAreTwelveVolunteerBadgesLikeThePatrons() {
+        assertEquals(12, VolunteerBadge.entries.size)
+        assertEquals(AchievementId.entries.size, VolunteerBadge.entries.size)
+        assertEquals(12, volunteerBadges(emptyList(), "me").size)
+    }
+
+    @Test
+    fun handoversAndMoreDeliveriesHaveTheirOwnBadges() {
+        val orders = (1..5).map { order("h$it", "me", OrderStatus.DELIVERED, zone = "z$it", person = "p$it") }
+        assertTrue(progress(orders, VolunteerBadge.FIRST_HANDOVER).unlocked)
+        assertTrue(progress(orders, VolunteerBadge.FIVE_HANDOVERS).unlocked)
+        assertTrue(progress(orders, VolunteerBadge.FIVE_AREAS).unlocked)
+        assertTrue(progress(orders, VolunteerBadge.FIVE_PEOPLE).unlocked)
+        assertFalse(progress(orders, VolunteerBadge.TEN_PEOPLE).unlocked)
+        assertFalse(progress(orders, VolunteerBadge.TWENTY_FIVE_DELIVERIES).unlocked)
+        assertEquals(5, progress(orders, VolunteerBadge.TWENTY_FIVE_DELIVERIES).progress)
+        val bought = (1..5).map { order("b$it", "me", OrderStatus.DELIVERED, kind = OrderKind.PURCHASE) }
+        assertTrue(progress(bought, VolunteerBadge.FIVE_PURCHASES).unlocked)
+        assertFalse(progress(bought, VolunteerBadge.FIRST_HANDOVER).unlocked) // bought items are not hand-overs
+    }
+
+    @Test
     fun theChatIsOpenOnlyBetweenAcceptingAndDelivering() {
         val base = order("a", "me", OrderStatus.OPEN)
         assertFalse(base.chatOpen)

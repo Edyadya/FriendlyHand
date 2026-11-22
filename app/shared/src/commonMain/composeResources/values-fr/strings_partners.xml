@@ -2,7 +2,7 @@
     <string name="partners_title">Nos partenaires</string>
     <string name="partners_subtitle">Ils vous remercient de votre aide</string>
     <string name="partner_kind_jetbrains">Outils de développement</string>
-    <string name="partner_kind_ims">Partenaire</string>
+    <string name="partner_kind_imc">Partenaire</string>
     <string name="partner_kind_wamazon">Boutique en ligne</string>
     <string name="partner_kind_kolibri">Café</string>
     <string name="partner_kind_velolac">Atelier vélo</string>
@@ -14,7 +14,7 @@
     <string name="reward_book">Bon livre de CHF 15</string>
     <string name="reward_breakfast">Petit-déjeuner pour deux</string>
     <string name="reward_jetbrains">Pack de goodies JetBrains</string>
-    <string name="reward_ims">Sac cadeau IMS</string>
+    <string name="reward_imc">Sac cadeau IMC</string>
     <string name="reward_label">Récompense</string>
     <string name="reward_from">offert par %1$s</string>
     <string name="reward_on_badge">Récompense : %1$s</string>

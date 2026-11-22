@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import ch.lauzhand.helpinghand.model.communityImpact
 import ch.lauzhand.helpinghand.model.needCoverage
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
@@ -53,32 +54,36 @@ fun OrdersScreen(repo: HelpRepository, volunteerId: String, volunteerName: Strin
     }
     LazyColumn(
         Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        // the community's impact and coverage, as at the top of a patron's Deliveries
+        // the community's impact and coverage, as at the top of a patron's Contributions
         item { ImpactStrip(communityImpact(repo.needs, repo.giveaways)) }
         item { CoverageCard(needCoverage(repo.needs)) }
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                if (onBack != null) TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
-                Text(stringResource(Res.string.orders_title), style = MaterialTheme.typography.headlineSmall)
-                Text(stringResource(Res.string.orders_intro), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (onBack != null) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
+                    Text(stringResource(Res.string.orders_title), style = MaterialTheme.typography.headlineSmall)
+                }
             }
         }
+        // my orders (with their chat) first, then what is waiting, then what I delivered
+        section(Res.string.orders_mine, mine, hideWhenEmpty = true) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered, onChat = { id -> chatOrderId = id }) }
         section(Res.string.orders_open, open) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered, onChat = { id -> chatOrderId = id }) }
-        section(Res.string.orders_mine, mine) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered, onChat = { id -> chatOrderId = id }) }
-        section(Res.string.orders_done, done) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered) }
+        section(Res.string.orders_done, done, hideWhenEmpty = true) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered) }
     }
 }
 
 private fun androidx.compose.foundation.lazy.LazyListScope.section(
     title: org.jetbrains.compose.resources.StringResource,
     list: List<DeliveryOrder>,
+    hideWhenEmpty: Boolean = false,
     card: @Composable (DeliveryOrder) -> Unit,
 ) {
-    item { Text(stringResource(title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary) }
-    if (list.isEmpty()) item { Text(stringResource(Res.string.orders_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+    if (list.isEmpty() && hideWhenEmpty) return // nothing to show: no heading, no "none" line
+    item { Text(stringResource(title), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary) }
+    if (list.isEmpty()) item { Text(stringResource(Res.string.orders_empty), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
     items(list, key = { it.id }) { card(it) }
 }
 
@@ -86,48 +91,61 @@ private fun androidx.compose.foundation.lazy.LazyListScope.section(
 private fun OrderCard(repo: HelpRepository, o: DeliveryOrder, volunteerId: String, volunteerName: String, onOpenPerson: (String) -> Unit, onDelivered: (DeliveryOrder) -> Unit, onChat: (String) -> Unit = {}) {
     val person = repo.people.firstOrNull { it.id == o.personId }
     val zone = repo.zones.firstOrNull { it.id == o.zoneId }?.name.orEmpty()
+    val buying = o.kind == OrderKind.PURCHASE
     Card(
         Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            val buying = o.kind == OrderKind.PURCHASE
-            Text(
-                if (buying) stringResource(Res.string.order_buy_for, o.itemTitle, person?.firstName.orEmpty(), zone)
-                else stringResource(Res.string.order_item_for, o.itemTitle, person?.firstName.orEmpty(), zone),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Text(
-                if (buying) stringResource(Res.string.order_paid_by, o.patronName, formatDate(o.createdAtMillis))
-                else stringResource(Res.string.order_from, o.patronName, formatDate(o.createdAtMillis)),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(o.status.line(o, person?.firstName.orEmpty()), style = MaterialTheme.typography.bodyLarge)
-            when (o.status) {
-                OrderStatus.OPEN -> AppButton(
-                    onClick = { repo.acceptOrder(o.id, volunteerId, volunteerName) },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-                ) { Text(stringResource(Res.string.order_accept), style = MaterialTheme.typography.titleMedium) }
-                OrderStatus.ACCEPTED -> AppButton(
-                    onClick = { repo.markPickedUp(o.id) },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-                ) { Text(stringResource(if (buying) Res.string.order_bought else Res.string.order_picked_up), style = MaterialTheme.typography.titleMedium) }
-                OrderStatus.PICKED_UP -> AppButton(
-                    onClick = { repo.confirmDelivered(o.needId); onDelivered(o) },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-                ) { Text(stringResource(Res.string.order_delivered_button, person?.firstName.orEmpty()), style = MaterialTheme.typography.titleMedium) }
-                OrderStatus.DELIVERED -> Unit
-            }
-            // a taken order has a chat with the patron, until the item is delivered
-            if (o.chatOpen && o.volunteerId == volunteerId) {
-                AppOutlinedButton(onClick = { onChat(o.id) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                    Text(stringResource(Res.string.chat_title, o.patronName))
+        Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            // the title and who paid / handed it over, with a small "View <name>" beside them
+            Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        if (buying) stringResource(Res.string.order_buy_for, o.itemTitle, person?.firstName.orEmpty(), zone)
+                        else stringResource(Res.string.order_item_for, o.itemTitle, person?.firstName.orEmpty(), zone),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        if (buying) stringResource(Res.string.order_paid_by, o.patronName, formatDate(o.createdAtMillis))
+                        else stringResource(Res.string.order_from, o.patronName, formatDate(o.createdAtMillis)),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                TextButton(onClick = { onOpenPerson(o.personId) }, modifier = Modifier.heightIn(min = 44.dp)) {
+                    Text(stringResource(Res.string.order_view_person, person?.firstName.orEmpty()), style = MaterialTheme.typography.labelLarge)
                 }
             }
-            AppOutlinedButton(onClick = { onOpenPerson(o.personId) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                Text(stringResource(Res.string.order_view_person, person?.firstName.orEmpty()))
+            // where it is (an open order says so in its section title, so only the others need a line)
+            if (o.status != OrderStatus.OPEN) {
+                Text(o.status.line(o, person?.firstName.orEmpty()), style = MaterialTheme.typography.bodyMedium)
+            }
+            // the action and, for a taken order, the chat with the patron: side by side
+            val canChat = o.chatOpen && o.volunteerId == volunteerId
+            if (o.status != OrderStatus.DELIVERED) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    when (o.status) {
+                        OrderStatus.OPEN -> AppButton(
+                            onClick = { repo.acceptOrder(o.id, volunteerId, volunteerName) },
+                            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                        ) { Text(stringResource(Res.string.order_accept), style = MaterialTheme.typography.labelLarge) }
+                        OrderStatus.ACCEPTED -> AppButton(
+                            onClick = { repo.markPickedUp(o.id) },
+                            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                        ) { Text(stringResource(if (buying) Res.string.order_bought else Res.string.order_picked_up), style = MaterialTheme.typography.labelLarge) }
+                        OrderStatus.PICKED_UP -> AppButton(
+                            onClick = { repo.confirmDelivered(o.needId); onDelivered(o) },
+                            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                        ) { Text(stringResource(Res.string.order_delivered_button, person?.firstName.orEmpty()), style = MaterialTheme.typography.labelLarge) }
+                        OrderStatus.DELIVERED -> Unit
+                    }
+                    if (canChat) {
+                        AppOutlinedButton(onClick = { onChat(o.id) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                            Text(stringResource(Res.string.chat_title, o.patronName), style = MaterialTheme.typography.labelLarge)
+                        }
+                    }
+                }
             }
         }
     }

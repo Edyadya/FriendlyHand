@@ -40,17 +40,21 @@ fun GoalsHero(completed: Int, modifier: Modifier = Modifier, pending: Int = 0, g
     val app = MaterialTheme.app
     val shown by animateIntAsState(completed.coerceAtMost(goal), tween(900))
     Column(
-        modifier.fillMaxWidth().darkOutline(AppShape.card).background(app.navy, AppShape.card).padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier.fillMaxWidth().darkOutline(AppShape.card).background(app.navy, AppShape.card).padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("$shown / $goal", style = MaterialTheme.typography.displayMedium, color = app.onNavy)
-            Text(
-                stringResource(Res.string.hero_goals),
-                Modifier.padding(bottom = 8.dp),
-                style = MaterialTheme.typography.headlineSmall,
-                color = app.onNavy,
-            )
+        // the count on the left, the stamps on the right: one row instead of three
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("$shown / $goal", style = MaterialTheme.typography.displaySmall, color = app.onNavy)
+                Text(
+                    stringResource(Res.string.hero_goals),
+                    Modifier.padding(bottom = 6.dp),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = app.onNavy,
+                )
+            }
+            StampRow(completed, goal, pending = pending, size = 30.dp, gap = 6.dp)
         }
         Text(
             stringResource(Res.string.rewards_progress, completed.coerceAtMost(goal), goal),
@@ -65,15 +69,14 @@ fun GoalsHero(completed: Int, modifier: Modifier = Modifier, pending: Int = 0, g
                 color = app.gold,
             )
         }
-        StampRow(completed, goal, pending = pending)
     }
 }
 
 /** [goal] stamp slots: completed = solid gold with a navy check, empty = outlined in the accent blue. */
 @Composable
-fun StampRow(completed: Int, goal: Int, modifier: Modifier = Modifier, pending: Int = 0) {
-    Row(modifier, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        repeat(goal) { i -> Stamp(done = i < completed, pending = i >= completed && i < completed + pending) }
+fun StampRow(completed: Int, goal: Int, modifier: Modifier = Modifier, pending: Int = 0, size: Dp = 40.dp, gap: Dp = 10.dp) {
+    Row(modifier, horizontalArrangement = Arrangement.spacedBy(gap)) {
+        repeat(goal) { i -> Stamp(done = i < completed, pending = i >= completed && i < completed + pending, size = size) }
     }
 }
 
@@ -132,8 +135,8 @@ fun VoucherCard(completed: Int, modifier: Modifier = Modifier, pending: Int = 0)
             .border(MaterialTheme.borderWidth, colors.outlineVariant, AppShape.card),
     ) {
         Box(Modifier.width(2.dp).fillMaxHeight().background(MaterialTheme.app.gold))
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(stringResource(Res.string.voucher_title), style = MaterialTheme.typography.headlineSmall, color = colors.onSurface)
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(Res.string.voucher_title), style = MaterialTheme.typography.titleLarge, color = colors.onSurface)
             AppProgressBar(
                 progress = { progress },
                 modifier = Modifier.fillMaxWidth().height(8.dp),

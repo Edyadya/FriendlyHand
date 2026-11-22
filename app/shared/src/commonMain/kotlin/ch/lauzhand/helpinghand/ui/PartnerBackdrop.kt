@@ -18,12 +18,12 @@ import androidx.compose.ui.unit.dp
 
 // Where each partner's bubble sits, as fractions of the page, and how big it is relative to the others.
 // Staggered on purpose, so the page looks scattered rather than gridded. The two real partners
-// (JetBrains, IMS) are in the middle of the page, where the cards let them show through best.
+// (JetBrains, IMC) are in the middle of the page, where the cards let them show through best.
 private val BackdropSpots = mapOf(
     Partner.KOLIBRI to Triple(0.03f, 0.03f, 0.90f),
     Partner.WAMAZON to Triple(0.57f, 0.07f, 0.82f),
     Partner.JETBRAINS to Triple(0.06f, 0.27f, 1.15f),
-    Partner.IMS to Triple(0.58f, 0.41f, 1.02f),
+    Partner.IMC to Triple(0.58f, 0.41f, 1.02f),
     Partner.VELOLAC to Triple(0.03f, 0.61f, 0.86f),
     Partner.PAGINA to Triple(0.54f, 0.72f, 1.06f),
 )

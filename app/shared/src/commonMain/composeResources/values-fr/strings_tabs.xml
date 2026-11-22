@@ -154,4 +154,20 @@
     <string name="chat_input">Écrire un message</string>
     <string name="chat_send">Envoyer</string>
     <string name="chat_demo_note">Dans cette démo, les messages restent sur cet appareil : l'autre personne ne les voit que sur ce même appareil.</string>
+    <string name="vr_badge_25">25 livraisons</string>
+    <string name="vr_badge_25_desc">Livrez 25 commandes aux personnes qui en ont besoin</string>
+    <string name="vr_badge_areas5">Cinq quartiers</string>
+    <string name="vr_badge_areas5_desc">Livrez dans 5 quartiers différents</string>
+    <string name="vr_badge_people10">Dix personnes</string>
+    <string name="vr_badge_people10_desc">Livrez à 10 personnes différentes</string>
+    <string name="vr_badge_purchase5">Super courses</string>
+    <string name="vr_badge_purchase5_desc">Achetez et livrez 5 objets payés par des mécènes</string>
+    <string name="vr_badge_handover1">Première remise</string>
+    <string name="vr_badge_handover1_desc">Livrez un objet qu'un mécène vous a remis</string>
+    <string name="vr_badge_handover5">Héros de la remise</string>
+    <string name="vr_badge_handover5_desc">Livrez 5 objets remis par des mécènes</string>
+    <string name="art_count_deliveries_one">1 livraison</string>
+    <string name="art_count_contributions_one">1 contribution</string>
+    <string name="badge_progress_short">%1$d / %2$d</string>
+    <string name="badge_pending_short">En attente</string>
 </resources>

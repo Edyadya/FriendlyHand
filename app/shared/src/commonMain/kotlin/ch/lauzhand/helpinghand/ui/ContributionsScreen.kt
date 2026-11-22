@@ -72,8 +72,8 @@ fun ContributionsScreen(repo: HelpRepository, onOpenPerson: (String) -> Unit) {
 
     LazyColumn(
         Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         // the community's impact and how much of the need is covered: shows scale, and what is still waiting
         item { ImpactStrip(communityImpact(repo.needs, repo.giveaways)) }
@@ -120,50 +120,53 @@ private fun ContributionCard(c: Contribution, need: Need, person: Person?, order
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(
-                stringResource(Res.string.contrib_person_need, person?.firstName.orEmpty(), need.title),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            // the date stamp
-            if (c.atMillis > 0) {
+        Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            // the title with the date stamp beside it
+            Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    stringResource(Res.string.contrib_on_date, formatDate(c.atMillis)),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    stringResource(Res.string.contrib_person_need, person?.firstName.orEmpty(), need.title),
+                    Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleMedium,
                 )
+                if (c.atMillis > 0) {
+                    Text(formatDate(c.atMillis), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
-            Text(
-                when (c.kind) {
-                    ContributionKind.BROUGHT -> stringResource(Res.string.contrib_brought)
-                    ContributionKind.PAID -> stringResource(Res.string.contrib_paid, c.amountChf ?: 0)
-                    ContributionKind.GAVE -> stringResource(Res.string.contrib_gave, c.amountChf ?: 0)
-                },
-                style = MaterialTheme.typography.bodyLarge,
-            )
             val bigTarget = need.targetAmountChf
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    when (c.kind) {
+                        ContributionKind.BROUGHT -> stringResource(Res.string.contrib_brought)
+                        ContributionKind.PAID -> stringResource(Res.string.contrib_paid, c.amountChf ?: 0)
+                        ContributionKind.GAVE -> stringResource(Res.string.contrib_gave, c.amountChf ?: 0)
+                    },
+                    Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                StageDot(need.status.stage())
+            }
             if (need.type == NeedType.BIG && bigTarget != null) {
                 val target = bigTarget.coerceAtLeast(1)
                 AppProgressBar(
                     progress = { (need.fundedAmountChf.toFloat() / target).coerceIn(0f, 1f) },
-                    modifier = Modifier.fillMaxWidth().height(8.dp),
+                    modifier = Modifier.fillMaxWidth().height(6.dp),
                     color = MaterialTheme.app.progressFill,
                     trackColor = MaterialTheme.app.progressTrack,
                 )
                 Text(
                     stringResource(Res.string.funded_of, need.fundedAmountChf, target),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            StageDot(need.status.stage())
-            // the hand-over: which volunteer has the order
+            // the hand-over: which volunteer has the order, and a chat button beside it once one took it
             order?.let {
-                Text(it.status.line(it, person?.firstName.orEmpty()), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
-                // once a volunteer took the order, patron and volunteer can talk until it is delivered
-                if (it.chatOpen) {
-                    AppOutlinedButton(onClick = { onChat(it.id) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                        Text(stringResource(Res.string.chat_title, it.volunteerName.orEmpty()))
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(it.status.line(it, person?.firstName.orEmpty()), Modifier.weight(1f), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                    if (it.chatOpen) {
+                        AppOutlinedButton(onClick = { onChat(it.id) }, modifier = Modifier.heightIn(min = 44.dp)) {
+                            Text(stringResource(Res.string.chat_title, it.volunteerName.orEmpty()), style = MaterialTheme.typography.labelLarge)
+                        }
                     }
                 }
             }
@@ -178,12 +181,12 @@ private fun GiveawayPaymentCard(c: GiveawayContribution, giveaway: Giveaway?) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(giveaway?.brand.orEmpty(), style = MaterialTheme.typography.titleLarge)
-            if (c.atMillis > 0) {
-                Text(stringResource(Res.string.contrib_on_date, formatDate(c.atMillis)), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(giveaway?.brand.orEmpty(), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                if (c.atMillis > 0) Text(formatDate(c.atMillis), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text(stringResource(Res.string.giveaway_contribution_line, c.amountChf, giveaway?.title.orEmpty()), style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(Res.string.giveaway_contribution_line, c.amountChf, giveaway?.title.orEmpty()), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

@@ -39,12 +39,14 @@ fun deliveriesToCelebrate(contributions: List<Contribution>, needs: List<Need>, 
 }
 
 /**
- * Volunteer badges. Each is earned from the orders the volunteer has delivered (delivered = the person confirmed
- * they received it): how many, in how many different areas, how many different people, and bought items.
+ * Volunteer badges: twelve, like the patrons'. Each is earned from the orders the volunteer has delivered (delivered =
+ * the person confirmed they received it): how many, in how many different areas, to how many different people, and
+ * how many bought items and hand-overs.
  */
 enum class VolunteerBadge(val target: Int) {
-    FIRST_DELIVERY(1), FIVE_DELIVERIES(5), TEN_DELIVERIES(10),
-    THREE_AREAS(3), FIVE_PEOPLE(5), FIRST_PURCHASE(1),
+    FIRST_DELIVERY(1), FIVE_DELIVERIES(5), TEN_DELIVERIES(10), TWENTY_FIVE_DELIVERIES(25),
+    THREE_AREAS(3), FIVE_AREAS(5), FIVE_PEOPLE(5), TEN_PEOPLE(10),
+    FIRST_PURCHASE(1), FIVE_PURCHASES(5), FIRST_HANDOVER(1), FIVE_HANDOVERS(5),
 }
 
 data class VolunteerProgress(val badge: VolunteerBadge, val progress: Int) {
@@ -65,10 +67,12 @@ fun deliveriesInProgress(orders: List<DeliveryOrder>, volunteerId: String): Int 
 fun volunteerBadges(orders: List<DeliveryOrder>, volunteerId: String): List<VolunteerProgress> {
     val done = deliveredBy(orders, volunteerId)
     fun value(b: VolunteerBadge) = when (b) {
-        VolunteerBadge.FIRST_DELIVERY, VolunteerBadge.FIVE_DELIVERIES, VolunteerBadge.TEN_DELIVERIES -> done.size
-        VolunteerBadge.THREE_AREAS -> done.map { it.zoneId }.toSet().size
-        VolunteerBadge.FIVE_PEOPLE -> done.map { it.personId }.toSet().size
-        VolunteerBadge.FIRST_PURCHASE -> done.count { it.kind == OrderKind.PURCHASE }
+        VolunteerBadge.FIRST_DELIVERY, VolunteerBadge.FIVE_DELIVERIES, VolunteerBadge.TEN_DELIVERIES,
+        VolunteerBadge.TWENTY_FIVE_DELIVERIES -> done.size
+        VolunteerBadge.THREE_AREAS, VolunteerBadge.FIVE_AREAS -> done.map { it.zoneId }.toSet().size
+        VolunteerBadge.FIVE_PEOPLE, VolunteerBadge.TEN_PEOPLE -> done.map { it.personId }.toSet().size
+        VolunteerBadge.FIRST_PURCHASE, VolunteerBadge.FIVE_PURCHASES -> done.count { it.kind == OrderKind.PURCHASE }
+        VolunteerBadge.FIRST_HANDOVER, VolunteerBadge.FIVE_HANDOVERS -> done.count { it.kind == OrderKind.HANDOVER }
     }
     return VolunteerBadge.entries.map { VolunteerProgress(it, value(it).coerceAtMost(it.target)) }
 }

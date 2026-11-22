@@ -26,8 +26,8 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun ImpactStrip(impact: CommunityImpact, modifier: Modifier = Modifier, animate: Boolean = false, title: String? = stringResource(Res.string.impact_title)) {
     Column(
-        modifier.fillMaxWidth().darkOutline(MaterialTheme.shapes.large).background(MaterialTheme.app.navy, MaterialTheme.shapes.large).padding(horizontal = 12.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier.fillMaxWidth().darkOutline(MaterialTheme.shapes.large).background(MaterialTheme.app.navy, MaterialTheme.shapes.large).padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         title?.let {
             Text(it, Modifier.padding(horizontal = 8.dp), style = MaterialTheme.typography.labelLarge, color = if (MaterialTheme.isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.app.onNavy.copy(alpha = 0.75f))
@@ -46,7 +46,7 @@ private fun ImpactNumber(value: Int, label: org.jetbrains.compose.resources.Stri
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
             (if (animate) shown else value).toString(),
-            style = MaterialTheme.typography.displaySmall,
+            style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.app.onNavy,
             maxLines = 1,
         )
@@ -67,21 +67,21 @@ fun CoverageCard(coverage: Coverage, modifier: Modifier = Modifier) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(
                 stringResource(Res.string.coverage_text, coverage.fulfilled, coverage.total, coverage.percent),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
             )
             AppProgressBar(
                 progress = { coverage.fraction.coerceIn(0f, 1f) },
-                modifier = Modifier.fillMaxWidth().height(10.dp),
+                modifier = Modifier.fillMaxWidth().height(8.dp),
                 color = MaterialTheme.app.progressFill,
                 trackColor = MaterialTheme.app.progressTrack,
             )
             if (coverage.waiting > 0) {
                 Text(
                     stringResource(Res.string.coverage_waiting, coverage.waiting),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
