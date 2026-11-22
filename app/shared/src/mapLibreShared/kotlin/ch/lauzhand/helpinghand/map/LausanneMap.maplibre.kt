@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.sp
 import ch.lauzhand.helpinghand.location.UserLocation
 import ch.lauzhand.helpinghand.model.*
 import ch.lauzhand.helpinghand.ui.app
-import ch.lauzhand.helpinghand.ui.rememberMapAvatar
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -30,7 +29,6 @@ import org.maplibre.compose.map.LocalMapState
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.convertToString
 import org.maplibre.compose.expressions.dsl.feature
-import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.interaction.ClickResult
 import org.maplibre.compose.interaction.MapInteractions
 import org.maplibre.compose.layers.CircleLayer
@@ -79,7 +77,6 @@ actual fun LausanneMap(
     val cityNow by rememberUpdatedState(city)
     val scope = rememberCoroutineScope()
     var focusedZoneId by remember { mutableStateOf<String?>(null) }
-    val onPerson by rememberUpdatedState(onPersonClick)
 
     // Which zones get a bubble, and the number on it, depends on the role (see zoneBubbleCount).
     val zoneData = remember(zones, people, needs, role) {
@@ -103,24 +100,6 @@ actual fun LausanneMap(
         }
     }
 
-    // Exact last-seen markers: only for volunteers, and only recent ones.
-    val seesExact = role == Role.VOLUNTEER
-    val now = remember(people) { nowMillis() }
-    val seenData = remember(people, seesExact, now) {
-        buildFeatureCollection<Point, JsonObject?> {
-            if (seesExact) {
-                for (p in people) {
-                    if (!p.lastSeenVisible(now)) continue
-                    if (p.photoConsent && p.photo != null) continue // shown as their photo instead
-                    addFeature(
-                        geometry = Point(Position(longitude = p.lastSeenLng!!, latitude = p.lastSeenLat!!)),
-                        properties = buildJsonObject { put("id", p.id) },
-                    )
-                }
-            }
-        }
-    }
-
     // The user's own position: a blue dot with a white ring and a slow pulsing ring around it.
     val userData = remember(userLocation) {
         buildFeatureCollection<Point, JsonObject?> {
@@ -132,9 +111,7 @@ actual fun LausanneMap(
     // updated in 16 steps per cycle, so the map is not restyled on every frame
     val pulse by remember { derivedStateOf { (pulseRaw * 16).toInt() / 16f } }
 
-    val photoPeople = if (seesExact) people.filter { it.lastSeenVisible(now) && it.photoConsent && it.photo != null } else emptyList()
     val zoneColor = MaterialTheme.app.accent                     // solid accent blue bubbles
-    val seenColor = MaterialTheme.colorScheme.primary
     val outline = MaterialTheme.app.onNavy                       // white ring
     val labelColor = MaterialTheme.app.onNavy                    // white number (large and bold, so 3.8:1 is enough)
     val styleUrl = if (isSystemInDarkTheme()) STYLE_DARK else STYLE_LIGHT
@@ -145,7 +122,6 @@ actual fun LausanneMap(
     ) {
         val mapState = LocalMapState.current
         val zoneSource = rememberGeoJsonSource(GeoJsonData.Features(zoneData))
-        val seenSource = rememberGeoJsonSource(GeoJsonData.Features(seenData))
         val ringSource = rememberGeoJsonSource(GeoJsonData.Features(ringData))
         val userSource = rememberGeoJsonSource(GeoJsonData.Features(userData))
 
@@ -191,43 +167,6 @@ actual fun LausanneMap(
             textSize = const(18.sp),
             textColor = const(labelColor),
         )
-        CircleLayer(
-            id = "last-seen",
-            source = seenSource,
-            radius = const(9.dp),
-            color = const(seenColor),
-            strokeColor = const(outline),
-            strokeWidth = const(3.dp),
-            hitPadding = 10.dp,
-            onClick = { features ->
-                features.firstOrNull()?.properties.id()?.let { onPerson(it) }
-                ClickResult.Consume
-            },
-        )
-        // People who agreed to a photo: their face on the map instead of the plain dot
-        for (p in photoPeople) key(p.id) {
-            val avatar = rememberMapAvatar(p)
-            if (avatar != null) {
-                val src = rememberGeoJsonSource(
-                    GeoJsonData.Features(
-                        buildFeatureCollection<Point, JsonObject?> {
-                            addFeature(
-                                geometry = Point(Position(longitude = p.lastSeenLng!!, latitude = p.lastSeenLat!!)),
-                                properties = buildJsonObject { put("id", p.id) },
-                            )
-                        },
-                    ),
-                )
-                SymbolLayer(
-                    id = "photo-${p.id}",
-                    source = src,
-                    iconImage = image(avatar),
-                    iconSize = const(0.42f),
-                    iconAllowOverlap = const(true),
-                    onClick = { onPerson(p.id); ClickResult.Consume },
-                )
-            }
-        }
         CircleLayer(
             id = "user-pulse",
             source = userSource,

@@ -23,7 +23,6 @@ import ch.lauzhand.helpinghand.map.fractionX
 import ch.lauzhand.helpinghand.map.fractionY
 import ch.lauzhand.helpinghand.map.zoneBubbleCount
 import ch.lauzhand.helpinghand.model.Role
-import ch.lauzhand.helpinghand.model.lastSeenVisible
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.Dp
@@ -151,21 +150,6 @@ fun ZoneMap(
                         .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
                         .padding(horizontal = 6.dp, vertical = 1.dp),
                 )
-            }
-        }
-
-        // Volunteers see each person's exact spot: their photo (only with consent) or a plain dot.
-        if (showBubbles && role == Role.VOLUNTEER) {
-            val now = remember(repo.people) { ch.lauzhand.helpinghand.model.nowMillis() }
-            repo.people.filter { p -> p.lastSeenVisible(now) && repo.zones.firstOrNull { it.id == p.zoneId }?.cityId == city.id }.forEach { p ->
-                val fx = fractionX(p.lastSeenLng!!, city)
-                val fy = fractionY(p.lastSeenLat!!, city)
-                if (fx in 0f..1f && fy in 0f..1f) {
-                    val size = 30.dp
-                    Box(Modifier.offset(x = w * fx - size / 2, y = h * fy - size / 2).size(size).clip(CircleShape).border(2.dp, MaterialTheme.app.onNavy, CircleShape)) {
-                        if (rememberPersonPhoto(p) != null) PersonAvatar(p, size) else Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary))
-                    }
-                }
             }
         }
 
