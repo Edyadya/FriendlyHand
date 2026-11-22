@@ -98,17 +98,17 @@ fun AchievementsScreen(repo: HelpRepository) {
     // delivered but not verified yet by a volunteer: shown as pending, not counted
     val pending = pendingGoals(repo.contributionsOf(ME_DONOR), repo.needs)
     val peopleHelped = peopleHelpedOverall(repo.needs)
-    // two designs: big boxes in four columns on wide windows (web), small blocks on phones
+    // the same roomy design everywhere: four columns on wide windows (web), two on a phone
     val wide = rememberIsWide()
 
     // centred, and no wider than 960 dp on big screens
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(4), // four across: big boxes on the web, small blocks on a phone
+        columns = GridCells.Fixed(if (wide) 4 else 2), // same big boxes everywhere: four across on the web, two on a phone
         modifier = (if (wide) Modifier.widthIn(max = 960.dp) else Modifier).fillMaxSize(),
-        contentPadding = PaddingValues(if (wide) 16.dp else 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(if (wide) 14.dp else 8.dp),
-        verticalArrangement = Arrangement.spacedBy(if (wide) 14.dp else 8.dp),
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(stringResource(Res.string.achievements_title), style = MaterialTheme.typography.headlineSmall)
@@ -126,7 +126,7 @@ fun AchievementsScreen(repo: HelpRepository) {
         item(span = { GridItemSpan(maxLineSpan) }) { PlatformHelped(peopleHelped) }
         item(span = { GridItemSpan(maxLineSpan) }) { GoalsHero(completed, pending = pending) }
         item(span = { GridItemSpan(maxLineSpan) }) { VoucherCard(completed, pending = pending) }
-        rewardGroups(groups, wide) { t -> opened = achievements.first { it.id.name == t.key } }
+        rewardGroups(groups) { t -> opened = achievements.first { it.id.name == t.key } }
     }
     }
 
