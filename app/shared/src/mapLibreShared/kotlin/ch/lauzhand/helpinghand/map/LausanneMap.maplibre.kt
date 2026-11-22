@@ -8,6 +8,8 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -35,6 +37,9 @@ import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.rememberMapState
+import org.maplibre.compose.overlay.AttributionDefaults
+import org.maplibre.compose.overlay.ExpandingAttributionButton
+import org.maplibre.compose.overlay.MapOverlayScope
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
@@ -206,14 +211,29 @@ actual fun LausanneMap(
             )
         }
     }
+    // The map data licences (OpenStreetMap, OpenFreeMap) require a visible credit, so it has to stay.
+    val creditOverlay: @Composable MapOverlayScope.() -> Unit = {
+        // small, faint text: still readable, but it no longer competes with the map
+        val expanded = AttributionDefaults.expandedStyle()
+        ExpandingAttributionButton(
+            Modifier.align(Alignment.BottomEnd).padding(4.dp),
+            Alignment.BottomEnd,
+            expandedStyle = expanded.copy(
+                containerColor = expanded.containerColor.copy(alpha = 0.4f),
+                contentColor = expanded.contentColor.copy(alpha = 0.7f),
+                textStyle = expanded.textStyle.copy(fontSize = 9.sp),
+            ),
+        )
+    }
     if (onMapClick == null) {
-        MaplibreMap(state = state, modifier = modifier)
+        MaplibreMap(state = state, modifier = modifier, overlay = creditOverlay)
     } else {
         // Picking a spot: a tap on the map reports where it was
         val clicked by rememberUpdatedState(onMapClick)
         MaplibreMap(
             state = state,
             modifier = modifier,
+            overlay = creditOverlay,
             interactions = MapInteractions {
                 callbacks {
                     click {

@@ -129,8 +129,21 @@ fun HomeScreen(
                     }
                 }
             }
-            // Volunteers: add a person, top right where it is easy to find
-            if (role == Role.VOLUNTEER) AddPersonButton(compact, onNewPerson)
+            // Top right, in one column so everything lines up: add a person (volunteers), then "centre on me"
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (role == Role.VOLUNTEER) AddPersonButton(compact, onNewPerson)
+                // "centre on me": only where there is a live map to move and a position to move to
+                if (isLiveMapSupported && me.location != null) {
+                    val label = stringResource(Res.string.centre_on_me)
+                    Surface(
+                        onClick = { centreOnMe++ },
+                        modifier = Modifier.size(48.dp).semantics { contentDescription = label },
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surface,
+                        shadowElevation = 6.dp,
+                    ) { Box(contentAlignment = Alignment.Center) { CentreIcon(MaterialTheme.colorScheme.primary) } }
+                }
+            }
         }
 
         Column(
@@ -138,17 +151,6 @@ fun HomeScreen(
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // "centre on me": only where there is a live map to move and a position to move to
-            if (isLiveMapSupported && me.location != null) {
-                val label = stringResource(Res.string.centre_on_me)
-                Surface(
-                    onClick = { centreOnMe++ },
-                    modifier = Modifier.padding(end = 16.dp).size(48.dp).semantics { contentDescription = label },
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surface,
-                    shadowElevation = 6.dp,
-                ) { Box(contentAlignment = Alignment.Center) { CentreIcon(MaterialTheme.colorScheme.primary) } }
-            }
             AnimatedVisibility(
                 visible = zoneFilter != null,
                 enter = slideInVertically { it } + fadeIn(),
