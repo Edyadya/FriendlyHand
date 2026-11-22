@@ -96,4 +96,5 @@
     <string name="spot_pending">New spot ready. Press Save to keep it.</string>
     <string name="changes_unsaved">You have changes that are not saved yet.</string>
     <string name="changes_saved">Saved</string>
+    <string name="add_person">Add person</string>
 </resources>

@@ -81,7 +81,9 @@ fun HomeScreen(
     if (zoneFilter != null) lastZone.id = zoneFilter
 
     // Zenly-style: the map fills the page; title, actions and the area's people float on top of it.
-    Box(Modifier.fillMaxSize()) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        // on a narrow phone the Add person button is just a plus, so the title card keeps its room
+        val compact = maxWidth < 520.dp
         HomeMap(
             repo, role, zoneFilter, { zoneFilter = it }, onOpenPerson, Modifier.fillMaxSize().padding(8.dp),
             userLocation = me.location, centreOnUser = centreOnMe, city = city,
@@ -127,6 +129,8 @@ fun HomeScreen(
                     }
                 }
             }
+            // Volunteers: add a person, top right where it is easy to find
+            if (role == Role.VOLUNTEER) AddPersonButton(compact, onNewPerson)
         }
 
         Column(
@@ -145,15 +149,6 @@ fun HomeScreen(
                     shadowElevation = 6.dp,
                 ) { Box(contentAlignment = Alignment.Center) { CentreIcon(MaterialTheme.colorScheme.primary) } }
             }
-            if (role == Role.VOLUNTEER) {
-                ExtendedFloatingActionButton(
-                    onClick = onNewPerson,
-                    modifier = Modifier.padding(end = 16.dp, bottom = 16.dp),
-                    shape = AppShape.button,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                ) { Text(stringResource(Res.string.new_person), style = MaterialTheme.typography.titleMedium) }
-            }
             AnimatedVisibility(
                 visible = zoneFilter != null,
                 enter = slideInVertically { it } + fadeIn(),
@@ -162,6 +157,29 @@ fun HomeScreen(
                 val zoneId = lastZone.id ?: return@AnimatedVisibility
                 AreaSheet(repo, role, zoneId, onClose = { zoneFilter = null }, onOpenPerson = onOpenPerson)
             }
+        }
+    }
+}
+
+/** "+ Add person" (or just a plus on narrow screens): a primary button, 48 dp or more to tap. */
+@Composable
+private fun AddPersonButton(compact: Boolean, onClick: () -> Unit) {
+    val label = stringResource(Res.string.add_person)
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.heightIn(min = 52.dp).widthIn(min = 52.dp).semantics { contentDescription = label },
+        shape = if (compact) CircleShape else AppShape.button,
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        shadowElevation = 6.dp,
+    ) {
+        Row(
+            Modifier.padding(horizontal = if (compact) 0.dp else 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        ) {
+            Text("+", style = MaterialTheme.typography.headlineMedium, modifier = if (compact) Modifier.padding(horizontal = 16.dp) else Modifier)
+            if (!compact) Text(label, style = MaterialTheme.typography.titleMedium)
         }
     }
 }
