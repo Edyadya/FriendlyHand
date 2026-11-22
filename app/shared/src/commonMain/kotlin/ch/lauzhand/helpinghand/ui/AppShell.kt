@@ -76,7 +76,6 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
                 onLogout = { menuOpen = false; repo.logout() },
                 accountName = account.name,
                 accountPhoto = repo.accountPhotoOf(account.id),
-                accountLocation = repo.accountProfileOf(account.id).location,
                 onProfilePicture = { menuOpen = false; shell.pictureOpen = true },
                 features = buildList {
                     add(Res.string.menu_charities to { menuOpen = false; screen = Screen.Charities })
