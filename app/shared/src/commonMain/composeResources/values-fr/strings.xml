@@ -73,4 +73,8 @@
     <string name="location_hint_off">La localisation est désactivée. Touchez pour l'autoriser et voir où vous êtes.</string>
     <string name="centre_on_me">Centrer la carte sur ma position</string>
     <string name="location_demo_note">Position de démonstration</string>
+    <string name="last_seen_here">Vu ici, à l'instant</string>
+    <string name="last_seen_exact_hint">Enregistre votre position exacte comme lieu où vous l'avez vu, pour que le prochain bénévole puisse le retrouver. Seuls les bénévoles peuvent la voir.</string>
+    <string name="last_seen_no_location">Activez la localisation pour enregistrer le lieu exact.</string>
+    <string name="last_seen_demo_note">Cet appareil n'a pas de localisation : une position de démonstration est utilisée.</string>
 </resources>

@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
+import ch.lauzhand.helpinghand.location.rememberUserLocation
 import ch.lauzhand.helpinghand.data.ME_DONOR
 import ch.lauzhand.helpinghand.model.*
 import helpinghand.app.shared.generated.resources.*
@@ -241,20 +242,34 @@ private fun LastSeenSection(repo: HelpRepository, role: Role, person: Person, zo
                     modifier = BigButtonModifier,
                 ) { Text(stringResource(Res.string.open_in_maps)) }
             }
-            if (role == Role.VOLUNTEER && zone != null) {
+            if (role == Role.VOLUNTEER) {
+                // The exact spot is the volunteer's own position right now (they are standing next to the person).
+                val me = rememberUserLocation()
+                val here = me.location
                 OutlinedTextField(
                     note, { note = it }, Modifier.fillMaxWidth(),
                     label = { Text(stringResource(Res.string.last_seen_note_field)) }, singleLine = true,
                 )
-                // Demo coordinates: the centre of the zone, never a real GPS fix.
                 AppButton(
                     onClick = {
-                        repo.updateLastSeen(person.id, zone.centerLat, zone.centerLng, note.trim().ifBlank { null })
-                        note = ""
-                        onSaved()
+                        if (here != null) {
+                            repo.updateLastSeen(person.id, here.lat, here.lng, note.trim().ifBlank { null })
+                            note = ""
+                            onSaved()
+                        }
                     },
+                    enabled = here != null,
                     modifier = BigButtonModifier,
-                ) { Text(stringResource(Res.string.update_last_seen)) }
+                ) { Text(stringResource(Res.string.last_seen_here)) }
+                Text(
+                    when {
+                        here == null -> stringResource(Res.string.last_seen_no_location)
+                        here.isDemo -> stringResource(Res.string.last_seen_demo_note)
+                        else -> stringResource(Res.string.last_seen_exact_hint)
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
             }
         }
     }
