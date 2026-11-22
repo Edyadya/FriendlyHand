@@ -76,7 +76,6 @@ fun SettingsMenuContent(
             // Language: a segmented control, applied at once and remembered. It sits right under the profile,
             // above the charities and the other pages.
             Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.settings_language), style = MaterialTheme.typography.titleSmall)
                 SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                     AppLanguage.entries.forEachIndexed { i, lang ->
                         SegmentedButton(
