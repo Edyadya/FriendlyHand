@@ -41,7 +41,8 @@ val SettingsDropdownMinWidth = 700.dp
  */
 @Composable
 fun SettingsMenuContent(
-    userLine: String,
+    /** The account's role under the name: Volunteer, Patron or Guest patron. */
+    accountRole: String,
     onOpenPage: (SettingsPage) -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
@@ -61,12 +62,19 @@ fun SettingsMenuContent(
         ) {
             AccountAvatar(accountName, accountPhoto, 44.dp)
             Column(Modifier.weight(1f)) {
+                // the name, and below it the role
                 Text(
-                    userLine,
-                    style = MaterialTheme.typography.labelLarge,
+                    accountName,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
+                Text(
+                    accountRole,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
                 )
             }
         }

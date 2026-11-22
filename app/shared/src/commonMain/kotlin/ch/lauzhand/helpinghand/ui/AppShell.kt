@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
 import ch.lauzhand.helpinghand.model.Cities
+import ch.lauzhand.helpinghand.model.isGuest
 import ch.lauzhand.helpinghand.model.Role
 import helpinghand.app.shared.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
@@ -71,7 +72,7 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
         val wide = maxWidth >= SettingsDropdownMinWidth
         val menuContent: @Composable () -> Unit = {
             SettingsMenuContent(
-                userLine = stringResource(Res.string.logged_in_as, account.name, stringResource(role.label())),
+                accountRole = stringResource(if (account.isGuest) Res.string.role_guest else role.label()),
                 onOpenPage = { menuOpen = false; settingsPage = it },
                 onLogout = { menuOpen = false; repo.logout() },
                 accountName = account.name,

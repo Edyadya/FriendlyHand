@@ -13,6 +13,12 @@ object AccessCodes {
     }
 }
 
+/** The names a patron who continues as a guest gets (English and French login screen). */
+val GuestNames: Set<String> = setOf("Guest", "Invité")
+
+/** True for a patron who came in with "Continue as guest". */
+val Account.isGuest: Boolean get() = role == Role.DONOR && name in GuestNames
+
 fun nowMillis(): Long = Clock.System.now().toEpochMilliseconds()
 
 /** True if the last-seen spot exists and is at most [maxAgeHours] old. Role checks are done by the caller. */

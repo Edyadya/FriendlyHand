@@ -18,4 +18,5 @@
     <string name="login_guest">Continuer en invité</string>
     <string name="login_guest_name">Invité</string>
     <string name="login_guest_hint">Aucun compte nécessaire. Votre aide est enregistrée sur cet appareil pour cette visite.</string>
+    <string name="role_guest">Mécène invité</string>
 </resources>

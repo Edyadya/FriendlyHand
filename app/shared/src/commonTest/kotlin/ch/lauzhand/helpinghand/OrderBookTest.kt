@@ -118,3 +118,13 @@ class OrderBookTest {
         assertEquals(AccountProfile(), repo.accountProfileOf("someone-else")) // each account has its own
     }
 }
+
+class GuestTest {
+    @Test
+    fun onlyAPatronWhoContinuedAsGuestIsAGuest() {
+        assertTrue(Account("a", "Guest", Role.DONOR).isGuest)
+        assertTrue(Account("a", "Invité", Role.DONOR).isGuest)
+        assertFalse(Account("a", "Dan", Role.DONOR).isGuest)
+        assertFalse(Account("a", "Guest", Role.VOLUNTEER).isGuest) // a volunteer is never a guest
+    }
+}
