@@ -46,15 +46,20 @@ fun nextUp(tiles: List<RewardTile>): RewardTile? = pickNextUp(tiles, { it.unlock
 fun <T> pickNextUp(items: List<T>, isUnlocked: (T) -> Boolean, fraction: (T) -> Float): T? =
     items.filter { !isUnlocked(it) }.maxByOrNull(fraction)
 
+/** COMPACT: the small blocks of the phone design. LARGE: the big boxes of the web design. */
+enum class TileSize { COMPACT, LARGE }
+
 /**
- * One reward tile: a 72 dp medallion with its progress ring, the name (as many lines as it needs, never cut off) and a
- * small count. The width is fixed, so tiles never stretch on wide screens. Tapping it opens the reward.
+ * One reward tile: a medallion with its progress ring, the name and a small count. LARGE (web): a big box that fills its
+ * column, with a 96 dp medallion. COMPACT (phone): a small block, four to a row, with a 56 dp medallion. Tapping it opens
+ * the reward.
  */
 @Composable
-fun RewardTileCard(t: RewardTile, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun RewardTileCard(t: RewardTile, onClick: () -> Unit, modifier: Modifier = Modifier, size: TileSize = TileSize.LARGE) {
     val colors = MaterialTheme.colorScheme
     val app = MaterialTheme.app
-    val shape = RoundedCornerShape(16.dp)
+    val large = size == TileSize.LARGE
+    val shape = RoundedCornerShape(if (large) 20.dp else 14.dp)
     val title = stringResource(t.title)
     val description = when {
         t.unlocked -> stringResource(Res.string.badge_a11y_unlocked, title)
@@ -62,21 +67,29 @@ fun RewardTileCard(t: RewardTile, onClick: () -> Unit, modifier: Modifier = Modi
         else -> stringResource(Res.string.badge_a11y_locked, title, t.progress, t.target)
     }
     Column(
-        modifier.width(108.dp)
+        // phone blocks share one height, so every row lines up even when one name needs three lines
+        modifier.fillMaxWidth().then(if (large) Modifier else Modifier.heightIn(min = 158.dp))
             .clip(shape)
             .background(colors.surface)
             .border(MaterialTheme.borderWidth, if (t.unlocked) app.goldRing else colors.outlineVariant, shape)
             .clickable(role = Role.Button, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = description }
-            .padding(horizontal = 4.dp, vertical = 10.dp),
+            .padding(horizontal = if (large) 12.dp else 3.dp, vertical = if (large) 18.dp else 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(if (large) 10.dp else 5.dp),
     ) {
-        BadgeMedallion(t.glyph, t.unlocked, t.progress, t.target, size = 72.dp, pending = t.pending)
-        Text(title, style = MaterialTheme.typography.labelMedium, color = colors.onSurface, textAlign = TextAlign.Center)
+        BadgeMedallion(t.glyph, t.unlocked, t.progress, t.target, size = if (large) 96.dp else 56.dp, pending = t.pending)
+        Text(
+            title,
+            style = if (large) MaterialTheme.typography.titleSmall else MaterialTheme.typography.labelSmall,
+            color = colors.onSurface,
+            textAlign = TextAlign.Center,
+            maxLines = if (large) Int.MAX_VALUE else 3,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+        )
         Text(
             if (t.unlocked) stringResource(Res.string.badge_unlocked) else stringResource(Res.string.badge_progress_short, t.progress, t.target),
-            style = MaterialTheme.typography.labelSmall,
+            style = if (large) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall,
             color = colors.onSurfaceVariant,
         )
     }
@@ -109,8 +122,17 @@ fun NextUpCard(t: RewardTile, onClick: () -> Unit, modifier: Modifier = Modifier
     }
 }
 
-/** Adds the "Next up" card and the grouped tiles to a grid: a small heading per group, then its tiles. */
-fun LazyGridScope.rewardGroups(groups: List<RewardGroup>, onOpen: (RewardTile) -> Unit) {
+/**
+ * Adds the badges to a four-column grid. [wide] (web, big windows): the "Next up" card, then each group under its small
+ * heading, in big boxes that fill their column, so four boxes take the full width of the cards above. Otherwise (phones):
+ * one plain list of small blocks, four to a row, unlocked ones first, with no headings.
+ */
+fun LazyGridScope.rewardGroups(groups: List<RewardGroup>, wide: Boolean, onOpen: (RewardTile) -> Unit) {
+    if (!wide) {
+        val tiles = groups.flatMap { it.tiles }.sortedByDescending { it.unlocked }
+        items(tiles.size, key = { tiles[it].key }) { i -> RewardTileCard(tiles[i], { onOpen(tiles[i]) }, size = TileSize.COMPACT) }
+        return
+    }
     nextUp(groups.flatMap { it.tiles })?.let { next ->
         item(span = { GridItemSpan(maxLineSpan) }) { NextUpCard(next, { onOpen(next) }) }
     }
@@ -118,14 +140,11 @@ fun LazyGridScope.rewardGroups(groups: List<RewardGroup>, onOpen: (RewardTile) -
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(
                 stringResource(g.title).uppercase(),
-                Modifier.padding(top = 6.dp),
+                Modifier.padding(top = 8.dp),
                 style = MaterialTheme.typography.labelLarge.copy(letterSpacing = androidx.compose.ui.unit.TextUnit(1.2f, androidx.compose.ui.unit.TextUnitType.Sp)),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        items(g.tiles.size, key = { g.tiles[it].key }) { i ->
-            // a fixed-width tile centred in its cell: the grid adapts the number of columns, the tile never stretches
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) { RewardTileCard(g.tiles[i], { onOpen(g.tiles[i]) }) }
-        }
+        items(g.tiles.size, key = { g.tiles[it].key }) { i -> RewardTileCard(g.tiles[i], { onOpen(g.tiles[i]) }, size = TileSize.LARGE) }
     }
 }

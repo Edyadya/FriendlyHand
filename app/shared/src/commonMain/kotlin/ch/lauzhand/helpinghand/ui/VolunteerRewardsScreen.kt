@@ -77,6 +77,8 @@ fun VolunteerRewardsScreen(repo: HelpRepository, account: Account) {
     val done = deliveriesDone(repo.orders, account.id)
     val onTheWay = deliveriesInProgress(repo.orders, account.id)
     val badges = volunteerBadges(repo.orders, account.id)
+    // two designs: big boxes in four columns on wide windows (web), small blocks on phones
+    val wide = rememberIsWide()
     var opened by remember { mutableStateOf<VolunteerProgress?>(null) }
 
     fun tile(b: VolunteerBadge): RewardTile {
@@ -100,11 +102,11 @@ fun VolunteerRewardsScreen(repo: HelpRepository, account: Account) {
     // centred, and no wider than 960 dp on big screens
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(104.dp), // about three columns on a phone, more on a wide screen
-            modifier = Modifier.widthIn(max = 960.dp).fillMaxSize(),
-            contentPadding = PaddingValues(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            columns = GridCells.Fixed(4), // four across: big boxes on the web, small blocks on a phone
+            modifier = (if (wide) Modifier.widthIn(max = 960.dp) else Modifier).fillMaxSize(),
+            contentPadding = PaddingValues(if (wide) 16.dp else 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(if (wide) 14.dp else 8.dp),
+            verticalArrangement = Arrangement.spacedBy(if (wide) 14.dp else 8.dp),
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) { Text(stringResource(Res.string.achievements_title), style = MaterialTheme.typography.headlineSmall) }
             item(span = { GridItemSpan(maxLineSpan) }) {
@@ -117,7 +119,7 @@ fun VolunteerRewardsScreen(repo: HelpRepository, account: Account) {
             item(span = { GridItemSpan(maxLineSpan) }) { PlatformHelped(peopleHelpedOverall(repo.needs)) }
             item(span = { GridItemSpan(maxLineSpan) }) { GoalsHero(done, pending = onTheWay) }
             item(span = { GridItemSpan(maxLineSpan) }) { VoucherCard(done, pending = onTheWay) }
-            rewardGroups(groups) { t -> opened = badges.first { it.badge.name == t.key } }
+            rewardGroups(groups, wide) { t -> opened = badges.first { it.badge.name == t.key } }
         }
     }
 }
