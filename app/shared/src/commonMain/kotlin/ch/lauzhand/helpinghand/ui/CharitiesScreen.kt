@@ -107,7 +107,7 @@ fun CharitiesScreen(city: City, onCityChange: (City) -> Unit = {}, onBack: (() -
             Card(
                 Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                border = BorderStroke(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outlineVariant),
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     // the name is the link to the charity's own page

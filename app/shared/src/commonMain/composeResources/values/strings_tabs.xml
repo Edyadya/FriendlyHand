@@ -133,4 +133,5 @@
     <string name="order_bought">I bought it</string>
     <string name="order_status_accepted_buy">%1$s will buy it and bring it</string>
     <string name="order_status_picked_buy">%1$s bought it and is bringing it to %2$s</string>
+    <string name="order_view_person">View %1$s</string>
 </resources>

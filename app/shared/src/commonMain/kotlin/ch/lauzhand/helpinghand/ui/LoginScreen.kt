@@ -148,7 +148,7 @@ fun LoginScreen(repo: HelpRepository) {
                         )
                     }
 
-                    OutlinedTextField(
+                    AppTextField(
                         value = name,
                         onValueChange = { name = it },
                         label = { Text(stringResource(Res.string.login_name)) },
@@ -162,7 +162,7 @@ fun LoginScreen(repo: HelpRepository) {
                     )
 
                     if (needsCode) {
-                        OutlinedTextField(
+                        AppTextField(
                             value = code,
                             onValueChange = { code = it; error = null },
                             label = { Text(stringResource(Res.string.login_code)) },
@@ -239,7 +239,7 @@ private fun RoleTile(role: Role, selected: Boolean, compact: Boolean, modifier: 
             .heightIn(min = if (compact) 84.dp else 120.dp)
             .clip(shape)
             .background(container)
-            .border(1.dp, if (selected) colors.primary else colors.outlineVariant, shape)
+            .border(MaterialTheme.borderWidth, if (selected) colors.primary else colors.outlineVariant, shape)
             .selectable(selected = selected, onClick = onSelect, role = SemanticsRole.RadioButton)
             .padding(if (compact) 10.dp else 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

@@ -129,16 +129,16 @@ fun VoucherCard(completed: Int, modifier: Modifier = Modifier, pending: Int = 0)
         modifier.fillMaxWidth().height(IntrinsicSize.Min)
             .clip(AppShape.card)
             .background(colors.surface)
-            .border(1.dp, colors.outlineVariant, AppShape.card),
+            .border(MaterialTheme.borderWidth, colors.outlineVariant, AppShape.card),
     ) {
         Box(Modifier.width(2.dp).fillMaxHeight().background(MaterialTheme.app.gold))
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(stringResource(Res.string.voucher_title), style = MaterialTheme.typography.headlineSmall, color = colors.onSurface)
-            LinearProgressIndicator(
+            AppProgressBar(
                 progress = { progress },
                 modifier = Modifier.fillMaxWidth().height(8.dp),
-                color = MaterialTheme.app.accent,
-                trackColor = colors.outlineVariant,
+                color = MaterialTheme.app.rewardFill,                // gold in dark mode
+                trackColor = MaterialTheme.app.progressTrack,
             )
             Text(
                 if (completed >= VOUCHER_GOAL) stringResource(Res.string.rewards_unlocked)

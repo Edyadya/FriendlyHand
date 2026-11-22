@@ -110,7 +110,7 @@ private fun ContributionCard(c: Contribution, need: Need, person: Person?, order
     Card(
         Modifier.fillMaxWidth().clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
@@ -136,11 +136,11 @@ private fun ContributionCard(c: Contribution, need: Need, person: Person?, order
             val bigTarget = need.targetAmountChf
             if (need.type == NeedType.BIG && bigTarget != null) {
                 val target = bigTarget.coerceAtLeast(1)
-                LinearProgressIndicator(
+                AppProgressBar(
                     progress = { (need.fundedAmountChf.toFloat() / target).coerceIn(0f, 1f) },
                     modifier = Modifier.fillMaxWidth().height(8.dp),
-                    color = MaterialTheme.app.accent,
-                    trackColor = MaterialTheme.colorScheme.outlineVariant,
+                    color = MaterialTheme.app.progressFill,
+                    trackColor = MaterialTheme.app.progressTrack,
                 )
                 Text(
                     stringResource(Res.string.funded_of, need.fundedAmountChf, target),
@@ -162,7 +162,7 @@ private fun GiveawayPaymentCard(c: GiveawayContribution, giveaway: Giveaway?) {
     Card(
         Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(giveaway?.brand.orEmpty(), style = MaterialTheme.typography.titleLarge)

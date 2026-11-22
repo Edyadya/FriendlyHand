@@ -96,7 +96,7 @@ fun StatusChip(status: NeedStatus, modifier: Modifier = Modifier) {
         Row(
             Modifier
                 .background(bg, AppShape.chip)
-                .then(if (s == NeedStatus.OPEN) Modifier.border(1.dp, MaterialTheme.colorScheme.outline, AppShape.chip) else Modifier)
+                .then(if (s == NeedStatus.OPEN) Modifier.border(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outline, AppShape.chip) else Modifier)
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),

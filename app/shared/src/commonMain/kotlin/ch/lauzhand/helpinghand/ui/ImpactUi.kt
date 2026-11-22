@@ -30,7 +30,7 @@ fun ImpactStrip(impact: CommunityImpact, modifier: Modifier = Modifier, animate:
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         title?.let {
-            Text(it, Modifier.padding(horizontal = 8.dp), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.app.onNavy.copy(alpha = 0.75f))
+            Text(it, Modifier.padding(horizontal = 8.dp), style = MaterialTheme.typography.labelLarge, color = if (MaterialTheme.isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.app.onNavy.copy(alpha = 0.75f))
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             ImpactNumber(impact.peopleHelped, Res.string.impact_people, animate, Modifier.weight(1f))
@@ -53,7 +53,7 @@ private fun ImpactNumber(value: Int, label: org.jetbrains.compose.resources.Stri
         Text(
             stringResource(label),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.app.onNavy.copy(alpha = 0.8f),
+            color = if (MaterialTheme.isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.app.onNavy.copy(alpha = 0.8f),
             textAlign = TextAlign.Center,
         )
     }
@@ -65,18 +65,18 @@ fun CoverageCard(coverage: Coverage, modifier: Modifier = Modifier) {
     Card(
         modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 stringResource(Res.string.coverage_text, coverage.fulfilled, coverage.total, coverage.percent),
                 style = MaterialTheme.typography.titleMedium,
             )
-            LinearProgressIndicator(
+            AppProgressBar(
                 progress = { coverage.fraction.coerceIn(0f, 1f) },
                 modifier = Modifier.fillMaxWidth().height(10.dp),
-                color = MaterialTheme.app.accent,
-                trackColor = MaterialTheme.colorScheme.outlineVariant,
+                color = MaterialTheme.app.progressFill,
+                trackColor = MaterialTheme.app.progressTrack,
             )
             if (coverage.waiting > 0) {
                 Text(

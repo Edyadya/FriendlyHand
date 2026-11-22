@@ -300,7 +300,7 @@ fun NeedChip(title: String, modifier: Modifier = Modifier) {
     Text(
         title,
         modifier
-            .border(1.dp, MaterialTheme.colorScheme.outline, AppShape.chip)
+            .border(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outline, AppShape.chip)
             .padding(horizontal = 10.dp, vertical = 4.dp),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurface,

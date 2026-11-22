@@ -106,7 +106,8 @@ fun AchievementsScreen(repo: HelpRepository) {
 private fun BadgeCard(a: Achievement, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val app = MaterialTheme.app
-    val container = if (a.unlocked) app.navy else app.locked // pending uses the locked fill, with a gold dashed icon
+    // locked: the grey fill in light mode; in dark mode a plain card with a border, so the empty bar stays visible
+    val container = if (a.unlocked) app.navy else if (MaterialTheme.isDark) colors.surface else app.locked // pending uses the locked look, with a gold dashed icon
     val text = if (a.unlocked) app.onNavy else colors.onSurface
     val sub = if (a.unlocked) app.onNavy else colors.onSurface
     Column(
@@ -140,12 +141,11 @@ private fun BadgeCard(a: Achievement, onClick: () -> Unit) {
             Text(stringResource(Res.string.badge_unlocked), style = MaterialTheme.typography.labelLarge, color = text)
         } else {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                LinearProgressIndicator(
+                AppProgressBar(
                     progress = { a.progress.toFloat() / a.target },
                     modifier = Modifier.weight(1f).height(6.dp),
-                    // dark mode: a light track with a navy fill, both clearly apart from the locked card (4.5:1 and 7.6:1)
-                    color = if (MaterialTheme.isDark) app.navy else app.accent,
-                    trackColor = if (MaterialTheme.isDark) colors.outline else colors.surface,
+                    color = app.rewardFill,                                   // gold in dark mode
+                    trackColor = if (MaterialTheme.isDark) app.progressTrack else colors.surface,
                 )
                 Text(
                     stringResource(Res.string.badge_progress, a.progress, a.target),
@@ -182,7 +182,7 @@ private fun RewardDialog(a: Achievement, onDismiss: () -> Unit) {
                     Modifier.fillMaxWidth().height(IntrinsicSize.Min)
                         .clip(AppShape.card)
                         .background(colors.surface)
-                        .border(1.dp, colors.outlineVariant, AppShape.card),
+                        .border(MaterialTheme.borderWidth, colors.outlineVariant, AppShape.card),
                 ) {
                     Box(Modifier.width(2.dp).fillMaxHeight().background(MaterialTheme.app.gold))
                     Row(

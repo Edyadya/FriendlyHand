@@ -49,18 +49,18 @@ fun GiveawaysScreen(repo: HelpRepository, onBack: () -> Unit) {
             Card(
                 Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                border = BorderStroke(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outlineVariant),
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(g.brand, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                     Text(g.title, style = MaterialTheme.typography.titleLarge)
                     Text(g.description, style = MaterialTheme.typography.bodyMedium)
                     // the sum goal for the logistics
-                    LinearProgressIndicator(
+                    AppProgressBar(
                         progress = { (g.fundedChf.toFloat() / g.logisticsGoalChf.coerceAtLeast(1)).coerceIn(0f, 1f) },
                         modifier = Modifier.fillMaxWidth().height(10.dp),
-                        color = MaterialTheme.app.accent,
-                        trackColor = MaterialTheme.colorScheme.outlineVariant,
+                        color = MaterialTheme.app.progressFill,
+                        trackColor = MaterialTheme.app.progressTrack,
                     )
                     Text(
                         stringResource(Res.string.giveaway_goal, g.fundedChf.coerceAtMost(g.logisticsGoalChf), g.logisticsGoalChf),

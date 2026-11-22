@@ -205,12 +205,12 @@ private fun LausanneMapStyled(
             source = userSource,
             radius = const((20f + 22f * pulse).dp),
             color = const(zoneColor),
-            opacity = const(0.32f * (1f - pulse)),
+            opacity = const((if (dark) 0.5f else 0.32f) * (1f - pulse)),
         )
         CircleLayer(
             id = "user-dot",
             source = userSource,
-            radius = const(8.dp),
+            radius = const(if (dark) 11.dp else 8.dp), // bigger on the dark map, so it stays clearly visible
             color = const(zoneColor),
             strokeColor = const(outline),
             strokeWidth = const(3.dp),

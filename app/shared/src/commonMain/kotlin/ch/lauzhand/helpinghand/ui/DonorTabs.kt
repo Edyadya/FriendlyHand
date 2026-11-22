@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -31,7 +32,14 @@ enum class DonorTab(val label: StringResource) {
 @Composable
 fun DonorBottomBar(selected: DonorTab, onSelect: (DonorTab) -> Unit) {
     // AppShell already pads for system bars, so no extra insets here
-    NavigationBar(containerColor = MaterialTheme.colorScheme.surface, windowInsets = WindowInsets(0)) {
+    val line = MaterialTheme.colorScheme.outline
+    val dark = MaterialTheme.isDark
+    NavigationBar(
+        // dark mode: a 1 dp line on top, so the bar is clearly apart from the page
+        modifier = if (dark) Modifier.drawBehind { drawLine(line, Offset(0f, 0f), Offset(size.width, 0f), 1.dp.toPx()) } else Modifier,
+        containerColor = MaterialTheme.colorScheme.surface,
+        windowInsets = WindowInsets(0),
+    ) {
         DonorTab.entries.forEach { tab ->
             NavigationBarItem(
                 selected = tab == selected,
@@ -51,7 +59,7 @@ fun DonorBottomBar(selected: DonorTab, onSelect: (DonorTab) -> Unit) {
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.primary,
                     selectedTextColor = MaterialTheme.colorScheme.primary,
-                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = if (dark) 0.22f else 0.12f),
                     unselectedIconColor = MaterialTheme.app.navUnselected,
                     unselectedTextColor = MaterialTheme.app.navUnselected,
                 ),

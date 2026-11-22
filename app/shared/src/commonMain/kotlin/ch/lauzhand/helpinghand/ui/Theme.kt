@@ -63,6 +63,10 @@ class AppColors(
     val gradientEnd: Color,
     /** Pale blue, for confetti and decorative shapes only. */
     val pale: Color,
+    /** Progress bars: the empty track, the fill for needs and money goals, and the fill for rewards and goals (gold in dark mode). */
+    val progressTrack: Color,
+    val progressFill: Color,
+    val rewardFill: Color,
 )
 
 private val Navy = Color(0xFF02215E)
@@ -80,19 +84,22 @@ private val LightApp = AppColors(
     navUnselected = Color(0xFF7A88A8),
     gradientStart = Color(0xFFDCE6FF), gradientEnd = Color(0xFFF4F7FE),
     pale = Color(0xFF8EAEFF),
+    progressTrack = Color(0xFFD5DEF0), progressFill = Accent, rewardFill = Accent,
 )
 
+// ---- Dark mode: high contrast. Page #010B22, cards #0B1F55, raised #142B6B, borders #4A67B8 (1.5 dp).
 internal val DarkApp = AppColors(
     accent = Accent, onAccent = Navy,
     gold = Gold, onGold = Navy,
     success = Color(0xFF4CC38A), onSuccess = Navy,
-    navy = Navy, onNavy = Color(0xFFFFFFFF),
-    volunteer = Color(0xFF1F7A8C), bubble = Color(0xFF2A66EC),
-    surfaceHigh = Color(0xFF103F9B), onSurfaceHigh = Color(0xFFF4F7FE),
-    locked = Color(0xFF2A3F73), lockedContent = Color(0xFFE8EEFB),   // 8.8:1
-    navUnselected = Color(0xFFD0D9F0),                                 // 10.8:1
-    gradientStart = Color(0xFF02215E), gradientEnd = Color(0xFF01163F),
+    navy = Color(0xFF142B6B), onNavy = Color(0xFFFFFFFF),              // panels: the raised surface
+    volunteer = Color(0xFF1F7A8C), bubble = Accent,
+    surfaceHigh = Color(0xFF142B6B), onSurfaceHigh = Color(0xFFFFFFFF),
+    locked = Color(0xFF1B2D63), lockedContent = Color(0xFF8A9BCB),     // disabled: fill and text
+    navUnselected = Color(0xFFC9D6FF),
+    gradientStart = Color(0xFF0B1F55), gradientEnd = Color(0xFF010B22),
     pale = Color(0xFF8EAEFF),
+    progressTrack = Color(0xFF24396F), progressFill = Color(0xFF5C8DFF), rewardFill = Gold,
 )
 
 private val LocalAppColors = staticCompositionLocalOf { LightApp }
@@ -127,23 +134,23 @@ private val LightColors: ColorScheme = lightColorScheme(
 )
 
 internal val DarkColors: ColorScheme = darkColorScheme(
-    primary = Color(0xFFB8CCFF), onPrimary = Navy,                     // 9.5:1 on the surface, navy on it 9.5:1
-    primaryContainer = Color(0xFF103F9B), onPrimaryContainer = Color(0xFFF4F7FE),
+    primary = Color(0xFF8EAEFF), onPrimary = Navy,                     // buttons, links, selected tab: #8EAEFF with #02215E text
+    primaryContainer = Color(0xFF142B6B), onPrimaryContainer = Color(0xFFFFFFFF),
     secondary = Accent, onSecondary = Navy,
-    secondaryContainer = Color(0xFF16408F), onSecondaryContainer = Color(0xFFF4F7FE),
+    secondaryContainer = Color(0xFF16408F), onSecondaryContainer = Color(0xFFFFFFFF),
     tertiary = Color(0xFF4CC38A), onTertiary = Navy,
-    tertiaryContainer = Color(0xFF14503A), onTertiaryContainer = Color(0xFFF4F7FE),
-    background = Color(0xFF01163F), onBackground = Color(0xFFF4F7FE),
-    surface = Color(0xFF02215E), onSurface = Color(0xFFF4F7FE),
-    surfaceVariant = Color(0xFF02215E), onSurfaceVariant = Color(0xFFD0D9F0),   // 10.8:1
+    tertiaryContainer = Color(0xFF14503A), onTertiaryContainer = Color(0xFFFFFFFF),
+    background = Color(0xFF010B22), onBackground = Color(0xFFFFFFFF),
+    surface = Color(0xFF0B1F55), onSurface = Color(0xFFFFFFFF),        // primary text: white
+    surfaceVariant = Color(0xFF0B1F55), onSurfaceVariant = Color(0xFFC9D6FF), // secondary text; nothing dimmer than #9FB3E8
     surfaceTint = Color(0xFF8EAEFF),
-    surfaceContainerLowest = Color(0xFF01163F), surfaceContainerLow = Color(0xFF02215E),
-    surfaceContainer = Color(0xFF02215E), surfaceContainerHigh = Color(0xFF103F9B),
-    surfaceContainerHighest = Color(0xFF103F9B),
-    // outline: field borders, panel borders (7.7:1). outlineVariant: card borders, dividers, progress tracks (4.2:1, was 1.5:1)
-    outline = Color(0xFFA9B8DC), outlineVariant = Color(0xFF6B85C2),
+    surfaceContainerLowest = Color(0xFF010B22), surfaceContainerLow = Color(0xFF0B1F55),
+    surfaceContainer = Color(0xFF0B1F55), surfaceContainerHigh = Color(0xFF142B6B),
+    surfaceContainerHighest = Color(0xFF142B6B),
+    // borders of cards, fields and chips: #4A67B8 (3.7:1 against the page)
+    outline = Color(0xFF4A67B8), outlineVariant = Color(0xFF4A67B8),
     inverseSurface = Color(0xFFF4F7FE), inverseOnSurface = Navy, inversePrimary = Color(0xFF103F9B),
-    error = Color(0xFFFFB4AB), onError = Color(0xFF690005),
+    error = Color(0xFFFF8A8A), onError = Color(0xFF690005),
     errorContainer = Color(0xFF93000A), onErrorContainer = Color(0xFFFFDAD6),
 )
 
@@ -224,3 +231,7 @@ fun HelpTheme(darkOverride: Boolean? = null, content: @Composable () -> Unit) {
 @Composable
 fun Modifier.darkOutline(shape: androidx.compose.ui.graphics.Shape): Modifier =
     if (MaterialTheme.isDark) this.border(1.5.dp, MaterialTheme.colorScheme.outline, shape) else this
+
+/** Border thickness of cards, chips and outlined controls: 1.5 dp in dark mode, 1 dp in light mode. */
+val MaterialTheme.borderWidth: androidx.compose.ui.unit.Dp
+    @Composable @ReadOnlyComposable get() = if (LocalDarkTheme.current) 1.5.dp else 1.dp

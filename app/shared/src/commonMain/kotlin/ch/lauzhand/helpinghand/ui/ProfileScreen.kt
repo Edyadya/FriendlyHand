@@ -160,18 +160,18 @@ private fun NeedCard(repo: HelpRepository, role: Role, person: Person, need: Nee
     Card(
         Modifier.fillMaxWidth().animateContentSize(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(need.title, style = MaterialTheme.typography.titleLarge)
             if (need.type == NeedType.BIG) {
                 val target = (need.targetAmountChf ?: 0).coerceAtLeast(1)
                 val progress by animateFloatAsState((need.fundedAmountChf.toFloat() / target).coerceIn(0f, 1f))
-                LinearProgressIndicator(
+                AppProgressBar(
                     progress = { progress },
                     modifier = Modifier.fillMaxWidth().height(10.dp),
-                    color = MaterialTheme.app.accent,
-                    trackColor = MaterialTheme.colorScheme.outlineVariant,
+                    color = MaterialTheme.app.progressFill,
+                    trackColor = MaterialTheme.app.progressTrack,
                 )
                 Text(
                     stringResource(Res.string.funded_of, need.fundedAmountChf, target),
@@ -308,7 +308,7 @@ private fun LastSeenSection(
                 // The exact spot is the volunteer's own position right now (they are standing next to the person).
                 val me = rememberUserLocation()
                 val here = me.location
-                OutlinedTextField(
+                AppTextField(
                     note, onNote, Modifier.fillMaxWidth(),
                     label = { Text(stringResource(Res.string.last_seen_note_field)) }, singleLine = true,
                 )

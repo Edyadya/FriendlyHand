@@ -69,7 +69,7 @@ fun ProfilePictureDialog(repo: HelpRepository, account: Account, onClose: () -> 
 
                 // gender: a list to choose from, optional
                 ExposedDropdownMenuBox(expanded = genderOpen, onExpandedChange = { genderOpen = it }, modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
+                    AppTextField(
                         value = gender?.let { stringResource(it.label()) } ?: stringResource(Res.string.profile_gender_none),
                         onValueChange = {},
                         readOnly = true,
@@ -92,12 +92,12 @@ fun ProfilePictureDialog(repo: HelpRepository, account: Account, onClose: () -> 
                         }
                     }
                 }
-                OutlinedTextField(
+                AppTextField(
                     city, { city = it }, Modifier.fillMaxWidth(),
                     label = { Text(stringResource(Res.string.profile_city)) }, singleLine = true,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                 )
-                OutlinedTextField(
+                AppTextField(
                     country, { country = it }, Modifier.fillMaxWidth(),
                     label = { Text(stringResource(Res.string.profile_country)) }, singleLine = true,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),

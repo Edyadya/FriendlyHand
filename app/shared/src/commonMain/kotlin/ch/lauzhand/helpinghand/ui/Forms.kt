@@ -56,11 +56,11 @@ fun OnboardingScreen(
     ) {
         TextButton(onClick = onBack) { Text(stringResource(Res.string.back)) }
         Text(stringResource(Res.string.onboarding_title), style = MaterialTheme.typography.headlineSmall)
-        OutlinedTextField(
+        AppTextField(
             firstName, { firstName = it }, Modifier.fillMaxWidth(),
             label = { Text(stringResource(Res.string.field_first_name)) }, singleLine = true,
         )
-        OutlinedTextField(
+        AppTextField(
             age, { age = it.digits() }, Modifier.fillMaxWidth(),
             label = { Text(stringResource(Res.string.field_age)) }, singleLine = true,
         )
@@ -87,11 +87,11 @@ fun OnboardingScreen(
                 )
             }
         }
-        OutlinedTextField(
+        AppTextField(
             usualTime, { usualTime = it }, Modifier.fillMaxWidth(),
             label = { Text(stringResource(Res.string.field_usual_time)) }, singleLine = true,
         )
-        OutlinedTextField(
+        AppTextField(
             ownWords, { ownWords = it }, Modifier.fillMaxWidth(),
             label = { Text(stringResource(Res.string.field_own_words)) }, minLines = 2,
         )
@@ -181,7 +181,7 @@ fun AddNeedScreen(
     ) {
         TextButton(onClick = onDone) { Text(stringResource(Res.string.back)) }
         Text(stringResource(Res.string.add_need), style = MaterialTheme.typography.headlineSmall)
-        OutlinedTextField(
+        AppTextField(
             title, { title = it }, Modifier.fillMaxWidth(),
             label = { Text(stringResource(Res.string.need_title_field)) }, singleLine = true,
         )
@@ -190,7 +190,7 @@ fun AddNeedScreen(
             Text(stringResource(Res.string.need_big_goal), style = MaterialTheme.typography.bodyLarge)
         }
         if (big) {
-            OutlinedTextField(
+            AppTextField(
                 target, { target = it.digits() }, Modifier.fillMaxWidth(),
                 label = { Text(stringResource(Res.string.need_target_chf)) }, singleLine = true,
             )

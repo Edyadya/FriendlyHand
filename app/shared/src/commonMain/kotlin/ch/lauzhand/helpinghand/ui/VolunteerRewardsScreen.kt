@@ -67,11 +67,11 @@ fun VolunteerRewardsScreen(repo: HelpRepository, volunteerId: String) {
                         if (b.unlocked) Text(stringResource(Res.string.vr_unlocked), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)
                     }
                     Text(stringResource(b.badge.description()), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    LinearProgressIndicator(
+                    AppProgressBar(
                         progress = { b.progress.toFloat() / b.badge.target },
                         modifier = Modifier.fillMaxWidth().height(10.dp),
-                        color = if (b.unlocked) gold else MaterialTheme.app.accent,
-                        trackColor = MaterialTheme.colorScheme.outlineVariant,
+                        color = if (b.unlocked) gold else MaterialTheme.app.rewardFill,
+                        trackColor = MaterialTheme.app.progressTrack,
                     )
                     Text(stringResource(Res.string.vr_progress, b.progress, b.badge.target), style = MaterialTheme.typography.bodySmall)
                 }

@@ -83,7 +83,7 @@ private fun OrderCard(repo: HelpRepository, o: DeliveryOrder, volunteerId: Strin
     Card(
         Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(MaterialTheme.borderWidth, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             val buying = o.kind == OrderKind.PURCHASE
@@ -115,7 +115,7 @@ private fun OrderCard(repo: HelpRepository, o: DeliveryOrder, volunteerId: Strin
                 OrderStatus.DELIVERED -> Unit
             }
             AppOutlinedButton(onClick = { onOpenPerson(o.personId) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                Text(person?.firstName.orEmpty())
+                Text(stringResource(Res.string.order_view_person, person?.firstName.orEmpty()))
             }
         }
     }
