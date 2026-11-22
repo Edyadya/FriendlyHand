@@ -109,6 +109,8 @@ fun ZoneMap(
             fontWeight = FontWeight.Medium,
         )
 
+        // bubbles: one colour per role, both from the colour scheme (patrons accent blue, volunteers brand navy)
+        val bubbleColor = if (role == Role.VOLUNTEER) MaterialTheme.app.navy else MaterialTheme.app.accent
         val bubble = 40.dp
         val slot = 76.dp
         repo.zones.filter { showBubbles && it.cityId == city.id }.forEach { z ->
@@ -123,11 +125,11 @@ fun ZoneMap(
             ) {
                 Box(Modifier.size(bubble), contentAlignment = Alignment.Center) {
                     // selected: concentric ring in accent (30 %) that expands outwards and fades
-                    if (selected) PulseRing(MaterialTheme.app.accent, bubble)
+                    if (selected) PulseRing(bubbleColor, bubble)
                     Surface(
                         onClick = { onZoneClick(if (selected) null else z.id) },
                         shape = CircleShape,
-                        color = MaterialTheme.app.accent,          // solid accent bubble
+                        color = bubbleColor,                       // solid bubble, colour by role
                         contentColor = MaterialTheme.app.onNavy,   // white, bold number (large text on the accent blue)
                         shadowElevation = 4.dp,
                         modifier = Modifier

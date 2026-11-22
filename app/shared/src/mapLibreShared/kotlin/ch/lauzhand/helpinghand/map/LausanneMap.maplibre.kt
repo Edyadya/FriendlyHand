@@ -116,7 +116,9 @@ actual fun LausanneMap(
     // updated in 16 steps per cycle, so the map is not restyled on every frame
     val pulse by remember { derivedStateOf { (pulseRaw * 16).toInt() / 16f } }
 
-    val zoneColor = MaterialTheme.app.accent                     // solid accent blue bubbles
+    val zoneColor = MaterialTheme.app.accent                     // the user's own position stays accent blue
+    // The area bubbles have a colour per role, both from the colour scheme: patrons accent blue, volunteers brand navy
+    val bubbleColor = if (role == Role.VOLUNTEER) MaterialTheme.app.navy else MaterialTheme.app.accent
     val outline = MaterialTheme.app.onNavy                       // white ring
     val labelColor = MaterialTheme.app.onNavy                    // white number (large and bold, so 3.8:1 is enough)
     val styleUrl = if (isSystemInDarkTheme()) STYLE_DARK else STYLE_LIGHT
@@ -134,14 +136,14 @@ actual fun LausanneMap(
             id = "zone-selected-ring",
             source = ringSource,
             radius = const(44.dp),
-            color = const(zoneColor),
+            color = const(bubbleColor),
             opacity = const(0.30f),
         )
         CircleLayer(
             id = "zones",
             source = zoneSource,
             radius = const(26.dp),
-            color = const(zoneColor),
+            color = const(bubbleColor),
             opacity = const(1f),
             strokeColor = const(outline),
             strokeWidth = const(3.dp),
