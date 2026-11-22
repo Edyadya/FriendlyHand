@@ -9,6 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
+import ch.lauzhand.helpinghand.data.ME_DONOR
+import ch.lauzhand.helpinghand.model.communityImpact
+import ch.lauzhand.helpinghand.model.deliveriesToCelebrate
 import ch.lauzhand.helpinghand.model.Cities
 import ch.lauzhand.helpinghand.model.isGuest
 import ch.lauzhand.helpinghand.model.Role
@@ -138,6 +141,17 @@ fun AppShell(repo: HelpRepository, shell: ShellState = remember { ShellState() }
         SettingsDrawer(open = menuOpen, onDismiss = { menuOpen = false }) { menuContent() }
         settingsPage?.let { SettingsPageDialog(it) { settingsPage = null } }
         if (shell.pictureOpen) ProfilePictureDialog(repo, account) { shell.pictureOpen = false }
+        // A patron whose delivery a volunteer has confirmed sees where it went, once: "Your socks reached Luc near Flon"
+        if (role == Role.DONOR) {
+            val fresh = deliveriesToCelebrate(repo.contributionsOf(ME_DONOR), repo.needs) { repo.isCelebrated(it) }
+            fresh.lastOrNull()?.let { need ->
+                val person = repo.people.firstOrNull { it.id == need.personId }
+                ConfirmedMoment(
+                    impactLine = reachedLine(need, person?.firstName.orEmpty(), repo.zones.firstOrNull { it.id == person?.zoneId }?.name.orEmpty(), mine = true),
+                    impact = communityImpact(repo.needs, repo.giveaways),
+                ) { repo.markCelebrated(fresh.map { it.id }) }
+            }
+        }
         }
     }
 }

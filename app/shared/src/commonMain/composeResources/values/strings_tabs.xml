@@ -107,4 +107,14 @@
     <string name="feedback_order_sent">Order sent. A volunteer will take it. You will see their name in Contributions.</string>
     <string name="contrib_on_date">On %1$s</string>
     <string name="charities_link_hint">Tap a name to open the charity's website.</string>
+    <string name="impact_title">Community impact</string>
+    <string name="impact_people">People helped</string>
+    <string name="impact_items">Items delivered</string>
+    <string name="impact_chf">CHF funded</string>
+    <string name="coverage_text">%1$d of %2$d needs fulfilled (%3$d%)</string>
+    <string name="coverage_waiting">%1$d still waiting for someone to help</string>
+    <string name="moment_reached_yours">Your %1$s reached %2$s near %3$s</string>
+    <string name="moment_reached_gift">Your gift for %1$s reached %2$s near %3$s</string>
+    <string name="moment_reached">The %1$s reached %2$s near %3$s</string>
+    <string name="moment_totals">The community so far</string>
 </resources>

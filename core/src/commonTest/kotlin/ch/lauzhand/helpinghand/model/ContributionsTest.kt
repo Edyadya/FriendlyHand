@@ -213,3 +213,63 @@ class AccountProfileTest {
         assertTrue(Gender.entries.contains(Gender.PREFER_NOT_TO_SAY))
     }
 }
+
+class ImpactTest {
+    private fun small(id: String, person: String, status: NeedStatus) = Need(id, person, NeedType.SMALL, "Socks", status = status)
+
+    @Test
+    fun communityTotalsCountOnlyVerifiedDeliveries() {
+        val needs = listOf(
+            small("a", "p1", NeedStatus.CONFIRMED),
+            small("b", "p1", NeedStatus.CONFIRMED),            // same person twice: one person, two items
+            small("c", "p2", NeedStatus.FULFILLED),            // delivered but not verified: not counted yet
+            small("d", "p3", NeedStatus.OPEN),
+            Need("e", "p4", NeedType.BIG, "Deposit", targetAmountChf = 900, fundedAmountChf = 300, status = NeedStatus.FUNDING),
+        )
+        val giveaways = listOf(Giveaway("g", "Brand", "Coats", "x", logisticsGoalChf = 100, fundedChf = 40))
+        val impact = communityImpact(needs, giveaways)
+        assertEquals(1, impact.peopleHelped)
+        assertEquals(2, impact.itemsDelivered)
+        assertEquals(340, impact.chfFunded)
+    }
+
+    @Test
+    fun coverageIsTheShareOfNeedsThatAreFulfilled() {
+        val needs = listOf(
+            small("a", "p1", NeedStatus.CONFIRMED), small("b", "p2", NeedStatus.FULFILLED),
+            small("c", "p3", NeedStatus.CLAIMED), small("d", "p4", NeedStatus.OPEN),
+        )
+        val c = needCoverage(needs)
+        assertEquals(2, c.fulfilled); assertEquals(4, c.total); assertEquals(1, c.waiting)
+        assertEquals(50, c.percent)
+        assertEquals(0.5f, c.fraction)
+        assertEquals(0, needCoverage(emptyList()).percent) // no division by zero
+    }
+
+    @Test
+    fun theSeedHasSomethingToShow() {
+        val impact = communityImpact(Seed.needs, SeedGiveaways.all)
+        assertTrue(impact.peopleHelped >= 4)
+        assertTrue(impact.chfFunded > 0)
+        val c = needCoverage(Seed.needs)
+        assertTrue(c.waiting > 0 && c.fulfilled > 0 && c.percent in 1..99)
+    }
+}
+
+class CelebrationTest {
+    private fun need(id: String, status: NeedStatus) = Need(id, "p", NeedType.SMALL, "Socks", status = status)
+
+    @Test
+    fun onlyConfirmedAndNotYetCelebratedDeliveriesAreShown() {
+        val needs = listOf(need("a", NeedStatus.CONFIRMED), need("b", NeedStatus.FULFILLED), need("c", NeedStatus.CONFIRMED), need("d", NeedStatus.OPEN))
+        val contributions = listOf(
+            Contribution("d1", "a", ContributionKind.BROUGHT, null, 1),
+            Contribution("d1", "a", ContributionKind.PAID, 10, 2),   // the same need twice: shown once
+            Contribution("d1", "b", ContributionKind.BROUGHT, null, 3), // handed over, not confirmed yet: not shown
+            Contribution("d1", "c", ContributionKind.BROUGHT, null, 4),
+        )
+        assertEquals(listOf("a", "c"), deliveriesToCelebrate(contributions, needs) { false }.map { it.id })
+        assertEquals(listOf("c"), deliveriesToCelebrate(contributions, needs) { it == "a" }.map { it.id })
+        assertTrue(deliveriesToCelebrate(contributions, needs) { true }.isEmpty())
+    }
+}

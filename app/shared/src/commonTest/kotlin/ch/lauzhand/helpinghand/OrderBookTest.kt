@@ -128,3 +128,28 @@ class GuestTest {
         assertFalse(Account("a", "Guest", Role.VOLUNTEER).isGuest) // a volunteer is never a guest
     }
 }
+
+class ImpactAppTest {
+    @Test
+    fun aConfirmedDeliveryIsCelebratedOnceAndTheTotalsGoUp() {
+        val repo = FakeRepository()
+        val before = communityImpact(repo.needs, repo.giveaways)
+        repo.claimNeed("n-1", ME_DONOR)
+        repo.requestHandover("n-1", ME_DONOR, "Dan")
+        assertTrue(deliveriesToCelebrate(repo.contributionsOf(ME_DONOR), repo.needs) { repo.isCelebrated(it) }.isEmpty()) // not confirmed yet
+        val order = repo.orders.single { it.needId == "n-1" }
+        repo.acceptOrder(order.id, ME_VOLUNTEER, "Mia")
+        repo.markPickedUp(order.id)
+        repo.confirmDelivered("n-1")
+
+        val fresh = deliveriesToCelebrate(repo.contributionsOf(ME_DONOR), repo.needs) { repo.isCelebrated(it) }
+        assertEquals(listOf("n-1"), fresh.map { it.id })
+        val after = communityImpact(repo.needs, repo.giveaways)
+        assertEquals(before.peopleHelped + 1, after.peopleHelped)
+        assertEquals(before.itemsDelivered + 1, after.itemsDelivered)
+
+        repo.markCelebrated(fresh.map { it.id })
+        assertTrue(deliveriesToCelebrate(repo.contributionsOf(ME_DONOR), repo.needs) { repo.isCelebrated(it) }.isEmpty())
+    }
+}
+

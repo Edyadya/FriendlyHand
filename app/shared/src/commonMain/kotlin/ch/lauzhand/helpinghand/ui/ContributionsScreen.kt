@@ -67,6 +67,9 @@ fun ContributionsScreen(repo: HelpRepository, onOpenPerson: (String) -> Unit) {
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        // the community's impact and how much of the need is covered: shows scale, and what is still waiting
+        item { ImpactStrip(communityImpact(repo.needs, repo.giveaways)) }
+        item { CoverageCard(needCoverage(repo.needs)) }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(stringResource(Res.string.contrib_title), style = MaterialTheme.typography.headlineSmall)

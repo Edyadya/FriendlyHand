@@ -26,6 +26,10 @@ interface BookApi {
     fun accountPhotoOf(accountId: String): String?
     fun setAccountPhoto(accountId: String, photoBase64: String?)
 
+    /** Deliveries whose "it reached them" moment was already shown to the patron. */
+    fun isCelebrated(needId: String): Boolean
+    fun markCelebrated(needIds: Collection<String>)
+
     /** Optional gender, city and country of the account (only for themselves). */
     fun accountProfileOf(accountId: String): AccountProfile
     fun setAccountProfile(accountId: String, profile: AccountProfile)
@@ -37,6 +41,7 @@ class LocalBook : BookApi {
     override val orders = mutableStateListOf<DeliveryOrder>()
     private val photos = mutableStateMapOf<String, String>()
     private val profiles = mutableStateMapOf<String, AccountProfile>()
+    private val celebrated = mutableStateListOf<String>()
 
     override fun giveawayContributionsOf(donorId: String) = givenToGiveaways.filter { it.donorId == donorId }
 
@@ -58,6 +63,12 @@ class LocalBook : BookApi {
 
     override fun setAccountPhoto(accountId: String, photoBase64: String?) {
         if (photoBase64 == null) photos.remove(accountId) else photos[accountId] = photoBase64
+    }
+
+    override fun isCelebrated(needId: String): Boolean = needId in celebrated
+
+    override fun markCelebrated(needIds: Collection<String>) {
+        needIds.forEach { if (it !in celebrated) celebrated += it }
     }
 
     override fun accountProfileOf(accountId: String): AccountProfile = profiles[accountId] ?: AccountProfile()

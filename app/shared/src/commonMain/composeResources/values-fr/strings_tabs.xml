@@ -107,4 +107,14 @@
     <string name="feedback_order_sent">Commande envoyée. Un bénévole va la prendre. Vous verrez son nom dans Contributions.</string>
     <string name="contrib_on_date">Le %1$s</string>
     <string name="charities_link_hint">Touchez un nom pour ouvrir le site de l'association.</string>
+    <string name="impact_title">Impact collectif</string>
+    <string name="impact_people">Personnes aidées</string>
+    <string name="impact_items">Objets remis</string>
+    <string name="impact_chf">CHF réunis</string>
+    <string name="coverage_text">%1$d besoins sur %2$d satisfaits (%3$d%)</string>
+    <string name="coverage_waiting">%1$d attendent encore quelqu'un</string>
+    <string name="moment_reached_yours">Votre aide (« %1$s ») est arrivée chez %2$s près de %3$s</string>
+    <string name="moment_reached_gift">Votre don pour %1$s est arrivé chez %2$s près de %3$s</string>
+    <string name="moment_reached">L'objet « %1$s » est arrivé chez %2$s près de %3$s</string>
+    <string name="moment_totals">La communauté jusqu'ici</string>
 </resources>

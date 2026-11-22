@@ -1,6 +1,7 @@
 package ch.lauzhand.helpinghand.ui
 
 import androidx.compose.animation.core.*
+import ch.lauzhand.helpinghand.model.CommunityImpact
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.Canvas
@@ -26,17 +27,16 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The "delivery confirmed" moment: concentric rings in the accent blue spread outwards, a gold stamp
- * lands in the middle (gold = reward) and a counter counts up to the number of confirmed deliveries.
- * It closes itself after a moment, or on tap-away.
+ * The "delivery confirmed" moment: concentric rings in the accent blue spread outwards, a gold stamp lands in
+ * the middle (gold = reward), then the impact line ("Your socks reached Luc near Flon") and the updated community
+ * totals, counting up. It closes itself after a few seconds, or on tap-away.
  */
 @Composable
-fun ConfirmedMoment(confirmedTotal: Int, onDismiss: () -> Unit) {
-    LaunchedEffect(Unit) { delay(2800); onDismiss() }
+fun ConfirmedMoment(impactLine: String, impact: CommunityImpact, onDismiss: () -> Unit) {
+    LaunchedEffect(Unit) { delay(4500); onDismiss() }
 
     val stamp = remember { Animatable(0f) }
     LaunchedEffect(Unit) { stamp.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = 220f)) }
-    val count by animateIntAsState(confirmedTotal, tween(1100, delayMillis = 350))
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         // Full-screen, so the confetti covers the whole screen; a tap anywhere outside the card closes it.
@@ -56,16 +56,14 @@ fun ConfirmedMoment(confirmedTotal: Int, onDismiss: () -> Unit) {
             }
             Text(
                 stringResource(Res.string.moment_title),
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center,
-            )
-            Text("$count", style = MaterialTheme.typography.displayMedium, color = MaterialTheme.colorScheme.primary)
-            Text(
-                stringResource(Res.string.moment_count),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
+            // the impact line: where it went
+            Text(impactLine, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
+            // then the updated totals, counting up
+            ImpactStrip(impact, animate = true, title = stringResource(Res.string.moment_totals))
         }
         ConfettiOverlay(trigger = 1)
         }

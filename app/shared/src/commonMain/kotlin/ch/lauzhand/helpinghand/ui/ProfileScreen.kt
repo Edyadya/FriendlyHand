@@ -217,7 +217,10 @@ private fun NeedActions(repo: HelpRepository, role: Role, person: Person, need: 
         )
     }
     if (showMoment) {
-        ConfirmedMoment(repo.needs.count { it.status == NeedStatus.CONFIRMED }) { showMoment = false }
+        ConfirmedMoment(
+            impactLine = reachedLine(need, person.firstName, zoneOf(repo, person)?.name.orEmpty(), mine = false),
+            impact = communityImpact(repo.needs, repo.giveaways),
+        ) { showMoment = false }
     }
     when (role) {
         Role.DONOR -> {

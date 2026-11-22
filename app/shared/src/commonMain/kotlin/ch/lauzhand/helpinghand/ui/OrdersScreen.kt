@@ -6,6 +6,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import ch.lauzhand.helpinghand.model.communityImpact
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ch.lauzhand.helpinghand.data.HelpRepository
@@ -26,6 +31,18 @@ fun OrdersScreen(repo: HelpRepository, volunteerId: String, volunteerName: Strin
     val mine = orders.filter { it.volunteerId == volunteerId && (it.status == OrderStatus.ACCEPTED || it.status == OrderStatus.PICKED_UP) }
     val done = orders.filter { it.status == OrderStatus.DELIVERED && it.volunteerId == volunteerId }
 
+    // The "it reached them" moment lives here, not in a card: a delivered card moves to another section.
+    var delivered by remember { mutableStateOf<DeliveryOrder?>(null) }
+    val onDelivered: (DeliveryOrder) -> Unit = { delivered = it }
+    delivered?.let { o ->
+        val need = repo.needs.firstOrNull { it.id == o.needId }
+        if (need != null) {
+            ConfirmedMoment(
+                impactLine = reachedLine(need, repo.people.firstOrNull { it.id == o.personId }?.firstName.orEmpty(), repo.zones.firstOrNull { it.id == o.zoneId }?.name.orEmpty(), mine = false),
+                impact = communityImpact(repo.needs, repo.giveaways),
+            ) { delivered = null }
+        }
+    }
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -38,9 +55,9 @@ fun OrdersScreen(repo: HelpRepository, volunteerId: String, volunteerName: Strin
                 Text(stringResource(Res.string.orders_intro), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        section(Res.string.orders_open, open) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson) }
-        section(Res.string.orders_mine, mine) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson) }
-        section(Res.string.orders_done, done) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson) }
+        section(Res.string.orders_open, open) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered) }
+        section(Res.string.orders_mine, mine) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered) }
+        section(Res.string.orders_done, done) { OrderCard(repo, it, volunteerId, volunteerName, onOpenPerson, onDelivered) }
     }
 }
 
@@ -55,7 +72,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.section(
 }
 
 @Composable
-private fun OrderCard(repo: HelpRepository, o: DeliveryOrder, volunteerId: String, volunteerName: String, onOpenPerson: (String) -> Unit) {
+private fun OrderCard(repo: HelpRepository, o: DeliveryOrder, volunteerId: String, volunteerName: String, onOpenPerson: (String) -> Unit, onDelivered: (DeliveryOrder) -> Unit) {
     val person = repo.people.firstOrNull { it.id == o.personId }
     val zone = repo.zones.firstOrNull { it.id == o.zoneId }?.name.orEmpty()
     Card(
@@ -81,7 +98,7 @@ private fun OrderCard(repo: HelpRepository, o: DeliveryOrder, volunteerId: Strin
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                 ) { Text(stringResource(Res.string.order_picked_up), style = MaterialTheme.typography.titleMedium) }
                 OrderStatus.PICKED_UP -> AppButton(
-                    onClick = { repo.confirmDelivered(o.needId) },
+                    onClick = { repo.confirmDelivered(o.needId); onDelivered(o) },
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                 ) { Text(stringResource(Res.string.order_delivered_button, person?.firstName.orEmpty()), style = MaterialTheme.typography.titleMedium) }
                 OrderStatus.DELIVERED -> Unit
