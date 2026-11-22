@@ -8,7 +8,7 @@
     <string name="login_wrong_code">Wrong password. Please check it and try again.</string>
     <string name="login_no_connection">Can’t reach the server. Check the connection and try again.</string>
     <string name="logged_in_as">%1$s · %2$s</string>
-    <string name="logout">Log out / switch user</string>
+    <string name="logout">Log out</string>
     <string name="login_headline_plain">Help someone</string>
     <string name="login_headline_highlight">nearby</string>
     <string name="footer_made_for">Made for</string>
